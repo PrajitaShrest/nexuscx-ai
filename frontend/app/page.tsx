@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 
 type Case = {
   case_id: string;
+  case_number: string;
+  assigned_to: string | null;
   customer: string;
   intent: string | null;
   priority: string;
@@ -21,18 +23,20 @@ const CATEGORY: Record<string, { label: string; style: string }> = {
   billing_question: { label: "Billing", style: "border-green-300 bg-green-50 text-green-700" },
   refund_request: { label: "Billing", style: "border-green-300 bg-green-50 text-green-700" },
   technical_issue: { label: "Technical", style: "border-orange-300 bg-orange-50 text-orange-700" },
+  account: { label: "Account", style: "border-purple-300 bg-purple-50 text-purple-700" },
 };
 
 // Case status -> badge (matches the Figma prototype)
 const STATUS: Record<string, { label: string; style: string }> = {
-  open: { label: "AI Handling", style: "border-indigo-300 bg-indigo-50 text-indigo-700" },
-  in_progress: { label: "Waiting", style: "border-amber-300 bg-amber-50 text-amber-700" },
+  ai_handling: { label: "AI Handling", style: "border-indigo-300 bg-indigo-50 text-indigo-700" },
+  human_handling: { label: "Human Handling", style: "border-sky-300 bg-sky-50 text-sky-700" },
+  waiting: { label: "Waiting", style: "border-amber-300 bg-amber-50 text-amber-700" },
   escalated: { label: "Escalated", style: "border-red-300 bg-red-50 text-red-700" },
   resolved: { label: "Resolved", style: "border-emerald-300 bg-emerald-50 text-emerald-700" },
   closed: { label: "Closed", style: "border-gray-300 bg-gray-50 text-gray-600" },
 };
 
-const TABS = ["All", "AI Handling", "Escalated", "Resolved"];
+const TABS = ["All", "AI Handling", "Human Handling", "Escalated", "Resolved"];
 
 const NAV = [
   { section: "", items: ["Conversations", "Cases", "Customers"] },
@@ -133,7 +137,7 @@ export default function ConversationsPage() {
           <ul className="divide-y rounded-lg border bg-white">
             {shown.map((c) => {
               const cat = CATEGORY[c.intent ?? ""] ?? { label: c.intent ?? "General", style: "border-gray-300 bg-gray-50 text-gray-600" };
-              const st = STATUS[c.status] ?? STATUS.open;
+              const st = STATUS[c.status] ?? STATUS.ai_handling;
               return (
                 <li key={c.case_id} className="flex gap-4 p-4 hover:bg-gray-50">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-500 text-sm font-semibold text-white">
@@ -141,12 +145,12 @@ export default function ConversationsPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex justify-between">
-                      <p className="font-semibold">{c.customer}</p>
+                      <p className="font-semibold">{c.customer} <span className="ml-2 text-xs font-normal text-gray-400">{c.case_number}</span></p>
                       <p className="text-sm text-gray-500">{time(c.created_at)}</p>
                     </div>
                     <p className="truncate text-sm text-gray-600">{c.subject ?? "(no message yet)"}</p>
                     <div className="mt-2 flex justify-between">
-                      <span className={`rounded-full border px-2.5 py-0.5 text-xs ${cat.style}`}>{cat.label}</span>
+                      <span className="flex items-center gap-2"><span className={`rounded-full border px-2.5 py-0.5 text-xs ${cat.style}`}>{cat.label}</span>{c.assigned_to && <span className="text-xs text-gray-500">→ {c.assigned_to}</span>}</span>
                       <span className={`rounded-full border px-2.5 py-0.5 text-xs ${st.style}`}>{st.label}</span>
                     </div>
                   </div>
