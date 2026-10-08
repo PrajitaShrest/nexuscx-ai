@@ -64,9 +64,9 @@ export default function LoginForm({ portal }: { portal: "customer" | "staff" }) 
           {err("password") && <p className="mt-1.5 text-sm text-bad">{err("password")}</p>}
         </div>
         <label className="flex items-center gap-2.5 text-sm text-ink">
-          <input type="checkbox" name="remember" defaultChecked={portal === "customer"}
+          <input type="checkbox" name="remember"
             className="h-4 w-4 rounded border-slate-300 accent-indigo-600" />
-          Keep me signed in for 30 days
+          Keep me signed in for 30 days <span className="text-muted">(only on your own device)</span>
         </label>
         <FormMessage error={generalError} ok={state.ok} />
         <button disabled={pending}
