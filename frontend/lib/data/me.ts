@@ -9,6 +9,7 @@ export type Me = {
   role: string;
   extraRoles: string[];
   team: string | null;
+  presence: string;
   permissions: string[];
 };
 
@@ -31,7 +32,7 @@ export async function getMe(): Promise<Me> {
 
   const { data: user, error } = await supabase
     .from("users")
-    .select("user_id, name, username, email, role, status, must_change_password, teams(name)")
+    .select("user_id, name, username, email, role, status, presence, must_change_password, teams(name)")
     .eq("auth_user_id", auth.claims.sub)
     .single();
   if (error || !user) {
@@ -58,6 +59,7 @@ export async function getMe(): Promise<Me> {
     role: user.role,
     extraRoles,
     team,
+    presence: user.presence ?? "online",
     permissions: [...new Set((perms ?? []).map((p) => p.permission))],
   };
 }
@@ -68,4 +70,12 @@ export function isStaff(me: Me) {
 
 export function can(me: Me, permission: string) {
   return me.permissions.includes(permission);
+}
+
+// What the account menu needs to show
+export function menuUser(me: Me) {
+  return {
+    name: me.name, username: me.username, email: me.email, staff: isStaff(me), presence: me.presence,
+    roles: [me.role, ...me.extraRoles].map((r) => ROLE_LABEL[r] ?? r),
+  };
 }

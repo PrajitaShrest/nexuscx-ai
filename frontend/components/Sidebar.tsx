@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { logout } from "@/app/auth/actions";
 import Logo from "./Logo";
-import { ROLE_LABEL, type Me } from "@/lib/data/me";
+import { menuUser, type Me } from "@/lib/data/me";
+import UserMenu from "./UserMenu";
 
 // Menu from the Figma prototype. Each item needs one permission; a role
 // without it never sees the item. The same permission is checked on the
@@ -31,7 +31,6 @@ export const NAV: { section: string; items: { label: string; href?: string; week
 ];
 
 export default function Sidebar({ me, active }: { me: Me; active: string }) {
-  const roles = [me.role, ...me.extraRoles].map((r) => ROLE_LABEL[r] ?? r).join(" + ");
   return (
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-navy text-slate-300 md:flex">
       <div className="px-5 py-5"><Logo tone="light" size={34} /></div>
@@ -59,19 +58,8 @@ export default function Sidebar({ me, active }: { me: Me; active: string }) {
           );
         })}
       </nav>
-      <div className="border-t border-white/10 px-5 py-4">
-        <Link href="/profile" className="flex items-center gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500 text-sm text-white">
-            {me.name.charAt(0).toUpperCase()}
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm text-white">{me.name}</p>
-            <p className="truncate text-xs text-slate-400" title={roles}>{roles}</p>
-          </div>
-        </Link>
-        <form action={logout} className="mt-3">
-          <button className="text-xs text-slate-400 hover:text-white">Log out</button>
-        </form>
+      <div className="border-t border-white/10 p-3">
+        <UserMenu user={menuUser(me)} dark up />
       </div>
     </aside>
   );

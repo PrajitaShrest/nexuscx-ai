@@ -6,6 +6,7 @@ export const CATEGORY: Record<string, { label: string; style: string }> = {
   refund_request: { label: "Billing", style: "border-green-300 bg-green-50 text-green-700" },
   technical_issue: { label: "Technical", style: "border-orange-300 bg-orange-50 text-orange-700" },
   account: { label: "Account", style: "border-purple-300 bg-purple-50 text-purple-700" },
+  general: { label: "General", style: "border-gray-300 bg-gray-50 text-gray-600" },
   unknown: { label: "General", style: "border-gray-300 bg-gray-50 text-gray-600" },
 };
 
