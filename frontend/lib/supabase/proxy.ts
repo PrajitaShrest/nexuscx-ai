@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { REMEMBER_COOKIE, applyRemember } from "@/lib/auth/cookies";
+import { IDLE_LIMIT_MS, REMEMBER_COOKIE, SEEN_COOKIE, applyRemember } from "@/lib/auth/cookies";
 
 // Pages anyone can open without signing in
 const PUBLIC_PATHS = ["/login", "/signup", "/staff/login", "/forgot-password", "/auth/callback", "/terms", "/privacy"];
@@ -32,13 +32,35 @@ export async function updateSession(request: NextRequest) {
 
   // getClaims() verifies the token's signature; never trust the browser.
   const { data } = await supabase.auth.getClaims();
-  const signedIn = Boolean(data?.claims);
+  let signedIn = Boolean(data?.claims);
   const path = request.nextUrl.pathname;
   const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
+  const staffPath = ["/conversations", "/cases", "/users"].some((p) => path.startsWith(p));
+
+  // Not "remembered" and idle for 30 minutes (or the browser restored an old tab): sign out.
+  if (signedIn && !remember) {
+    const seen = Number(request.cookies.get(SEEN_COOKIE)?.value ?? 0);
+    if (seen && Date.now() - seen > IDLE_LIMIT_MS) {
+      await supabase.auth.signOut();
+      signedIn = false;
+      if (!isPublic && !path.startsWith("/api")) {
+        const url = request.nextUrl.clone();
+        url.pathname = staffPath ? "/staff/login" : "/login";
+        url.search = "?expired=1";
+        const redirect = NextResponse.redirect(url);
+        response.cookies.getAll().forEach((c) => redirect.cookies.set(c));
+        redirect.cookies.delete(SEEN_COOKIE);
+        return redirect;
+      }
+      response.cookies.delete(SEEN_COOKIE);
+    } else {
+      response.cookies.set(SEEN_COOKIE, String(Date.now()), { httpOnly: true, sameSite: "lax", path: "/" });
+    }
+  }
 
   if (!signedIn && !isPublic && !path.startsWith("/api")) {
     const url = request.nextUrl.clone();
-    url.pathname = ["/conversations", "/cases", "/users"].some((p) => path.startsWith(p)) ? "/staff/login" : "/login";
+    url.pathname = staffPath ? "/staff/login" : "/login";
     return NextResponse.redirect(url);
   }
   return response;

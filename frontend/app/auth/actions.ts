@@ -4,7 +4,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { REMEMBER_COOKIE } from "@/lib/auth/cookies";
+import { REMEMBER_COOKIE, SEEN_COOKIE } from "@/lib/auth/cookies";
 import { passwordProblem } from "@/lib/auth/password";
 
 // field = which input the error belongs to, so the page can show it under that box
@@ -69,6 +69,7 @@ export async function login(_prev: FormState, formData: FormData): Promise<FormS
   cookieStore.set(REMEMBER_COOKIE, remember ? "1" : "0", {
     httpOnly: true, sameSite: "lax", path: "/", ...(remember ? { maxAge: 60 * 60 * 24 * 30 } : {}),
   });
+  cookieStore.set(SEEN_COOKIE, String(Date.now()), { httpOnly: true, sameSite: "lax", path: "/" });
   const supabase = await createClient({ remember });
 
   // Locked after too many wrong passwords? (checked in the database)
@@ -182,7 +183,11 @@ export async function signup(_prev: FormState, formData: FormData): Promise<Form
   if ((await checkUsername(username)) === "taken")
     return { error: "That username is taken. Try adding a number or a dot.", field: "username", values };
 
-  const supabase = await createClient({ remember: true });
+  // New accounts are not "remembered": the session ends when the browser closes or after 30 idle minutes
+  const cookieStore = await cookies();
+  cookieStore.set(REMEMBER_COOKIE, "0", { httpOnly: true, sameSite: "lax", path: "/" });
+  cookieStore.set(SEEN_COOKIE, String(Date.now()), { httpOnly: true, sameSite: "lax", path: "/" });
+  const supabase = await createClient({ remember: false });
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -206,7 +211,6 @@ export async function signup(_prev: FormState, formData: FormData): Promise<Form
     return { error: "We could not create your account. Please try again.", values };
   }
   if (!data.session) return { ok: "Account created. Please check your email, then sign in." };
-  (await cookies()).set(REMEMBER_COOKIE, "1", { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 30 });
   revalidatePath("/", "layout");
   redirect("/support");
 }
