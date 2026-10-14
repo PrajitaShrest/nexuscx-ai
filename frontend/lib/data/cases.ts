@@ -33,13 +33,24 @@ export type EnquiryResult = {
 };
 
 // Staff: every case. Customers: only their own (enforced by RLS, not here).
-export async function listCaseQueue(): Promise<{ data: CaseRow[]; error?: string }> {
+export type CaseFilters = { q?: string; status?: string; intents?: string[]; priority?: string; sentiment?: string; assigned?: string; myName?: string; sla?: string };
+
+export async function listCaseQueue(f: CaseFilters = {}): Promise<{ data: CaseRow[]; error?: string }> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("v_case_queue")
-    .select("*")
-    .neq("status", "closed")
-    .order("created_at", { ascending: false });
+  let q = supabase.from("v_case_queue").select("*");
+  if (f.status === "all") { /* everything, including closed */ }
+  else if (f.status === "open") q = q.not("status", "in", "(resolved,closed)");
+  else if (f.status) q = q.eq("status", f.status);
+  else q = q.neq("status", "closed");
+  if (f.intents?.length) q = q.in("intent", f.intents);
+  if (f.priority) q = q.eq("priority", f.priority);
+  if (f.sentiment) q = q.eq("sentiment", f.sentiment);
+  if (f.assigned === "me" && f.myName) q = q.eq("assigned_to", f.myName);
+  if (f.assigned === "nobody") q = q.is("assigned_to", null);
+  if (f.sla === "risk") q = q.lt("sla_minutes_left", 60).not("status", "in", "(resolved,closed)");
+  const text = (f.q ?? "").replace(/[%,()*]/g, " ").trim();
+  if (text) q = q.or(`case_number.ilike.%${text}%,customer_name.ilike.%${text}%,subject.ilike.%${text}%`);
+  const { data, error } = await q.order("created_at", { ascending: false }).limit(300);
   if (error) return { data: [], error: friendlyError(error, "listCaseQueue") };
   return { data: data as CaseRow[] };
 }

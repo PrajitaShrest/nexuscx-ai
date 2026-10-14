@@ -6,6 +6,10 @@ import { PRESENCE } from "@/components/Avatar";
 import { can, getMe, ROLE_LABEL } from "@/lib/data/me";
 import { getDashboard, type DashCase } from "@/lib/data/dashboard";
 import { ago, greeting } from "@/lib/format";
+import FilterBar from "@/components/FilterBar";
+import { LabelBars, SplitBars, StackBar, TrendChart } from "@/components/charts/Charts";
+import { SENTIMENT_COLOR, SERIES } from "@/components/charts/palette";
+import { getCaseStats, ISSUE_LABEL, PERIODS, PRIORITIES, readFilters, SENTIMENTS, TOPICS } from "@/lib/data/stats";
 
 function sla(due: string | null) {
   if (!due) return { text: "—", late: false };
@@ -47,11 +51,44 @@ function Tile({ label, value, href, tone, hint }: { label: string; value: string
     : <div className="rounded-xl border bg-white px-4 py-3">{body}</div>;
 }
 
-// Staff home: what needs doing now. Numbers depend on the person's roles.
-export default async function DashboardPage() {
+const pct = (part: number, total: number) => (total ? Math.round((part / total) * 100) : 0);
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+// Group intents that share a label (e.g. "general" and "unknown" are both "General").
+function issueRows(topics: { intent: string; total: number; escalated: number }[]) {
+  const m = new Map<string, { label: string; part: number; total: number }>();
+  for (const t of topics) {
+    const label = ISSUE_LABEL[t.intent] ?? cap(t.intent.replace(/_/g, " "));
+    const r = m.get(label) ?? { label, part: 0, total: 0 };
+    r.part += t.escalated; r.total += t.total; m.set(label, r);
+  }
+  return [...m.values()].sort((a, b) => b.total - a.total).map((r) => ({ ...r, note: `${pct(r.part, r.total)}% escalated` }));
+}
+
+// A headline number with its change against the previous period of the same length.
+function Stat({ label, value, delta, goodWhenUp, hint }: { label: string; value: string; delta?: number | null; goodWhenUp?: boolean; hint?: string }) {
+  const show = delta !== undefined && delta !== null && Number.isFinite(delta);
+  const good = show && delta !== 0 && (goodWhenUp === undefined ? null : (delta > 0) === goodWhenUp);
+  return (
+    <div className="rounded-xl border bg-white px-4 py-3">
+      <p className="text-xs text-gray-500">{label}</p>
+      <p className="mt-1 text-2xl font-semibold">{value}</p>
+      {show ? (
+        <p className={`mt-0.5 text-xs ${good === null || delta === 0 ? "text-gray-500" : good ? "text-emerald-700" : "text-red-700"}`}>
+          <span aria-hidden>{delta! > 0 ? "▲" : delta! < 0 ? "▼" : "•"}</span> {delta! > 0 ? "+" : ""}{delta}{hint ?? ""} <span className="text-gray-400">vs previous period</span>
+        </p>
+      ) : hint ? <p className="mt-0.5 text-xs text-gray-400">{hint}</p> : null}
+    </div>
+  );
+}
+
+// Staff home: what needs doing now, then how the service is performing.
+// Numbers depend on the person's roles; the filters scope the performance section.
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const me = await getMe();
   if (!can(me, "view_cases")) return <NoAccess me={me} page="Dashboard" needs="view_cases" />;
-  const d = await getDashboard(me);
+  const f = readFilters(await searchParams);
+  const [d, { data: st, error: statsError }] = await Promise.all([getDashboard(me), getCaseStats(f)]);
   const k = d.kpis;
   const roles = [me.role, ...me.extraRoles].map((r) => ROLE_LABEL[r] ?? r).join(" + ");
   const maxIntent = Math.max(1, ...d.byIntent.map((i) => i.count));
@@ -66,9 +103,9 @@ export default async function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-          <Tile label="My open cases" value={d.myCases.length} href="#mine" />
+          <Tile label="My open cases" value={d.myCases.length} href="/cases?assigned=me" />
           <Tile label="Waiting for a person" value={d.waitingCount} href="/conversations?tab=escalated" tone={d.waitingCount ? "text-red-600" : ""} />
-          <Tile label="SLA due within 1h" value={d.slaRisk} href="/cases" tone={d.slaRisk ? "text-amber-600" : ""} />
+          <Tile label="SLA due within 1h" value={d.slaRisk} href="/cases?sla=risk" tone={d.slaRisk ? "text-amber-600" : ""} />
           <Tile label="New today" value={d.openToday} hint={`${d.resolvedToday} resolved today`} />
           <Tile label="Orders to process" value={d.ordersToProcess} href="/orders" />
           <Tile label="Returns to review" value={d.returnsToReview} href="/returns" />
@@ -111,6 +148,78 @@ export default async function DashboardPage() {
             )}
           </section>
         </div>
+
+
+        <section aria-labelledby="perf" className="space-y-4 border-t pt-6">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 id="perf" className="text-lg font-semibold">Service performance</h2>
+              <p className="text-sm text-gray-500">Cases created in the last {f.days} days{f.topic ? ` · ${TOPICS[f.topic].label}` : ""}{f.sentiment ? ` · ${f.sentiment} customers` : ""}{f.priority ? ` · ${f.priority} priority` : ""}</p>
+            </div>
+          </div>
+          <FilterBar filters={[
+            { name: "days", label: "Period", options: PERIODS.map((p) => [String(p), `Last ${p} days`] as [string, string]) },
+            { name: "topic", label: "Issue", options: [["", "All issues"], ...Object.entries(TOPICS).map(([k, t]) => [k, t.label] as [string, string])] },
+            { name: "sentiment", label: "Sentiment", options: [["", "All sentiment"], ...SENTIMENTS.map((s) => [s, cap(s)] as [string, string])] },
+            { name: "priority", label: "Priority", options: [["", "All priorities"], ...PRIORITIES.map((p) => [p, cap(p)] as [string, string])] },
+          ]} />
+          {statsError && <p role="alert" className="rounded-md bg-amber-50 p-3 text-sm text-amber-800">{statsError}</p>}
+          {st && (() => {
+            const s = st.summary, p = st.previous;
+            const aiPct = pct(s.ai_only, s.cases), escPct = pct(s.escalated, s.cases);
+            return (
+              <>
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+                  <Stat label="Cases" value={String(s.cases)} delta={s.cases - p.cases} />
+                  <Stat label="Handled by AI only" value={`${aiPct}%`} delta={p.cases ? aiPct - pct(p.ai_only, p.cases) : null} goodWhenUp hint=" pts" />
+                  <Stat label="Escalated to a person" value={`${escPct}%`} delta={p.cases ? escPct - pct(p.escalated, p.cases) : null} goodWhenUp={false} hint=" pts" />
+                  <Stat label="Resolved within SLA" value={s.resolved_with_sla ? `${pct(s.resolved_in_sla, s.resolved_with_sla)}%` : "—"} hint={`${s.resolved} resolved`} />
+                  <Stat label="Average wait for a person" value={s.wait_for_person_min !== null ? (s.wait_for_person_min < 60 ? `${s.wait_for_person_min} min` : `${Math.round(s.wait_for_person_min / 6) / 10} h`) : "—"} hint={s.hours_to_resolve !== null ? `${s.hours_to_resolve} h to resolve on average` : undefined} />
+                  <Stat label="Customer rating" value={st.rating.csat !== null ? `${st.rating.csat} / 5` : "—"}
+                    delta={st.rating.csat !== null && st.rating.prev_csat !== null ? Math.round((st.rating.csat - st.rating.prev_csat) * 10) / 10 : null} goodWhenUp hint={st.rating.prev_csat === null ? `${st.rating.ratings} ratings` : undefined} />
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+                  <section className="rounded-xl border bg-white p-4 xl:col-span-2">
+                    <h3 className="font-semibold">New, escalated and resolved cases per day</h3>
+                    <p className="mb-3 text-xs text-gray-500">Hover or use the arrow keys to see each day.</p>
+                    <TrendChart title="New, escalated and resolved cases per day" data={st.daily} series={[
+                      { key: "new", label: "New", color: SERIES.blue },
+                      { key: "escalated", label: "Escalated", color: SERIES.orange },
+                      { key: "resolved", label: "Resolved", color: SERIES.aqua },
+                    ]} />
+                  </section>
+                  <section className="rounded-xl border bg-white p-4">
+                    <h3 className="font-semibold">Where these cases are now</h3>
+                    <p className="mb-3 text-xs text-gray-500">Out of {s.cases} cases</p>
+                    <StackBar title="Where these cases are now" parts={[
+                      { key: "ai", label: "Answered by AI, no person needed", value: st.outcomes.ai_only, color: SERIES.blue },
+                      { key: "waiting", label: "Waiting for a person", value: st.outcomes.waiting, color: SERIES.orange },
+                      { key: "done", label: "Resolved by staff", value: st.outcomes.staff_resolved, color: SERIES.aqua },
+                      { key: "with", label: "Being handled by staff", value: st.outcomes.with_staff, color: SERIES.yellow },
+                    ]} />
+                  </section>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+                  <section className="rounded-xl border bg-white p-4 xl:col-span-2">
+                    <h3 className="font-semibold">Issues and how often they need a person</h3>
+                    <p className="mb-3 text-xs text-gray-500">High escalation rates show where the AI needs better knowledge articles.</p>
+                    <SplitBars title="Cases by issue, split by escalation" partLabel="Escalated" restLabel="Handled by AI" partColor={SERIES.orange} restColor={SERIES.blue}
+                      rows={issueRows(st.topics)} />
+                  </section>
+                  <section className="rounded-xl border bg-white p-4">
+                    <h3 className="font-semibold">Customer mood</h3>
+                    <p className="mb-3 text-xs text-gray-500">Sentiment the AI detected in the first message</p>
+                    <LabelBars title="Customer sentiment" rows={SENTIMENTS.map((x) => ({ label: cap(x), value: st.sentiment[x] ?? 0, color: SENTIMENT_COLOR[x] }))} />
+                    <h3 className="mb-2 mt-5 font-semibold">Priority</h3>
+                    <LabelBars title="Cases by priority" rows={PRIORITIES.filter((x) => st.priority[x]).map((x) => ({ label: cap(x), value: st.priority[x], color: SERIES.blue }))} />
+                  </section>
+                </div>
+              </>
+            );
+          })()}
+        </section>
 
         {can(me, "view_analytics") && (
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
