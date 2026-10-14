@@ -8,7 +8,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
   const { saved } = await searchParams;
   const q = saved ? `?saved=${encodeURIComponent(saved)}` : "";
   if (!isStaff(me)) redirect(`/account${q}`);
-  if (can(me, "view_cases")) redirect(`/conversations${q}`);
+  if (can(me, "view_cases")) redirect(`/dashboard${q}`);
+  if (can(me, "manage_knowledge")) redirect(`/knowledge${q}`);
   if (can(me, "manage_users")) redirect(`/users${q}`);
   redirect(`/profile${q}`);
 }

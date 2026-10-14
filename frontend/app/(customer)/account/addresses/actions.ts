@@ -3,33 +3,24 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { deleteAddress, saveAddress, setDefaultAddress } from "@/lib/data/shop";
-import { normaliseMobile } from "@/lib/auth/phone";
+import { addressSchema, check, formObject } from "@/lib/validation";
 
 export type AddressState = { error?: string; field?: string };
 
 const SAFE_NEXT = ["/shop", "/account"];
 
 export async function save(_p: AddressState, f: FormData): Promise<AddressState> {
-  const v = (k: string) => String(f.get(k) ?? "").trim();
-  const phoneRaw = v("phone");
-  let phone = "";
-  if (phoneRaw) {
-    const p = normaliseMobile(phoneRaw);
-    if (!p) return { error: "Enter an Australian mobile, like 0412 345 678.", field: "phone" };
-    phone = p;
-  }
-  if (v("recipient").length < 2) return { error: "Please enter who will receive the delivery.", field: "recipient" };
-  if (v("line1").length < 3) return { error: "Please enter the street address.", field: "line1" };
-  if (v("suburb").length < 2) return { error: "Please enter the suburb.", field: "suburb" };
-  if (!/^\d{4}$/.test(v("postcode"))) return { error: "Postcode must be 4 digits.", field: "postcode" };
-
+  // Shared rules in lib/validation (the database checks again)
+  const v = check(addressSchema, formObject(f));
+  if ("error" in v) return v;
+  const a = v.data;
   const r = await saveAddress({
-    id: v("address_id") || null, label: v("label"), recipient: v("recipient"), line1: v("line1"), line2: v("line2"),
-    suburb: v("suburb"), state: v("state"), postcode: v("postcode"), phone, isDefault: f.get("is_default") === "on",
+    id: a.address_id, label: a.label, recipient: a.recipient, line1: a.line1, line2: a.line2,
+    suburb: a.suburb, state: a.state, postcode: a.postcode, phone: a.phone, isDefault: a.is_default,
   });
   if (r.error) return { error: r.error };
   revalidatePath("/account", "layout");
-  const next = v("next");
+  const next = a.next;
   redirect(`${SAFE_NEXT.includes(next) ? next : "/account/addresses"}?saved=address`);
 }
 

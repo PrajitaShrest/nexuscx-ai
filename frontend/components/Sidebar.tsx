@@ -10,18 +10,18 @@ import { unreadCount } from "@/lib/data/workspace";
 // "week" marks screens planned for later sprints.
 export const NAV: { section: string; items: { label: string; href?: string; week?: number; needs: string }[] }[] = [
   { section: "", items: [
-    { label: "Dashboard", week: 8, needs: "view_cases" },
+    { label: "Dashboard", href: "/dashboard", needs: "view_cases" },
     { label: "Inbox", href: "/inbox", needs: "view_cases" },
     { label: "Conversations", href: "/conversations", needs: "view_cases" },
     { label: "Cases", href: "/cases", needs: "view_cases" },
     { label: "Orders", href: "/orders", needs: "view_cases" },
     { label: "Returns", href: "/returns", needs: "view_cases" },
-    { label: "Customers", week: 7, needs: "view_cases" },
+    { label: "Customers", href: "/customers", needs: "view_cases" },
   ]},
   { section: "AI operations", items: [
     { label: "AI Agents", week: 8, needs: "configure_ai" },
     { label: "Routing & Escalation", week: 8, needs: "configure_ai" },
-    { label: "Knowledge Base", week: 7, needs: "manage_knowledge" },
+    { label: "Knowledge Base", href: "/knowledge", needs: "manage_knowledge" },
   ]},
   { section: "Insights", items: [
     { label: "Analytics", week: 9, needs: "view_analytics" },
