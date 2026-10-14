@@ -54,6 +54,17 @@ function Tile({ label, value, href, tone, hint }: { label: string; value: string
 const pct = (part: number, total: number) => (total ? Math.round((part / total) * 100) : 0);
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
+// Group intents that share a label (e.g. "general" and "unknown" are both "General").
+function issueRows(topics: { intent: string; total: number; escalated: number }[]) {
+  const m = new Map<string, { label: string; part: number; total: number }>();
+  for (const t of topics) {
+    const label = ISSUE_LABEL[t.intent] ?? cap(t.intent.replace(/_/g, " "));
+    const r = m.get(label) ?? { label, part: 0, total: 0 };
+    r.part += t.escalated; r.total += t.total; m.set(label, r);
+  }
+  return [...m.values()].sort((a, b) => b.total - a.total).map((r) => ({ ...r, note: `${pct(r.part, r.total)}% escalated` }));
+}
+
 // A headline number with its change against the previous period of the same length.
 function Stat({ label, value, delta, goodWhenUp, hint }: { label: string; value: string; delta?: number | null; goodWhenUp?: boolean; hint?: string }) {
   const show = delta !== undefined && delta !== null && Number.isFinite(delta);
@@ -195,7 +206,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                     <h3 className="font-semibold">Issues and how often they need a person</h3>
                     <p className="mb-3 text-xs text-gray-500">High escalation rates show where the AI needs better knowledge articles.</p>
                     <SplitBars title="Cases by issue, split by escalation" partLabel="Escalated" restLabel="Handled by AI" partColor={SERIES.orange} restColor={SERIES.blue}
-                      rows={st.topics.map((t) => ({ label: ISSUE_LABEL[t.intent] ?? cap(t.intent.replace(/_/g, " ")), part: t.escalated, total: t.total, note: `${pct(t.escalated, t.total)}% escalated` }))} />
+                      rows={issueRows(st.topics)} />
                   </section>
                   <section className="rounded-xl border bg-white p-4">
                     <h3 className="font-semibold">Customer mood</h3>
