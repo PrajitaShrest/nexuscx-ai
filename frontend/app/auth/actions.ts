@@ -1,6 +1,7 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
+import { siteUrl } from "@/lib/site";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -224,7 +225,7 @@ export async function requestPasswordReset(_prev: FormState, formData: FormData)
   if (!identifier) return { error: "Enter your username or email.", field: "identifier" };
   const email = await resolveEmail(identifier);
   if (email) {
-    const origin = (await headers()).get("origin") ?? "http://localhost:3000";
+    const origin = await siteUrl();
     const supabase = await createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${origin}/auth/callback?next=/reset-password`,

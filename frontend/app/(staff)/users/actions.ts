@@ -1,6 +1,6 @@
 "use server";
 
-import { headers } from "next/headers";
+import { siteUrl } from "@/lib/site";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
@@ -55,7 +55,7 @@ export async function emailReset(_p: AdminState, f: FormData): Promise<AdminStat
   const id = String(f.get("user_id"));
   const { data, error } = await getOverview(id);
   if (error || !data) return { error: error ?? "That person no longer exists." };
-  const origin = (await headers()).get("origin") ?? "http://localhost:3000";
+  const origin = await siteUrl();
   const r = await sendResetLink(data.email, origin);
   if (r.error) return { error: r.error };
   return { ok: `Reset link sent to ${data.email}.` };
