@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import CustomerHeader from "@/components/CustomerHeader";
 import { ClockIcon, HeadsetIcon, ShieldIcon, SparkIcon, BookIcon } from "@/components/Icons";
 import { getMe, isStaff } from "@/lib/data/me";
 import { listCaseQueue } from "@/lib/data/cases";
@@ -14,11 +13,6 @@ function ago(iso: string) {
   if (h < 24) return `${h} hr ago`;
   const d = Math.round(h / 24);
   return d === 1 ? "yesterday" : `${d} days ago`;
-}
-
-function greeting() {
-  const h = Number(new Intl.DateTimeFormat("en-AU", { hour: "numeric", hour12: false, timeZone: "Australia/Sydney" }).format(new Date()));
-  return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
 }
 
 // Customer portal: chat with the AI assistant + track my requests.
@@ -39,10 +33,7 @@ export default async function SupportPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-ink">
-      <CustomerHeader me={me} />
-
-      <main className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
+    <>
         {/* Welcome banner */}
         <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-500 p-6 text-white shadow-lg shadow-indigo-200 sm:p-8">
           <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10" />
@@ -52,8 +43,8 @@ export default async function SupportPage() {
               <p className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium">
                 <span className="h-2 w-2 rounded-full bg-emerald-300" /> Support is online now
               </p>
-              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{greeting()}, {first}!</h1>
-              <p className="mt-2 max-w-md text-indigo-100">How can we help today? Our AI answers in seconds, and a real person steps in whenever you need one.</p>
+              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">How can we help, {first}?</h1>
+              <p className="mt-2 max-w-md text-indigo-100">Our AI answers in seconds from approved help articles, and a real person steps in whenever you need one.</p>
             </div>
             <div className="flex gap-3">
               {stats.map((s) => (
@@ -88,7 +79,6 @@ export default async function SupportPage() {
             </section>
           </aside>
         </div>
-      </main>
-    </div>
+    </>
   );
 }

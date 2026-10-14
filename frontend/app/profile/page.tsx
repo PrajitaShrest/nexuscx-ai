@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
-import CustomerHeader from "@/components/CustomerHeader";
+import CustomerShell from "@/components/CustomerShell";
+import { listAddresses, listMyOrders } from "@/lib/data/shop";
 import Avatar, { PRESENCE } from "@/components/Avatar";
 import { CalendarIcon, CheckIcon, ClockIcon, KeyIcon, ShieldIcon, UserIcon, XIcon } from "@/components/Icons";
 import { getMe, isStaff, ROLE_LABEL } from "@/lib/data/me";
@@ -40,26 +41,27 @@ export default async function ProfilePage() {
   const p = await getProfile(me);
   const roles = [me.role, ...me.extraRoles].map((r) => ROLE_LABEL[r] ?? r);
 
+  const [cases, addresses, orders] = staff ? [[], [], []] : await Promise.all([listCaseQueue().then((r) => r.data), listAddresses(), listMyOrders()]);
+
   // Customers: how complete is the profile, and a summary of their requests
   const checks = [
     ["Full name", me.name.trim().length >= 2],
     ["Mobile number", !!p.phone],
     ["Date of birth", !!p.date_of_birth],
-    ["Delivery address", !!p.address],
+    ["Delivery address", addresses.length > 0],
   ] as const;
   const percent = Math.round((checks.filter(([, ok]) => ok).length / checks.length) * 100);
-  const cases = staff ? [] : (await listCaseQueue()).data;
   const openCount = cases.filter((c) => !["resolved", "closed"].includes(c.status)).length;
 
   const body = (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
+    <div className={staff ? "mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6" : "space-y-6"}>
       {/* Cover */}
       <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div className="relative h-32 bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-500 sm:h-40">
           <div className="absolute -right-10 -top-16 h-56 w-56 rounded-full bg-white/10" />
           <div className="absolute bottom-0 right-40 h-28 w-28 translate-y-1/2 rounded-full bg-white/10" />
           <Link href="/" className="absolute left-4 top-4 rounded-full bg-white/15 px-3 py-1.5 text-sm font-medium text-white backdrop-blur hover:bg-white/25">
-            ← {staff ? "Back to workspace" : "Back to Help Centre"}
+            ← {staff ? "Back to workspace" : "Back to my account"}
           </Link>
         </div>
         <div className="flex flex-wrap items-end gap-5 px-6 pb-6">
@@ -89,7 +91,7 @@ export default async function ProfilePage() {
           <Card title="Personal details" icon={<UserIcon className="h-5 w-5" />}>
             <DetailsForm init={{
               name: me.name, username: me.username, email: me.email, customer: !staff,
-              phone: displayMobile(p.phone), address: p.address ?? "", dob: p.date_of_birth ?? "",
+              phone: displayMobile(p.phone), dob: p.date_of_birth ?? "",
             }} />
           </Card>
           <Card id="security" title="Password & security" icon={<KeyIcon className="h-5 w-5" />}>
@@ -133,12 +135,13 @@ export default async function ProfilePage() {
                   ))}
                 </ul>
               </Card>
-              <Card title="My support" icon={<ClockIcon className="h-5 w-5" />}>
+              <Card title="My activity" icon={<ClockIcon className="h-5 w-5" />}>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-indigo-50 p-4"><p className="text-2xl font-bold text-indigo-700">{openCount}</p><p className="text-xs text-indigo-700">Open requests</p></div>
-                  <div className="rounded-2xl bg-emerald-50 p-4"><p className="text-2xl font-bold text-emerald-700">{cases.length - openCount}</p><p className="text-xs text-emerald-700">Resolved</p></div>
+                  <Link href="/account/orders" className="rounded-2xl bg-sky-50 p-4 hover:ring-2 hover:ring-sky-200"><p className="text-2xl font-bold text-sky-700">{orders.length}</p><p className="text-xs text-sky-700">Orders</p></Link>
+                  <Link href="/account/chats" className="rounded-2xl bg-indigo-50 p-4 hover:ring-2 hover:ring-indigo-200"><p className="text-2xl font-bold text-indigo-700">{openCount}</p><p className="text-xs text-indigo-700">Open chats</p></Link>
+                  <Link href="/account/addresses" className="rounded-2xl bg-amber-50 p-4 hover:ring-2 hover:ring-amber-200"><p className="text-2xl font-bold text-amber-700">{addresses.length}</p><p className="text-xs text-amber-700">Addresses</p></Link>
+                  <Link href="/account/chats" className="rounded-2xl bg-emerald-50 p-4 hover:ring-2 hover:ring-emerald-200"><p className="text-2xl font-bold text-emerald-700">{cases.length - openCount}</p><p className="text-xs text-emerald-700">Resolved chats</p></Link>
                 </div>
-                <Link href="/support" className="mt-4 block rounded-xl border border-slate-200 py-2.5 text-center text-sm font-semibold text-indigo-700 hover:bg-indigo-50">Go to Help Centre →</Link>
               </Card>
             </>
           )}
@@ -160,9 +163,6 @@ export default async function ProfilePage() {
       <main className="min-w-0 flex-1">{body}</main>
     </div>
   ) : (
-    <div className="min-h-screen bg-slate-50 text-ink">
-      <CustomerHeader me={me} />
-      <main>{body}</main>
-    </div>
+    <CustomerShell me={me}>{body}</CustomerShell>
   );
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import Logo from "./Logo";
 import { menuUser, type Me } from "@/lib/data/me";
 import UserMenu from "./UserMenu";
+import { unreadCount } from "@/lib/data/workspace";
 
 // Menu from the Figma prototype. Each item needs one permission; a role
 // without it never sees the item. The same permission is checked on the
@@ -10,8 +11,11 @@ import UserMenu from "./UserMenu";
 export const NAV: { section: string; items: { label: string; href?: string; week?: number; needs: string }[] }[] = [
   { section: "", items: [
     { label: "Dashboard", week: 8, needs: "view_cases" },
+    { label: "Inbox", href: "/inbox", needs: "view_cases" },
     { label: "Conversations", href: "/conversations", needs: "view_cases" },
     { label: "Cases", href: "/cases", needs: "view_cases" },
+    { label: "Orders", href: "/orders", needs: "view_cases" },
+    { label: "Returns", href: "/returns", needs: "view_cases" },
     { label: "Customers", week: 7, needs: "view_cases" },
   ]},
   { section: "AI operations", items: [
@@ -30,7 +34,8 @@ export const NAV: { section: string; items: { label: string; href?: string; week
   ]},
 ];
 
-export default function Sidebar({ me, active }: { me: Me; active: string }) {
+export default async function Sidebar({ me, active }: { me: Me; active: string }) {
+  const unread = await unreadCount();
   return (
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-navy text-slate-300 md:flex">
       <div className="px-5 py-5"><Logo tone="light" size={34} /></div>
@@ -44,8 +49,9 @@ export default function Sidebar({ me, active }: { me: Me; active: string }) {
               {items.map((item) =>
                 item.href ? (
                   <Link key={item.label} href={item.href}
-                    className={`block rounded-md px-2 py-2 text-sm ${active.startsWith(item.href) ? "bg-indigo-600 text-white" : "hover:bg-white/5"}`}>
+                    className={`flex items-center justify-between rounded-md px-2 py-2 text-sm ${active.startsWith(item.href) ? "bg-indigo-600 text-white" : "hover:bg-white/5"}`}>
                     {item.label}
+                    {item.href === "/inbox" && unread > 0 && <span className="rounded-full bg-rose-500 px-1.5 text-[11px] font-semibold text-white">{unread > 99 ? "99+" : unread}</span>}
                   </Link>
                 ) : (
                   <p key={item.label} className="flex items-center justify-between rounded-md px-2 py-2 text-sm text-slate-500" title="Planned for a later sprint">

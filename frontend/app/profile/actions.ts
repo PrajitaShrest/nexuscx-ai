@@ -21,19 +21,18 @@ export async function saveProfile(_prev: ProfileState, f: FormData): Promise<Pro
   if (name.length < 2 || name.length > 100) return { error: "Please enter your full name (2–100 characters).", field: "name" };
   if (!USERNAME_RE.test(username)) return { error: "Use 3–30 letters, numbers, dots or underscores.", field: "username" };
 
-  let phone: string | null = null, address: string | null = null, dob: string | null = null;
+  let phone: string | null = null, dob: string | null = null;
   if (me.role === "customer") {
     const rawPhone = String(f.get("phone") ?? "").trim();
     if (rawPhone) {
       phone = normaliseMobile(rawPhone);
       if (!phone) return { error: "Enter an Australian mobile, like 0412 345 678.", field: "phone" };
     }
-    address = String(f.get("address") ?? "").trim().slice(0, 255) || null;
     dob = String(f.get("date_of_birth") ?? "") || null;
     if (dob && new Date(`${dob}T00:00:00`) > new Date()) return { error: "Date of birth cannot be in the future.", field: "date_of_birth" };
   }
 
-  const r = await updateMyProfile(me, { name, username, phone, address, dob });
+  const r = await updateMyProfile(me, { name, username, phone, dob });
   if (r.error) return r;
   revalidatePath("/", "layout");
   redirect("/?saved=profile");
