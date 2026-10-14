@@ -6,6 +6,7 @@ import { CheckIcon, XIcon } from "./Icons";
 
 const MESSAGES: Record<string, string> = {
   profile: "Your profile has been updated.",
+  article: "Article saved.",
   password: "Your password has been changed.",
   order: "Order placed. You can track it here.",
   cancelled: "Order cancelled. Any payment is refunded within 3 to 5 business days.",

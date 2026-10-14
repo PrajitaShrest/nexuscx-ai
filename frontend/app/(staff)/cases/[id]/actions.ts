@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { check, formObject, noteSchema, staffReplySchema } from "@/lib/validation";
 import { staffAddNote, staffReply, staffSetStatus, staffTakeCase, staffUpdateReturn } from "@/lib/data/workspace";
 
 export type CaseActionState = { error?: string; ok?: string; at?: number };
@@ -19,13 +20,12 @@ export async function take(_p: CaseActionState, f: FormData): Promise<CaseAction
 }
 
 export async function reply(_p: CaseActionState, f: FormData): Promise<CaseActionState> {
-  const id = String(f.get("case_id"));
-  const message = String(f.get("message") ?? "").trim();
-  if (message.length < 2) return { error: "Write a message first." };
+  const v = check(staffReplySchema, formObject(f));
+  if ("error" in v) return { error: v.error };
+  const { case_id: id, message, then } = v.data;
   const r = await staffReply(id, message);
   if (r.error) return { error: r.error };
-  if (f.get("then") === "waiting") await staffSetStatus(id, "waiting", "");
-  if (f.get("then") === "resolved") await staffSetStatus(id, "resolved", "");
+  if (then) await staffSetStatus(id, then, "");
   return done(id, "Sent to the customer.");
 }
 
@@ -38,8 +38,10 @@ export async function setStatus(_p: CaseActionState, f: FormData): Promise<CaseA
 }
 
 export async function addNote(_p: CaseActionState, f: FormData): Promise<CaseActionState> {
-  const id = String(f.get("case_id"));
-  const r = await staffAddNote(id, String(f.get("note") ?? ""));
+  const v = check(noteSchema, formObject(f));
+  if ("error" in v) return { error: v.error };
+  const id = v.data.case_id;
+  const r = await staffAddNote(id, v.data.note);
   return r.error ? { error: r.error } : done(id, "Note saved.");
 }
 

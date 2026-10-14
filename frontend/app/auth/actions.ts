@@ -125,7 +125,7 @@ export async function login(_prev: FormState, formData: FormData): Promise<FormS
 
   revalidatePath("/", "layout");
   if (me?.must_change_password) redirect("/reset-password?forced=1");
-  redirect(role === "customer" ? "/account" : "/conversations");
+  redirect(role === "customer" ? "/account" : "/dashboard");
 }
 
 // ---------------------------------------------------------------------

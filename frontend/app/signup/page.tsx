@@ -29,20 +29,22 @@ export default function SignupPage() {
   const [state, action, pending] = useActionState<FormState, FormData>(signup, {});
   const v = state.values ?? {};
   const [username, setUsername] = useState(v.username ?? "");
-  const [nameStatus, setNameStatus] = useState<NameStatus>("idle");
+  const [checked, setChecked] = useState<{ name: string; status: NameStatus } | null>(null);
   const [dob, setDob] = useState(v.date_of_birth ?? "");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [agreed, setAgreed] = useState(false);
 
-  // Check the username shortly after the person stops typing
+  // Check the username shortly after the person stops typing.
+  // Simple cases are worked out while rendering; only the server check runs in the effect.
+  const valid = USERNAME_RE.test(username);
+  const nameStatus: NameStatus = !username ? "idle" : !valid ? "invalid"
+    : checked?.name === username ? checked.status : "checking";
   useEffect(() => {
-    if (!username) { setNameStatus("idle"); return; }
-    if (!USERNAME_RE.test(username)) { setNameStatus("invalid"); return; }
-    setNameStatus("checking");
-    const t = setTimeout(async () => setNameStatus(await checkUsername(username)), 450);
+    if (!username || !valid) return;
+    const t = setTimeout(async () => setChecked({ name: username, status: await checkUsername(username) }), 450);
     return () => clearTimeout(t);
-  }, [username]);
+  }, [username, valid]);
 
   const err = (f: string) => (state.field === f ? state.error : undefined);
   const age = dob ? ageFrom(dob) : null;
