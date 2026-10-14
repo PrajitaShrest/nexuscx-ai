@@ -40,7 +40,7 @@ export default function FilterBar({ filters, keep = [], search }: { filters: Fil
         </label>
       ))}
       {active && (
-        <button type="button" onClick={() => start(() => router.replace(path + (params.get("days") ? `?days=${params.get("days")}` : ""), { scroll: false }))}
+        <button type="button" onClick={() => { const next = new URLSearchParams(); for (const k of ["days", ...keep]) { const v = params.get(k); if (v) next.set(k, v); } start(() => router.replace(`${path}${next.size ? `?${next}` : ""}`, { scroll: false })); }}
           className="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-indigo-700 hover:bg-indigo-50">Clear filters</button>
       )}
     </div>

@@ -19,18 +19,18 @@ export const NAV: { section: string; items: { label: string; href?: string; week
     { label: "Customers", href: "/customers", needs: "view_cases" },
   ]},
   { section: "AI operations", items: [
-    { label: "AI Agents", week: 8, needs: "configure_ai" },
-    { label: "Routing & Escalation", week: 8, needs: "configure_ai" },
+    { label: "AI Agents", href: "/ai-agents", needs: "configure_ai" },
+    { label: "Routing & Escalation", href: "/routing", needs: "configure_ai" },
     { label: "Knowledge Base", href: "/knowledge", needs: "manage_knowledge" },
   ]},
   { section: "Insights", items: [
-    { label: "Analytics", week: 9, needs: "view_analytics" },
-    { label: "Team Operations", week: 9, needs: "view_analytics" },
+    { label: "Analytics", href: "/analytics", needs: "view_analytics" },
+    { label: "Team Operations", href: "/team", needs: "view_analytics" },
   ]},
   { section: "Administration", items: [
     { label: "Users & Roles", href: "/users", needs: "manage_users" },
-    { label: "Audit Logs", week: 8, needs: "view_audit_logs" },
-    { label: "Settings", week: 9, needs: "configure_ai" },
+    { label: "Audit Logs", href: "/audit", needs: "view_audit_logs" },
+    { label: "Settings", href: "/settings", needs: "configure_ai" },
   ]},
 ];
 

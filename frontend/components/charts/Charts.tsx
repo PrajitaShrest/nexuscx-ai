@@ -175,7 +175,7 @@ export function SplitBars({ rows, partLabel, restLabel, partColor, restColor, ti
 }
 
 // Simple labelled bars where each bar has its own colour (used for sentiment).
-export function LabelBars({ rows, title }: { rows: { label: string; value: number; color: string }[]; title: string }) {
+export function LabelBars({ rows, title, wideLabels }: { rows: { label: string; value: number; color: string }[]; title: string; wideLabels?: boolean }) {
   const max = Math.max(1, ...rows.map((r) => r.value));
   const total = rows.reduce((a, r) => a + r.value, 0);
   return (
@@ -183,7 +183,7 @@ export function LabelBars({ rows, title }: { rows: { label: string; value: numbe
       <ul className="space-y-2.5">
         {rows.map((r) => (
           <li key={r.label} className="flex items-center gap-3 text-sm" title={`${r.label}: ${r.value}`}>
-            <span className="w-20 shrink-0 text-gray-700">{r.label}</span>
+            <span className={`${wideLabels ? "w-40" : "w-20"} shrink-0 truncate text-gray-700`} title={r.label}>{r.label}</span>
             <span className="flex h-3.5 flex-1 items-center">
               <span className="h-full rounded-r" style={{ width: `${(r.value / max) * 100}%`, minWidth: r.value ? 4 : 0, background: r.color }} />
               <span className="ml-2 text-xs font-semibold tabular-nums">{r.value}</span>
@@ -192,6 +192,36 @@ export function LabelBars({ rows, title }: { rows: { label: string; value: numbe
           </li>
         ))}
       </ul>
+    </figure>
+  );
+}
+
+// Single-series columns (e.g. cases by hour of day) with a hover/focus readout.
+export function Columns({ values, labels, title, color, labelEvery = 1, unit = "cases" }: {
+  values: number[]; labels: string[]; title: string; color: string; labelEvery?: number; unit?: string;
+}) {
+  const [hover, setHover] = useState<number | null>(null);
+  const max = niceMax(Math.max(1, ...values));
+  const total = values.reduce((a, v) => a + v, 0);
+  const peak = values.indexOf(Math.max(...values));
+  return (
+    <figure aria-label={title}>
+      <p className="mb-2 h-5 text-sm text-gray-600" aria-live="polite">
+        {hover !== null ? <><b className="text-gray-900">{values[hover]}</b> {unit} · {labels[hover]}</>
+          : total ? <>Busiest: <b className="text-gray-900">{labels[peak]}</b> ({values[peak]} {unit})</> : "No cases in this period."}
+      </p>
+      <div className="flex h-36 items-end gap-[2px] border-b" style={{ borderColor: INK.base }}>
+        {values.map((v, i) => (
+          <button key={i} type="button" aria-label={`${labels[i]}: ${v} ${unit}`} className="flex h-full flex-1 items-end"
+            onPointerEnter={() => setHover(i)} onPointerLeave={() => setHover(null)} onFocus={() => setHover(i)} onBlur={() => setHover(null)}>
+            <span className="block w-full max-w-6 rounded-t mx-auto transition-opacity" style={{ height: `${(v / max) * 100}%`, minHeight: v ? 3 : 0, background: color, opacity: hover !== null && hover !== i ? 0.5 : 1 }} />
+          </button>
+        ))}
+      </div>
+      <div className="mt-1 flex gap-[2px] text-[10px] text-gray-500">
+        {labels.map((l, i) => <span key={i} className="flex-1 text-center">{i % labelEvery === 0 ? l : ""}</span>)}
+      </div>
+      <TableView caption={title} head={["", unit.charAt(0).toUpperCase() + unit.slice(1)]} rows={labels.map((l, i) => [l, values[i]])} />
     </figure>
   );
 }

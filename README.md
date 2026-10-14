@@ -90,6 +90,7 @@ Open `.env.local` and fill in the two values from **Supabase → Connect** (or *
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Publishable key (starts with `sb_publishable_`) |
+| `NEXT_PUBLIC_SITE_URL` | Online only: the app's public address, e.g. `https://nexuscx-ai.vercel.app`. Leave empty locally. |
 
 Never put the **secret** key or the database password in this file or in GitHub. `.env.local` is ignored by Git.
 
