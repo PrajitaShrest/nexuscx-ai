@@ -34,7 +34,7 @@ export async function updateMyProfile(me: Me, v: { name: string; username: strin
   if (!data?.length) return { error: "You are not allowed to do this." };
   if (me.role === "customer") {
     const { error: e2 } = await supabase.from("customers")
-      .update({ phone: v.phone, address: v.address, date_of_birth: v.dob }).eq("user_id", me.user_id);
+      .update({ phone: v.phone, date_of_birth: v.dob }).eq("user_id", me.user_id);
     if (e2) return { error: friendlyError(e2, "updateMyProfile.customer"), field: e2.code === "22023" ? "date_of_birth" : undefined };
   }
   return {};

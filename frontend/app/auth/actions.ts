@@ -125,7 +125,7 @@ export async function login(_prev: FormState, formData: FormData): Promise<FormS
 
   revalidatePath("/", "layout");
   if (me?.must_change_password) redirect("/reset-password?forced=1");
-  redirect(role === "customer" ? "/support" : "/conversations");
+  redirect(role === "customer" ? "/account" : "/conversations");
 }
 
 // ---------------------------------------------------------------------
@@ -212,7 +212,7 @@ export async function signup(_prev: FormState, formData: FormData): Promise<Form
   }
   if (!data.session) return { ok: "Account created. Please check your email, then sign in." };
   revalidatePath("/", "layout");
-  redirect("/support");
+  redirect("/account");
 }
 
 // ---------------------------------------------------------------------

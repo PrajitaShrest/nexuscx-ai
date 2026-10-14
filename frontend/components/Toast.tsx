@@ -7,6 +7,10 @@ import { CheckIcon, XIcon } from "./Icons";
 const MESSAGES: Record<string, string> = {
   profile: "Your profile has been updated.",
   password: "Your password has been changed.",
+  order: "Order placed. You can track it here.",
+  cancelled: "Order cancelled. Any payment is refunded within 3 to 5 business days.",
+  address: "Address saved.",
+  return: "Request sent. We usually reply within 1 business day.",
 };
 
 // Shows a short success message after a redirect, e.g. /support?saved=profile,

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { CUSTOMER_STATUS, topicForIntent } from "./topics";
 import { InboxIcon } from "@/components/Icons";
@@ -17,7 +18,7 @@ export default function MyRequests({ items }: { items: RequestCard[] }) {
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-ink">My requests</h2>
+        <Link href="/account/chats" className="text-lg font-bold text-ink hover:text-indigo-700">My requests</Link>
         <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-muted">{items.length}</span>
       </div>
       <div className="mb-4 grid grid-cols-3 rounded-xl bg-slate-100 p-1 text-sm" role="tablist">
@@ -41,7 +42,7 @@ export default function MyRequests({ items }: { items: RequestCard[] }) {
             const t = topicForIntent(c.intent);
             const s = CUSTOMER_STATUS[c.status] ?? CUSTOMER_STATUS.ai_handling;
             return (
-              <li key={c.id} className="rounded-2xl border border-slate-200 p-3.5 transition hover:border-indigo-300 hover:shadow-md">
+              <li key={c.id}><Link href={`/account/chats/${c.id}`} className="block rounded-2xl border border-slate-200 p-3.5 transition hover:border-indigo-300 hover:shadow-md">
                 <div className="flex gap-3">
                   <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ring-1 [&>svg]:h-5 [&>svg]:w-5 ${t.tint}`}>{t.icon}</span>
                   <div className="min-w-0 flex-1">
@@ -57,7 +58,7 @@ export default function MyRequests({ items }: { items: RequestCard[] }) {
                   </div>
                   <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ${s.style}`}>{s.label}</span>
                 </div>
-              </li>
+              </Link></li>
             );
           })}
         </ul>

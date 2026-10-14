@@ -14,7 +14,7 @@ const ghost = "rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-semib
 
 export type DetailsInit = {
   name: string; username: string; email: string; customer: boolean;
-  phone: string; address: string; dob: string;
+  phone: string; dob: string;
 };
 
 export function DetailsForm({ init }: { init: DetailsInit }) {
@@ -74,10 +74,7 @@ export function DetailsForm({ init }: { init: DetailsInit }) {
               <input id="date_of_birth" name="date_of_birth" type="date" value={v.dob} onChange={set("dob")}
                 max={new Date().toISOString().slice(0, 10)} className={inputClass(!!err("date_of_birth"))} />
             </Field>
-            <Field label="Delivery address" htmlFor="address" hint="Optional. Used for your orders.">
-              <input id="address" name="address" value={v.address} onChange={set("address")} maxLength={255}
-                autoComplete="street-address" placeholder="12 Example St, Sydney NSW 2000" className={inputClass()} />
-            </Field>
+            <div className="flex flex-col justify-end text-sm text-muted">Delivery addresses are kept in your <Link href="/account/addresses" className="font-semibold text-indigo-700 hover:underline">address book</Link>.</div>
           </>
         )}
       </div>

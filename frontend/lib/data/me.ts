@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -22,19 +23,22 @@ export const ROLE_LABEL: Record<string, string> = {
   administrator: "Administrator",
 };
 
+// Cached for one request: the layout, the page and the menu all share one lookup.
 // The signed-in user's profile, roles and permissions (main role + extra roles).
 // Checked on the server on every page: not signed in -> /login,
 // suspended -> signed out, temporary password -> must choose a new one.
-export async function getMe(): Promise<Me> {
+export const getMe = cache(async function getMe(): Promise<Me> {
   const supabase = await createClient();
   const { data: auth, error: authError } = await supabase.auth.getClaims();
   if (authError || !auth?.claims) redirect("/login");
 
-  const { data: user, error } = await supabase
-    .from("users")
-    .select("user_id, name, username, email, role, status, presence, must_change_password, teams(name)")
-    .eq("auth_user_id", auth.claims.sub)
-    .single();
+  // One trip for the person (with extra roles) and one for the small permissions table, side by side
+  const [{ data: user, error }, { data: perms }] = await Promise.all([
+    supabase.from("users")
+      .select("user_id, name, username, email, role, status, presence, must_change_password, teams(name), user_roles!user_roles_user_id_fkey(role)")
+      .eq("auth_user_id", auth.claims.sub).single(),
+    supabase.from("role_permissions").select("role, permission"),
+  ]);
   if (error || !user) {
     console.error("[getMe]", error?.message);
     await supabase.auth.signOut();
@@ -46,9 +50,8 @@ export async function getMe(): Promise<Me> {
   }
   if (user.must_change_password) redirect("/reset-password?forced=1");
 
-  const { data: extra } = await supabase.from("user_roles").select("role").eq("user_id", user.user_id);
-  const extraRoles = (extra ?? []).map((r) => r.role);
-  const { data: perms } = await supabase.from("role_permissions").select("permission").in("role", [user.role, ...extraRoles]);
+  const extraRoles = ((user.user_roles ?? []) as { role: string }[]).map((r) => r.role);
+  const roles = new Set([user.role, ...extraRoles]);
   const team = (user.teams as unknown as { name: string } | null)?.name ?? null;
 
   return {
@@ -60,9 +63,9 @@ export async function getMe(): Promise<Me> {
     extraRoles,
     team,
     presence: user.presence ?? "online",
-    permissions: [...new Set((perms ?? []).map((p) => p.permission))],
+    permissions: [...new Set((perms ?? []).filter((p) => roles.has(p.role)).map((p) => p.permission))],
   };
-}
+});
 
 export function isStaff(me: Me) {
   return me.role !== "customer";

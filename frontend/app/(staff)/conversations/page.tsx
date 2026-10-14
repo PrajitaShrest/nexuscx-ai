@@ -42,7 +42,7 @@ export default async function ConversationsPage({ searchParams }: { searchParams
           {!error && shown.length === 0 && <p className="text-gray-500">No cases here.</p>}
           <ul className="divide-y rounded-lg border bg-white">
             {shown.map((c) => (
-              <li key={c.case_id} className="flex gap-4 p-4">
+              <li key={c.case_id}><Link href={`/cases/${c.case_id}`} className="flex gap-4 p-4 hover:bg-indigo-50/40">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-500 text-sm font-semibold text-white">
                   {initials(c.customer_name)}
                 </div>
@@ -60,7 +60,7 @@ export default async function ConversationsPage({ searchParams }: { searchParams
                     <Pill map={STATUS} value={c.status} />
                   </div>
                 </div>
-              </li>
+              </Link></li>
             ))}
           </ul>
           <p className="mt-3 text-xs text-gray-400">{cases.length} cases loaded live from Supabase as {me.name}</p>

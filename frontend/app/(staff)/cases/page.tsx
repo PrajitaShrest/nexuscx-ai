@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
 import NoAccess from "@/components/NoAccess";
 import { can } from "@/lib/data/me";
@@ -23,7 +24,7 @@ export default async function CasesPage() {
       <Sidebar me={me} active="/cases" />
       <main className="flex-1 p-6">
         <h1 className="text-xl font-semibold">Case Queue</h1>
-        <p className="mb-4 text-sm text-gray-500">AI-powered customer service management</p>
+        <p className="mb-4 text-sm text-gray-500">AI-powered customer service management. Click a case to open it, chat with the customer and resolve it.</p>
         <div className="mb-6 flex gap-4">
           {[["Total", cases.length], ["Escalated", escalated], ["SLA Risk", slaRisk]].map(([k, v]) => (
             <div key={k} className="rounded-lg border bg-white px-5 py-3"><p className="text-xs text-gray-500">{k}</p><p className="text-2xl font-semibold">{v}</p></div>
@@ -37,10 +38,10 @@ export default async function CasesPage() {
             </thead>
             <tbody className="divide-y">
               {cases.map((c) => (
-                <tr key={c.case_id}>
-                  <td className="px-4 py-3 font-medium">{c.case_number}</td>
+                <tr key={c.case_id} className="hover:bg-indigo-50/40">
+                  <td className="px-4 py-3 font-medium"><Link href={`/cases/${c.case_id}`} className="text-indigo-700 hover:underline">{c.case_number}</Link></td>
                   <td className="px-4 py-3">{c.customer_name}</td>
-                  <td className="max-w-xs truncate px-4 py-3">{c.subject}</td>
+                  <td className="max-w-xs truncate px-4 py-3"><Link href={`/cases/${c.case_id}`} className="hover:text-indigo-700">{c.subject}</Link></td>
                   <td className="px-4 py-3"><Pill map={CATEGORY} value={c.intent} /></td>
                   <td className="px-4 py-3 capitalize">{c.priority}</td>
                   <td className="px-4 py-3 capitalize">{c.sentiment ?? "—"}</td>
