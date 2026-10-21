@@ -7,6 +7,9 @@ import { can, getMe } from "@/lib/data/me";
 import { listSettings, type Setting } from "@/lib/data/ops";
 import { ago } from "@/lib/format";
 import { saveSetting, saveSla } from "../admin-actions";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Settings" };
 
 const SECTIONS: { category: string; title: string; note: string }[] = [
   { category: "general", title: "General", note: "Name, language and time zone. The time zone is used for the busiest-hours chart." },
@@ -77,7 +80,7 @@ export default async function SettingsPage() {
   const { settings, sla, error } = await listSettings();
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/settings" />
       <main className="min-w-0 flex-1 space-y-6 p-6">
         <div>

@@ -6,6 +6,7 @@ import { money } from "@/lib/format";
 import { Panel, ProductTile, RETURN_REASONS, btnPrimary } from "@/components/ShopUI";
 import { RepeatIcon, TruckIcon } from "@/components/Icons";
 import { submitReturn, type ReturnState } from "./actions";
+import PhotoPicker from "@/components/PhotoPicker";
 
 export default function ReturnForm({ orderId, items, daysLeft }: { orderId: string; items: OrderItem[]; daysLeft: number }) {
   const [state, action, pending] = useActionState<ReturnState, FormData>(submitReturn, {});
@@ -87,6 +88,10 @@ export default function ReturnForm({ orderId, items, daysLeft }: { orderId: stri
             <textarea name="details" rows={3} maxLength={500} placeholder="e.g. The box was crushed and the left ear cup is cracked."
               className="mt-1 w-full resize-none rounded-xl border border-slate-300 px-3 py-2 text-sm font-normal outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
           </label>
+          <div className="mt-4">
+            <p className="mb-2 text-sm font-semibold">Photos {reason === "damaged" || reason === "faulty" || reason === "wrong_item" ? <span className="font-normal text-muted">(helps us approve it faster)</span> : null}</p>
+            <PhotoPicker name="photos" />
+          </div>
         </Panel>
       </div>
 

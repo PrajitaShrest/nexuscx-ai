@@ -2,6 +2,9 @@ import { getMe } from "@/lib/data/me";
 import { getOrder, listAddresses, listProducts } from "@/lib/data/shop";
 import { PageHead } from "@/components/CustomerShell";
 import ShopClient from "./ShopClient";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Shop" };
 
 // Shop: browse products, build a cart, check out to a saved address.
 // ?reorder=<order id> fills the cart with a past order ("Buy again").

@@ -5,6 +5,9 @@ import { day, dayTime, money } from "@/lib/format";
 import { ChatPill, OrderPill, OrderTracker, Panel, ProductTile, ReturnPill, btnGhost, btnPrimary } from "@/components/ShopUI";
 import { MapPinIcon, RepeatIcon, TruckIcon } from "@/components/Icons";
 import { AskForm, CancelButton } from "./OrderActions";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Order" };
 
 export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

@@ -2,6 +2,7 @@ import Link from "next/link";
 import Logo from "./Logo";
 import { menuUser, type Me } from "@/lib/data/me";
 import UserMenu from "./UserMenu";
+import MobileStaffNav from "./MobileStaffNav";
 import { unreadCount } from "@/lib/data/workspace";
 
 // Menu from the Figma prototype. Each item needs one permission; a role
@@ -36,7 +37,13 @@ export const NAV: { section: string; items: { label: string; href?: string; week
 
 export default async function Sidebar({ me, active }: { me: Me; active: string }) {
   const unread = await unreadCount();
+  const groups = NAV.map((g) => ({
+    section: g.section,
+    items: g.items.filter((i) => me.permissions.includes(i.needs)).map((i) => ({ label: i.label, href: i.href, week: i.week, badge: i.href === "/inbox" ? unread : undefined })),
+  })).filter((g) => g.items.length > 0);
   return (
+    <>
+    <MobileStaffNav groups={groups} active={active} user={menuUser(me)} />
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-navy text-slate-300 md:flex">
       <div className="px-5 py-5"><Logo tone="light" size={34} /></div>
       <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4">
@@ -68,5 +75,6 @@ export default async function Sidebar({ me, active }: { me: Me; active: string }
         <UserMenu user={menuUser(me)} dark up />
       </div>
     </aside>
+    </>
   );
 }

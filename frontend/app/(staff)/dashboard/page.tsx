@@ -10,6 +10,9 @@ import FilterBar from "@/components/FilterBar";
 import { LabelBars, SplitBars, StackBar, TrendChart } from "@/components/charts/Charts";
 import { SENTIMENT_COLOR, SERIES } from "@/components/charts/palette";
 import { getCaseStats, ISSUE_LABEL, PERIODS, PRIORITIES, readFilters, SENTIMENTS, TOPICS } from "@/lib/data/stats";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Dashboard" };
 
 function sla(due: string | null) {
   if (!due) return { text: "—", late: false };
@@ -94,7 +97,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const maxIntent = Math.max(1, ...d.byIntent.map((i) => i.count));
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/dashboard" />
       <main className="min-w-0 flex-1 space-y-6 p-6">
         <div>

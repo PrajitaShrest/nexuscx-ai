@@ -4,6 +4,9 @@ import { getOrder } from "@/lib/data/shop";
 import { PageHead } from "@/components/CustomerShell";
 import { Panel } from "@/components/ShopUI";
 import ReturnForm from "./ReturnForm";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Return or exchange" };
 
 export default async function ReturnPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

@@ -95,6 +95,9 @@ export const returnSchema = z.object({
   items: jsonArray(
     z.object({ order_item_id: z.string().guid(), quantity: z.coerce.number().int().min(1), exchange_for: z.string().trim().max(120).optional() }),
     "Please choose at least one item.", "Please choose the items again."),
+  photos: z.string().optional().default("[]").transform((s, ctx) => {
+    try { return JSON.parse(s || "[]"); } catch { ctx.addIssue({ code: "custom", message: "Please add the photos again." }); return z.NEVER; }
+  }).pipe(z.array(z.string().max(200)).max(3, "You can add up to 3 photos.")),
 }).refine((r) => r.kind === "return" || r.items.every((i) => i.exchange_for), {
   message: "Tell us what you'd like instead for each item (for example, size or colour).", path: ["items"],
 });

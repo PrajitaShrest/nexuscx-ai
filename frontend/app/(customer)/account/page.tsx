@@ -5,6 +5,9 @@ import { listNotifications } from "@/lib/data/workspace";
 import { ago, day, greeting, money } from "@/lib/format";
 import { ArrowRightIcon, BellIcon, CartIcon, ChatIcon, ClockIcon, HeadsetIcon, MapPinIcon, PackageIcon, RepeatIcon, TruckIcon } from "@/components/Icons";
 import { ChatPill, EmptyState, OrderPill, OrderTracker, Panel, ProductTile, btnGhost, btnPrimary } from "@/components/ShopUI";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "My account" };
 
 // Customer home: what is happening with my orders and chats, in one place.
 export default async function AccountHome() {

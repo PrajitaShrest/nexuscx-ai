@@ -4,6 +4,9 @@ import { getMe, isStaff } from "@/lib/data/me";
 import { listCaseQueue } from "@/lib/data/cases";
 import EnquiryForm from "./EnquiryForm";
 import MyRequests, { type RequestCard } from "./MyRequests";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Help & chat" };
 
 function ago(iso: string) {
   const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);

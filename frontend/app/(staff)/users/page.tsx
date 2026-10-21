@@ -5,6 +5,9 @@ import { listPeople } from "@/lib/data/admin";
 import { listRolePermissions } from "@/lib/data/users";
 import PeopleTable from "./PeopleTable";
 import PermissionMatrix from "./PermissionMatrix";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Users & Roles" };
 
 export default async function UsersPage({ searchParams }: { searchParams: Promise<{ deleted?: string }> }) {
   const me = await getMe();
@@ -22,7 +25,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
   ] as const;
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-ink">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-ink">
       <Sidebar me={me} active="/users" />
       <main className="flex-1 space-y-6 p-6">
         <div>

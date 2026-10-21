@@ -6,7 +6,7 @@ import { ROLE_LABEL, type Me } from "@/lib/data/me";
 export default function NoAccess({ me, page, needs }: { me: Me; page: string; needs: string }) {
   const roles = [me.role, ...me.extraRoles].map((r) => ROLE_LABEL[r] ?? r).join(" + ");
   return (
-    <div className="flex min-h-screen bg-gray-50 text-ink">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-ink">
       <Sidebar me={me} active="" />
       <main className="flex flex-1 items-center justify-center p-6">
         <div className="max-w-md text-center">

@@ -7,6 +7,9 @@ import { can, getMe } from "@/lib/data/me";
 import { listKnowledge } from "@/lib/data/knowledge";
 import { ago } from "@/lib/format";
 import { KB_CATEGORY, KB_STATUS } from "./StatusPill";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Knowledge Base" };
 
 const TABS = [["all", "All"], ["approved", "Live"], ["under_review", "In review"], ["draft", "Drafts"], ["disabled", "Disabled"], ["archived", "Archived"]];
 
@@ -20,7 +23,7 @@ export default async function KnowledgePage({ searchParams }: { searchParams: Pr
   const qs = (t: string, c: string) => `/knowledge?tab=${t}${c ? `&cat=${c}` : ""}`;
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/knowledge" />
       <main className="min-w-0 flex-1 p-6">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">

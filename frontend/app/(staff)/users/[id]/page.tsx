@@ -4,6 +4,9 @@ import NoAccess from "@/components/NoAccess";
 import { getMe, can, ROLE_LABEL } from "@/lib/data/me";
 import { getOverview, listTeams } from "@/lib/data/admin";
 import ManagePerson from "./ManagePerson";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Manage person" };
 
 function when(at: string | null) {
   if (!at) return "Never";
@@ -17,7 +20,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
   const [{ data: p, error }, teams] = await Promise.all([getOverview(id), listTeams()]);
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-ink">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-ink">
       <Sidebar me={me} active="/users" />
       <main className="flex-1 space-y-6 p-6">
         <Link href="/users" className="text-sm text-indigo-600 hover:underline">← All people</Link>

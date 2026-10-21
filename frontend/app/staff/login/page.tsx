@@ -1,6 +1,9 @@
 import Link from "next/link";
 import AuthCard from "@/components/AuthCard";
 import LoginForm from "@/components/LoginForm";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Staff sign in" };
 
 export default async function StaffLoginPage({ searchParams }: { searchParams: Promise<{ expired?: string }> }) {
   const { expired } = await searchParams;

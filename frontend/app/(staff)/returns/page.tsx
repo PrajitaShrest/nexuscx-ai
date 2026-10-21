@@ -5,6 +5,9 @@ import { can, getMe } from "@/lib/data/me";
 import { listReturnQueue } from "@/lib/data/workspace";
 import { RETURN_REASONS, ReturnPill } from "@/components/ShopUI";
 import { dayTime, money } from "@/lib/format";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Returns" };
 
 // All return and exchange requests. Each one opens its case, where staff chat and approve.
 export default async function ReturnsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
@@ -18,7 +21,7 @@ export default async function ReturnsPage({ searchParams }: { searchParams: Prom
     ["To finish", returns.filter((r) => r.status === "received").length], ["Exchanges", returns.filter((r) => r.kind === "exchange").length]] as const;
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/returns" />
       <main className="min-w-0 flex-1 p-6">
         <h1 className="text-xl font-semibold">Returns &amp; exchanges</h1>

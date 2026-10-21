@@ -6,6 +6,9 @@ import { SearchIcon } from "@/components/Icons";
 import { can, getMe } from "@/lib/data/me";
 import { listCustomers } from "@/lib/data/customers";
 import { ago, money } from "@/lib/format";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Customers" };
 
 const TIER: Record<string, string> = { standard: "bg-gray-100 text-gray-600", premium: "bg-amber-100 text-amber-800", vip: "bg-violet-100 text-violet-800" };
 
@@ -17,7 +20,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
   const withOpen = rows.filter((r) => r.open_cases > 0).length;
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/customers" />
       <main className="min-w-0 flex-1 p-6">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">

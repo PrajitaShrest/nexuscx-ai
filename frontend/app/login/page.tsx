@@ -1,6 +1,9 @@
 import Link from "next/link";
 import AuthCard from "@/components/AuthCard";
 import LoginForm from "@/components/LoginForm";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Sign in" };
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ suspended?: string; expired?: string }> }) {
   const { suspended, expired } = await searchParams;
