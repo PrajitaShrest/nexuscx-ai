@@ -6,6 +6,9 @@ import { can, getMe } from "@/lib/data/me";
 import { listRules } from "@/lib/data/ops";
 import { ISSUE_LABEL } from "@/lib/data/stats";
 import { saveEscalation, saveRouting } from "../admin-actions";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Routing & Escalation" };
 
 // What each escalation condition means, in plain words, and which thresholds make sense.
 const CONDITION: Record<string, { text: string; options?: string[]; number?: boolean; locked?: boolean }> = {
@@ -27,7 +30,7 @@ export default async function RoutingPage() {
   const { routing, escalation, agents, error } = await listRules();
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/routing" />
       <main className="min-w-0 flex-1 space-y-6 p-6">
         <div>

@@ -16,6 +16,9 @@ const STAFF_ROLES = [
 ];
 
 // Demo shortcuts, like the prototype. They fill the username only; passwords are never stored here.
+// Shown on a laptop (npm run dev). On the public website they are hidden unless
+// NEXT_PUBLIC_SHOW_DEMO_LOGINS=1 is set, so strangers are not shown staff usernames.
+const SHOW_DEMO = process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_SHOW_DEMO_LOGINS === "1";
 const DEMO: Record<"customer" | "staff", { label: string; username: string; role?: string }[]> = {
   customer: [{ label: "Alex (customer)", username: "alex.nguyen" }],
   staff: [
@@ -75,7 +78,7 @@ export default function LoginForm({ portal }: { portal: "customer" | "staff" }) 
         </button>
       </form>
 
-      <div className="mt-8 border-t border-slate-200 pt-6">
+      {SHOW_DEMO && <div className="mt-8 border-t border-slate-200 pt-6">
         <p className="text-sm text-muted">Demo accounts: tap one to fill in the details.</p>
         <div className="mt-3 flex flex-wrap gap-2">
           {DEMO[portal].map((d) => (
@@ -86,7 +89,7 @@ export default function LoginForm({ portal }: { portal: "customer" | "staff" }) 
             </button>
           ))}
         </div>
-      </div>
+      </div>}
     </>
   );
 }

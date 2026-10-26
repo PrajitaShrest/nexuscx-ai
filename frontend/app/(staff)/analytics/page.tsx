@@ -6,6 +6,9 @@ import { SERIES } from "@/components/charts/palette";
 import { can, getMe } from "@/lib/data/me";
 import { getBreakdowns } from "@/lib/data/ops";
 import { getCaseStats, PERIODS, readFilters } from "@/lib/data/stats";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Analytics" };
 
 const pct = (a: number, b: number) => (b ? Math.round((a / b) * 100) : 0);
 const HOURS = Array.from({ length: 24 }, (_, h) => (h === 0 ? "12am" : h < 12 ? `${h}am` : h === 12 ? "12pm" : `${h - 12}pm`));
@@ -32,7 +35,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
   const happy = ratings.slice(0, 2).reduce((a, r) => a + r.value, 0);
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/analytics" />
       <main className="min-w-0 flex-1 space-y-6 p-6">
         <div className="flex flex-wrap items-end justify-between gap-3">

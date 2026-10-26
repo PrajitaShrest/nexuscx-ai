@@ -3,6 +3,9 @@ import NoAccess from "@/components/NoAccess";
 import { can, getMe } from "@/lib/data/me";
 import { listOrderQueue } from "@/lib/data/shop";
 import OrderQueue from "./OrderQueue";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Orders" };
 
 // Staff view of every customer order, matching the customer's My orders page.
 export default async function StaffOrdersPage() {
@@ -17,7 +20,7 @@ export default async function StaffOrdersPage() {
   ] as const;
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/orders" />
       <main className="min-w-0 flex-1 p-6">
         <h1 className="text-xl font-semibold">Orders</h1>

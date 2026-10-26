@@ -6,10 +6,15 @@ import { CATEGORY, STATUS, Pill, initials } from "@/components/Badges";
 import { OrderPill, RETURN_REASONS, ReturnPill, ReturnSteps } from "@/components/ShopUI";
 import { BotIcon, HeadsetIcon, ShieldIcon } from "@/components/Icons";
 import { can, getMe } from "@/lib/data/me";
-import { getCaseDetail } from "@/lib/data/workspace";
+import { getCaseDetail, signPhotos } from "@/lib/data/workspace";
+import PhotoStrip from "@/components/PhotoStrip";
+import LiveRefresh from "@/components/LiveRefresh";
 import { dayTime, money } from "@/lib/format";
 import { displayMobile } from "@/lib/auth/phone";
 import { Composer, NoteForm, ReturnControls, StatusBar } from "./CaseControls";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Case" };
 
 function Box({ title, children, tone }: { title: string; children: React.ReactNode; tone?: string }) {
   return (
@@ -33,6 +38,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const c = await getCaseDetail(id);
   if (!c) notFound();
+  const photoUrls = await signPhotos(c.returns.flatMap((r) => r.photos ?? []));
   const canEdit = can(me, "resolve_cases");
   const active = c.assignments.find((a) => a.status === "active");
   const mine = active?.user?.user_id === me.user_id;
@@ -41,7 +47,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
   const conf = c.confidence !== null ? Math.round(Number(c.confidence) * 100) : null;
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/cases" />
       <main className="min-w-0 flex-1 space-y-4 p-6">
         <div>
@@ -65,7 +71,13 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
           <section className="flex min-w-0 flex-col overflow-hidden rounded-xl border bg-white xl:sticky xl:top-4 xl:col-span-2 xl:self-start">
             <div className="flex items-center justify-between border-b px-4 py-3">
               <h2 className="text-sm font-semibold">Conversation with {customerName}</h2>
-              <span className="text-xs text-gray-500">{c.messages.length} messages</span>
+              <span className="flex items-center gap-3 text-xs text-gray-500">{c.messages.length} messages
+                <LiveRefresh name={`case-${c.case_id}`} watch={[
+                  ...(c.conversation_ids.length ? [{ table: "messages", event: "INSERT" as const, filter: `conversation_id=in.(${c.conversation_ids.join(",")})` }] : []),
+                  { table: "cases", event: "UPDATE", filter: `case_id=eq.${c.case_id}` },
+                  { table: "return_requests", filter: `case_id=eq.${c.case_id}` },
+                ]} />
+              </span>
             </div>
             <div className="max-h-[60vh] min-h-64 flex-1 space-y-4 overflow-y-auto bg-gray-50 p-4">
               {c.messages.map((m) => {
@@ -127,6 +139,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
                   {r.return_items.map((i) => <li key={i.return_item_id}>{i.quantity} × {i.product_name}{i.exchange_for && <span className="text-gray-500"> → {i.exchange_for}</span>}</li>)}
                 </ul>
                 {r.details && <p className="mt-2 rounded-md bg-gray-50 px-2 py-1.5 text-xs text-gray-600">“{r.details}”</p>}
+                <PhotoStrip paths={r.photos} urls={photoUrls} />
                 {r.kind === "return" && <p className="mt-2 text-xs text-gray-500">Refund due: <span className="font-semibold text-gray-900">{money(r.refund_cents)}</span></p>}
                 <div className="mt-2"><ReturnSteps status={r.status} kind={r.kind} /></div>
                 {canEdit && <div className="mt-3"><ReturnControls caseId={c.case_id} returnId={r.return_id} status={r.status} kind={r.kind} /></div>}

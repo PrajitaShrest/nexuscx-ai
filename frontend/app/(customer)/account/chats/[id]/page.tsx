@@ -5,8 +5,12 @@ import { dayTime, day } from "@/lib/format";
 import { ChatPill } from "@/components/ShopUI";
 import { BotIcon, HeadsetIcon, PackageIcon, ShieldIcon } from "@/components/Icons";
 import ReplyBox from "./ReplyBox";
+import LiveRefresh from "@/components/LiveRefresh";
 import RateChat from "./RateChat";
 import { getMyRating } from "@/lib/data/workspace";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Chat" };
 
 export default async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -32,7 +36,13 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
               )}
             </p>
           </div>
-          <ChatPill status={chat.status} />
+          <span className="flex items-center gap-3">
+            <LiveRefresh name={`chat-${chat.case_id}`} watch={[
+              ...(chat.conversation_ids.length ? [{ table: "messages", event: "INSERT" as const, filter: `conversation_id=in.(${chat.conversation_ids.join(",")})` }] : []),
+              { table: "cases", event: "UPDATE", filter: `case_id=eq.${chat.case_id}` },
+            ]} />
+            <ChatPill status={chat.status} />
+          </span>
         </div>
       </div>
 

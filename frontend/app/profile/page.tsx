@@ -9,6 +9,9 @@ import { getProfile } from "@/lib/data/profile";
 import { listCaseQueue } from "@/lib/data/cases";
 import { displayMobile } from "@/lib/auth/phone";
 import { DetailsForm, PasswordForm } from "./ProfileForms";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "My profile" };
 
 const PERMISSION_TEXT: Record<string, string> = {
   view_cases: "See conversations and cases",
@@ -158,7 +161,7 @@ export default async function ProfilePage() {
   );
 
   return staff ? (
-    <div className="flex min-h-screen bg-slate-50 text-ink">
+    <div className="flex min-h-screen flex-col md:flex-row bg-slate-50 text-ink">
       <Sidebar me={me} active="/profile" />
       <main className="min-w-0 flex-1">{body}</main>
     </div>

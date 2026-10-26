@@ -1,10 +1,14 @@
 import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
+import LiveRefresh from "@/components/LiveRefresh";
 import NoAccess from "@/components/NoAccess";
 import { can } from "@/lib/data/me";
 import { CATEGORY, STATUS, Pill, initials } from "@/components/Badges";
 import { getMe } from "@/lib/data/me";
 import { listCaseQueue } from "@/lib/data/cases";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Conversations" };
 
 const TABS = [
   { label: "All", value: "" },
@@ -22,11 +26,11 @@ export default async function ConversationsPage({ searchParams }: { searchParams
   const shown = cases.filter((c) => !tab || c.status === tab);
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/conversations" />
       <main className="flex-1">
         <header className="flex items-center justify-between border-b bg-white px-6 py-4">
-          <h1 className="text-xl font-semibold">Conversations</h1>
+          <h1 className="flex items-center gap-3 text-xl font-semibold">Conversations <LiveRefresh name="conversations" watch={[{ table: "cases" }]} /></h1>
           <span className="rounded-full border border-green-300 bg-green-50 px-3 py-1 text-sm text-green-700">● AI Systems Online</span>
         </header>
         <div className="mx-auto max-w-3xl p-6">

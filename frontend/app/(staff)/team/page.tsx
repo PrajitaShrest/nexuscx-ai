@@ -7,6 +7,9 @@ import { can, getMe, ROLE_LABEL } from "@/lib/data/me";
 import { getTeamStats } from "@/lib/data/ops";
 import { PERIODS, readFilters } from "@/lib/data/stats";
 import { ago } from "@/lib/format";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Team Operations" };
 
 const wait = (m: number | null) => (m === null ? "—" : m < 60 ? `${m} min` : m < 1440 ? `${Math.round(m / 6) / 10} h` : `${Math.round(m / 144) / 10} days`);
 
@@ -21,7 +24,7 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
   const teams = [...new Set(people.map((p) => p.team ?? "No team"))];
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/team" />
       <main className="min-w-0 flex-1 space-y-6 p-6">
         <div className="flex flex-wrap items-end justify-between gap-3">

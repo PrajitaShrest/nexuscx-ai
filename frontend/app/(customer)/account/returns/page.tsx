@@ -1,12 +1,17 @@
 import Link from "next/link";
-import { listMyReturns } from "@/lib/data/workspace";
+import { listMyReturns, signPhotos } from "@/lib/data/workspace";
+import PhotoStrip from "@/components/PhotoStrip";
 import { PageHead } from "@/components/CustomerShell";
 import { EmptyState, RETURN_REASONS, ReturnPill, ReturnSteps, btnGhost, btnPrimary } from "@/components/ShopUI";
 import { RepeatIcon } from "@/components/Icons";
 import { day, money } from "@/lib/format";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Returns & exchanges" };
 
 export default async function MyReturnsPage() {
   const returns = await listMyReturns();
+  const photoUrls = await signPhotos(returns.flatMap((r) => r.photos ?? []));
   return (
     <>
       <PageHead title="Returns & exchanges" sub="Free returns within 30 days of delivery. Start one from any delivered order."
@@ -28,6 +33,7 @@ export default async function MyReturnsPage() {
               <ul className="mt-3 space-y-1 text-sm">
                 {r.return_items.map((i) => <li key={i.return_item_id}>{i.quantity} × {i.product_name}{i.exchange_for && <span className="text-muted"> → {i.exchange_for}</span>}</li>)}
               </ul>
+              <PhotoStrip paths={r.photos} urls={photoUrls} size={56} />
               <div className="mt-4"><ReturnSteps status={r.status} kind={r.kind} /></div>
               {r.staff_note && <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-sm text-muted">Note from our team: {r.staff_note}</p>}
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4 text-sm">

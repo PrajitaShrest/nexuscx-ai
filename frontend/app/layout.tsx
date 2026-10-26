@@ -7,7 +7,7 @@ import "./globals.css";
 const figtree = Figtree({ variable: "--font-figtree", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "NexusCX AI",
+  title: { default: "NexusCX AI", template: "%s · NexusCX AI" },
   description: "Multi-agent customer service platform",
 };
 

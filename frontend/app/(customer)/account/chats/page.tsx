@@ -3,6 +3,9 @@ import { listMyChats } from "@/lib/data/shop";
 import { PageHead } from "@/components/CustomerShell";
 import { btnPrimary } from "@/components/ShopUI";
 import ChatList from "./ChatList";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Chat history" };
 
 export default async function ChatsPage() {
   const chats = await listMyChats();

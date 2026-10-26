@@ -6,6 +6,9 @@ import { can, getMe } from "@/lib/data/me";
 import { AUDIT_PAGE, listAudit, listSecurityEvents, type AuditFilters } from "@/lib/data/ops";
 import { actionLabel, AREA_LABEL, detailLines } from "@/lib/audit-format";
 import { dayTime } from "@/lib/format";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Audit Logs" };
 
 const RISK: Record<string, string> = { low: "bg-gray-100 text-gray-700", medium: "bg-amber-100 text-amber-800", high: "bg-orange-100 text-orange-800", critical: "bg-red-100 text-red-800" };
 const RESULT: Record<string, string> = { success: "text-emerald-700", blocked: "text-red-700 font-semibold", failed: "text-red-700" };
@@ -35,7 +38,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/audit" />
       <main className="min-w-0 flex-1 p-6">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">

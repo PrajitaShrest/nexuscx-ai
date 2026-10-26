@@ -1,6 +1,9 @@
 import { listAddresses } from "@/lib/data/shop";
 import { PageHead } from "@/components/CustomerShell";
 import AddressBook from "./AddressBook";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Addresses" };
 
 export default async function AddressesPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next } = await searchParams;

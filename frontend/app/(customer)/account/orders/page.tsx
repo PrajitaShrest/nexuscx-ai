@@ -3,6 +3,9 @@ import { listMyOrders } from "@/lib/data/shop";
 import { PageHead } from "@/components/CustomerShell";
 import { btnPrimary } from "@/components/ShopUI";
 import OrderList from "./OrderList";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "My orders" };
 
 export default async function OrdersPage() {
   const orders = await listMyOrders();

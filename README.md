@@ -67,6 +67,13 @@ In Supabase, create a new project. Then open **SQL Editor → New query** and ru
 | 6 | `007_login_security.sql` | Lock after 5 wrong passwords, phone and terms at sign-up |
 | 7 | `008_admin_controls.sql` | Administrator tools: extra roles, suspend, unlock, temporary password, delete |
 | 8 | `009_smarter_answers.sql` | 20+ approved help articles and full-text search for answers |
+| 9 | `010_customer_portal.sql` | Shop, addresses, orders and order history |
+| 10 | `011_case_workflow_and_returns.sql` | Staff case workspace, returns and exchanges, notifications |
+| 11 | `012_knowledge_and_customers.sql` | Knowledge Base editing with review, Customers list |
+| 12 | `013_customers_only.sql` | Customers list shows customers only |
+| 13 | `014_dashboard_stats.sql` | Dashboard charts and filters |
+| 14 | `015_admin_screens.sql` | AI Agents, Routing & Escalation, Settings, Analytics, Team Operations |
+| 15 | `016_rate_limits_and_photos.sql` | Message limits, private return photos, live chat updates |
 
 Each file ends with a small check query. A table of results means it worked.
 
@@ -157,22 +164,36 @@ Customers sign in at `/login`. Staff sign in at `/staff/login` (choose your role
 **Profile (`/profile`)**
 - Edit name, username, and (customers) mobile, date of birth and address; profile strength meter; change password (current password required); "What you can do" for staff. Saving returns to your home page with a confirmation message.
 
+## Deploy to Vercel
+
+1. Merge everything into `main` with green checks.
+2. On [vercel.com](https://vercel.com), sign in with GitHub → **Add New → Project** → import `nexuscx-ai`.
+3. Set **Root Directory** to `frontend`. Framework is detected as Next.js.
+4. Add **Environment Variables** (names only are listed in `frontend/.env.example`):
+   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and after the first deploy `NEXT_PUBLIC_SITE_URL` (the Vercel address).
+   Optional for the class demo: `NEXT_PUBLIC_SHOW_DEMO_LOGINS=1`. Never add the secret key or database password.
+5. Click **Deploy**.
+6. In Supabase → **Authentication → URL Configuration**: set **Site URL** to the Vercel address and add `https://<your-app>.vercel.app/**` to **Redirect URLs** (keep `http://localhost:3000/**` for development).
+7. Redeploy once so `NEXT_PUBLIC_SITE_URL` is used, then sign in on the live site with each demo role.
+
 ## Security summary
 
 - Passwords are hashed by Supabase Auth (bcrypt). The app never sees or stores them.
 - Row Level Security is on for every table. Customers see only their own cases; staff access depends on permissions.
 - Admin actions run in `SECURITY DEFINER` database functions that check the caller's permission first.
 - All input is validated in the app **and** again in the database.
-- Secrets live only in `.env.local`, which Git ignores.
+- Secrets live only in `.env.local`, which Git ignores. Only the publishable key is used online.
+- Customers are limited to 5 new requests per 10 minutes and 10 chat messages per minute (database rules).
+- Return photos are in a private Storage bucket; only the customer and staff can open them, through 1-hour links.
+- The live site sends security headers (no framing, no MIME sniffing, HTTPS only) and hides demo usernames unless switched on.
 
 ## Known issues and next steps
 
 | Issue | Plan |
 |---|---|
-| The AI classification is rule-based (keywords), not a language model. | Week 7: connect an LLM behind the same `submit_enquiry` steps. |
+| The AI classification is rule-based (keywords), not a language model. Agent "Instructions" are stored but not read yet. | Connect an LLM behind the same `submit_enquiry` steps. |
 | Help articles in `009` are sample policies for a demo store. | Replace with the client's real, approved content. |
-| Dashboard, Customers, Knowledge Base, AI Agents, Routing, Analytics, Team Operations, Audit Logs and Settings show as "Wk 7–9" in the menu. | Built in Weeks 7–9. |
+| Notification switches and integration status in Settings are saved but no email/Slack alerts are sent yet. | Add email alerts after the core build. |
 | `login_email()` lets anyone who knows a username look up its email (needed for username sign-in). | Accepted for the project; production would do this lookup on the server with a private key. |
 | Supabase free plan limits emails (reset links). | Use "Set temporary password" in Users & Roles during demos. |
-| `frontend/lib/db.ts` and the `pg` package are no longer used. | Remove in Week 7 clean-up. |
-| Smoke test (14 checks) still to be recorded. | Before the Week 6 demo. |
+| Free Supabase projects pause after a week without use. | Open the dashboard the day before any demo. |

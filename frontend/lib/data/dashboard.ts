@@ -46,7 +46,12 @@ export async function getDashboard(me: Me): Promise<Dashboard> {
   ]);
 
   const counts = new Map<string, number>();
-  for (const r of (intents.data ?? []) as { intent: string | null }[]) counts.set(r.intent ?? "unknown", (counts.get(r.intent ?? "unknown") ?? 0) + 1);
+  // Intents that share a topic label are counted together (e.g. returns under Order).
+  const SAME_TOPIC: Record<string, string> = { return_request: "order_status", refund_request: "billing_question", unknown: "general" };
+  for (const r of (intents.data ?? []) as { intent: string | null }[]) {
+    const key = SAME_TOPIC[r.intent ?? "unknown"] ?? r.intent ?? "general";
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
   const myCases = ((mine.data ?? []) as unknown as { cases: DashCase | null }[]).map((r) => r.cases).filter((c): c is DashCase => !!c && c.status !== "closed");
 
   return {

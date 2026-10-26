@@ -8,6 +8,9 @@ import { listAgents } from "@/lib/data/ops";
 import { ISSUE_LABEL } from "@/lib/data/stats";
 import { ago } from "@/lib/format";
 import { saveAgent } from "../admin-actions";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "AI Agents" };
 
 const TYPE: Record<string, string> = { orchestrator: "Orchestrator", classifier: "Classifier", specialist: "Specialist", safety: "Safety", builder: "Builder", policy: "Policy" };
 const CORE = ["orchestrator", "classifier", "safety", "policy"];
@@ -20,7 +23,7 @@ export default async function AgentsPage() {
   const groups = [["Core pipeline", agents.filter((a) => CORE.includes(a.type))], ["Specialists", agents.filter((a) => a.type === "specialist")], ["Other", agents.filter((a) => !CORE.includes(a.type) && a.type !== "specialist")]] as const;
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/ai-agents" />
       <main className="min-w-0 flex-1 space-y-6 p-6">
         <div>

@@ -8,6 +8,9 @@ import { getKnowledgeDoc } from "@/lib/data/knowledge";
 import { dayTime } from "@/lib/format";
 import { KnowledgeForm, StatusButtons } from "../KnowledgeForm";
 import { KB_STATUS } from "../StatusPill";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Knowledge article" };
 
 // /knowledge/new creates an article; /knowledge/<id> edits one and moves it through review.
 export default async function KnowledgeDocPage({ params }: { params: Promise<{ id: string }> }) {
@@ -19,7 +22,7 @@ export default async function KnowledgeDocPage({ params }: { params: Promise<{ i
   if (!isNew && !doc) notFound();
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/knowledge" />
       <main className="min-w-0 flex-1 p-6">
         <Link href="/knowledge" className="text-sm text-indigo-700 hover:underline">← Knowledge Base</Link>

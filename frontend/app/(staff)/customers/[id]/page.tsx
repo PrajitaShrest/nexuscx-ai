@@ -9,6 +9,9 @@ import { displayMobile } from "@/lib/auth/phone";
 import { can, getMe } from "@/lib/data/me";
 import { getCustomer } from "@/lib/data/customers";
 import { ago, day, money } from "@/lib/format";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Customer" };
 
 export default async function CustomerPage({ params }: { params: Promise<{ id: string }> }) {
   const me = await getMe();
@@ -18,7 +21,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
   if (!c) notFound();
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/customers" />
       <main className="min-w-0 flex-1 space-y-6 p-6">
         <Link href="/customers" className="text-sm text-indigo-700 hover:underline">← All customers</Link>

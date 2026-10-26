@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
+import LiveRefresh from "@/components/LiveRefresh";
 import NoAccess from "@/components/NoAccess";
 import { can } from "@/lib/data/me";
 import { CATEGORY, STATUS, Pill } from "@/components/Badges";
@@ -7,6 +8,9 @@ import { getMe } from "@/lib/data/me";
 import { listCaseQueue } from "@/lib/data/cases";
 import FilterBar from "@/components/FilterBar";
 import { PRIORITIES, SENTIMENTS, TOPICS } from "@/lib/data/stats";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Cases" };
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const SENTIMENT_STYLE: Record<string, string> = { angry: "text-red-700 font-medium", negative: "text-red-600", neutral: "text-gray-600", positive: "text-emerald-700" };
@@ -33,10 +37,10 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
   const slaRisk = cases.filter((c) => c.sla_minutes_left !== null && c.sla_minutes_left < 60 && !["resolved", "closed"].includes(c.status)).length;
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/cases" />
       <main className="flex-1 p-6">
-        <h1 className="text-xl font-semibold">Case Queue</h1>
+        <h1 className="flex items-center gap-3 text-xl font-semibold">Case Queue <LiveRefresh name="cases" watch={[{ table: "cases" }]} /></h1>
         <p className="mb-4 text-sm text-gray-500">AI-powered customer service management. Click a case to open it, chat with the customer and resolve it.</p>
         <div className="mb-4">
           <FilterBar search={{ name: "q", label: "Search", placeholder: "Case, customer or issue" }} filters={[
