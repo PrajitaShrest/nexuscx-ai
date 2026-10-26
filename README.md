@@ -4,11 +4,13 @@ A multi-agent customer service platform. Customers ask for help in a chat. AI ag
 
 PROF910 IT Project Part B – group project.
 
+**Live site:** https://nexuscx-ai.vercel.app
+
 | Team member | Main area |
 |---|---|
-| Prajita Shrestha | Database, authentication, security |
-| Bishal Bastakoti | *(add your area)* |
-| Hari Ranabhat | *(add your area)* |
+| Prajita Shrestha | Database & backend lead: database, authentication, security |
+| Bishal Bastakoti | Frontend & UX |
+| Hari Ranabhat | Testing & quality |
 
 ---
 
@@ -165,6 +167,8 @@ Customers sign in at `/login`. Staff sign in at `/staff/login` (choose your role
 - Edit name, username, and (customers) mobile, date of birth and address; profile strength meter; change password (current password required); "What you can do" for staff. Saving returns to your home page with a confirmation message.
 
 ## Deploy to Vercel
+
+The app is live at **https://nexuscx-ai.vercel.app** (Vercel project `nexuscx-ai-qqp6`, root directory `frontend`, deployed 27 October 2026). Every push to `main` redeploys it. The steps below are for setting it up again.
 
 1. Merge everything into `main` with green checks.
 2. On [vercel.com](https://vercel.com), sign in with GitHub → **Add New → Project** → import `nexuscx-ai`.
