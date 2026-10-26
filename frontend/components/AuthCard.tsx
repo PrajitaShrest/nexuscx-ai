@@ -1,4 +1,5 @@
 import Logo from "./Logo";
+import TeamCredit from "./TeamCredit";
 
 // Sign-in and sign-up frame. Left: what NexusCX does, shown as one real
 // conversation being classified and routed. Right: the form.
@@ -55,11 +56,14 @@ export default function AuthCard({ title, subtitle, children, variant = "custome
           </div>
         )}
 
-        <p className="text-xs text-slate-500">
-          {staff
-            ? "Every staff sign-in is recorded in the audit log."
-            : "AI answers from approved company policies only. Sensitive requests always go to a person."}
-        </p>
+        <div className="space-y-5">
+          <p className="text-xs text-slate-500">
+            {staff
+              ? "Every staff sign-in is recorded in the audit log."
+              : "AI answers from approved company policies only. Sensitive requests always go to a person."}
+          </p>
+          <div className="border-t border-white/10 pt-5"><TeamCredit tone="light" /></div>
+        </div>
       </aside>
 
       <main className="flex flex-1 items-center justify-center px-5 py-10 sm:px-10">
@@ -68,6 +72,7 @@ export default function AuthCard({ title, subtitle, children, variant = "custome
           <h2 className="text-2xl font-bold text-ink">{title}</h2>
           <p className="mb-7 mt-1 text-muted">{subtitle}</p>
           {children}
+          <div className="mt-10 border-t border-slate-200 pt-5 lg:hidden"><TeamCredit /></div>
         </div>
       </main>
     </div>

@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { IDLE_LIMIT_MS, REMEMBER_COOKIE, SEEN_COOKIE, applyRemember } from "@/lib/auth/cookies";
 
 // Pages anyone can open without signing in
-const PUBLIC_PATHS = ["/login", "/signup", "/staff/login", "/forgot-password", "/auth/callback", "/terms", "/privacy"];
+const PUBLIC_PATHS = ["/login", "/signup", "/staff/login", "/forgot-password", "/auth/callback", "/terms", "/privacy", "/about"];
 
 // Runs before every page: refreshes the session cookie and sends anyone
 // who is not signed in to the right sign-in page.
