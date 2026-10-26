@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { logout } from "@/app/auth/actions";
 import { setPresence } from "@/app/profile/actions";
 import Avatar, { PRESENCE } from "./Avatar";
-import { ChevronIcon, HomeIcon, KeyIcon, LogOutIcon, SettingsIcon, ChatIcon } from "./Icons";
+import { ChevronIcon, HomeIcon, KeyIcon, LogOutIcon, SettingsIcon, ChatIcon, HelpIcon } from "./Icons";
 
 export type MenuUser = { name: string; username: string; email: string; roles: string[]; staff: boolean; presence?: string };
 
@@ -84,6 +84,9 @@ export default function UserMenu({ user, dark, up }: { user: MenuUser; dark?: bo
             </Link>
             <Link href="/profile#security" role="menuitem" className={item} onClick={() => setOpen(false)}>
               <KeyIcon className="h-4 w-4 text-muted" /> Change password
+            </Link>
+            <Link href="/about" role="menuitem" className={item} onClick={() => setOpen(false)}>
+              <HelpIcon className="h-4 w-4 text-muted" /> About us
             </Link>
           </div>
           <form action={logout} className="border-t p-2">
