@@ -9,7 +9,8 @@ import { ago, greeting } from "@/lib/format";
 import FilterBar from "@/components/FilterBar";
 import { LabelBars, SplitBars, StackBar, TrendChart } from "@/components/charts/Charts";
 import { SENTIMENT_COLOR, SERIES } from "@/components/charts/palette";
-import { getCaseStats, ISSUE_LABEL, PERIODS, PRIORITIES, readFilters, SENTIMENTS, TOPICS } from "@/lib/data/stats";
+import { getCaseStats, ISSUE_LABEL, PERIODS, PRIORITIES, readFilters, SENTIMENTS, TOPICS, topicsFor } from "@/lib/data/stats";
+import { getPack } from "@/lib/industry";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Dashboard" };
@@ -91,7 +92,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const me = await getMe();
   if (!can(me, "view_cases")) return <NoAccess me={me} page="Dashboard" needs="view_cases" />;
   const f = readFilters(await searchParams);
-  const [d, { data: st, error: statsError }] = await Promise.all([getDashboard(me), getCaseStats(f)]);
+  const [d, { data: st, error: statsError }, pack] = await Promise.all([getDashboard(me), getCaseStats(f), getPack()]);
   const k = d.kpis;
   const roles = [me.role, ...me.extraRoles].map((r) => ROLE_LABEL[r] ?? r).join(" + ");
   const maxIntent = Math.max(1, ...d.byIntent.map((i) => i.count));
@@ -146,7 +147,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 <div><dt className="text-xs text-gray-500">AI resolution</dt><dd className="font-semibold">{k.ai_resolution_pct ?? 0}%</dd></div>
                 <div><dt className="text-xs text-gray-500">Escalations</dt><dd className="font-semibold">{k.human_escalations}</dd></div>
                 <div><dt className="text-xs text-gray-500">High-risk open</dt><dd className="font-semibold text-red-600">{k.open_high_risk_cases}</dd></div>
-                <div><dt className="text-xs text-gray-500">Customer rating</dt><dd className="font-semibold">{k.csat !== null ? `${k.csat} / 5` : "—"}</dd></div>
+                <div><dt className="text-xs text-gray-500">{pack.person} rating</dt><dd className="font-semibold">{k.csat !== null ? `${k.csat} / 5` : "—"}</dd></div>
               </dl>
             )}
           </section>
@@ -157,12 +158,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <h2 id="perf" className="text-lg font-semibold">Service performance</h2>
-              <p className="text-sm text-gray-500">Cases created in the last {f.days} days{f.topic ? ` · ${TOPICS[f.topic].label}` : ""}{f.sentiment ? ` · ${f.sentiment} customers` : ""}{f.priority ? ` · ${f.priority} priority` : ""}</p>
+              <p className="text-sm text-gray-500">Cases created in the last {f.days} days{f.topic ? ` · ${TOPICS[f.topic].label}` : ""}{f.sentiment ? ` · ${f.sentiment} ${pack.people.toLowerCase()}` : ""}{f.priority ? ` · ${f.priority} priority` : ""}</p>
             </div>
           </div>
           <FilterBar filters={[
             { name: "days", label: "Period", options: PERIODS.map((p) => [String(p), `Last ${p} days`] as [string, string]) },
-            { name: "topic", label: "Issue", options: [["", "All issues"], ...Object.entries(TOPICS).map(([k, t]) => [k, t.label] as [string, string])] },
+            { name: "topic", label: "Issue", options: [["", "All issues"], ...topicsFor(pack.id).map(([k, t]) => [k, t.label] as [string, string])] },
             { name: "sentiment", label: "Sentiment", options: [["", "All sentiment"], ...SENTIMENTS.map((s) => [s, cap(s)] as [string, string])] },
             { name: "priority", label: "Priority", options: [["", "All priorities"], ...PRIORITIES.map((p) => [p, cap(p)] as [string, string])] },
           ]} />
@@ -178,7 +179,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   <Stat label="Escalated to a person" value={`${escPct}%`} delta={p.cases ? escPct - pct(p.escalated, p.cases) : null} goodWhenUp={false} hint=" pts" />
                   <Stat label="Resolved within SLA" value={s.resolved_with_sla ? `${pct(s.resolved_in_sla, s.resolved_with_sla)}%` : "—"} hint={`${s.resolved} resolved`} />
                   <Stat label="Average wait for a person" value={s.wait_for_person_min !== null ? (s.wait_for_person_min < 60 ? `${s.wait_for_person_min} min` : `${Math.round(s.wait_for_person_min / 6) / 10} h`) : "—"} hint={s.hours_to_resolve !== null ? `${s.hours_to_resolve} h to resolve on average` : undefined} />
-                  <Stat label="Customer rating" value={st.rating.csat !== null ? `${st.rating.csat} / 5` : "—"}
+                  <Stat label={`${pack.person} rating`} value={st.rating.csat !== null ? `${st.rating.csat} / 5` : "—"}
                     delta={st.rating.csat !== null && st.rating.prev_csat !== null ? Math.round((st.rating.csat - st.rating.prev_csat) * 10) / 10 : null} goodWhenUp hint={st.rating.prev_csat === null ? `${st.rating.ratings} ratings` : undefined} />
                 </div>
 
@@ -212,9 +213,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                       rows={issueRows(st.topics)} />
                   </section>
                   <section className="rounded-xl border bg-white p-4">
-                    <h3 className="font-semibold">Customer mood</h3>
+                    <h3 className="font-semibold">{pack.person} mood</h3>
                     <p className="mb-3 text-xs text-gray-500">Sentiment the AI detected in the first message</p>
-                    <LabelBars title="Customer sentiment" rows={SENTIMENTS.map((x) => ({ label: cap(x), value: st.sentiment[x] ?? 0, color: SENTIMENT_COLOR[x] }))} />
+                    <LabelBars title={`${pack.person} sentiment`} rows={SENTIMENTS.map((x) => ({ label: cap(x), value: st.sentiment[x] ?? 0, color: SENTIMENT_COLOR[x] }))} />
                     <h3 className="mb-2 mt-5 font-semibold">Priority</h3>
                     <LabelBars title="Cases by priority" rows={PRIORITIES.filter((x) => st.priority[x]).map((x) => ({ label: cap(x), value: st.priority[x], color: SERIES.blue }))} />
                   </section>

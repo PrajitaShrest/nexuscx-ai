@@ -6,7 +6,9 @@ import { ShieldIcon } from "@/components/Icons";
 import { can, getMe } from "@/lib/data/me";
 import { listSettings, type Setting } from "@/lib/data/ops";
 import { ago } from "@/lib/format";
-import { saveSetting, saveSla } from "../admin-actions";
+import { saveSetting, saveSla, switchIndustry } from "../admin-actions";
+import { PACKS, isIndustry } from "@/lib/packs";
+import IndustryPicker from "./IndustryPicker";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Settings" };
@@ -78,6 +80,8 @@ export default async function SettingsPage() {
   const me = await getMe();
   if (!can(me, "configure_ai")) return <NoAccess me={me} page="Settings" needs="configure_ai" />;
   const { settings, sla, error } = await listSettings();
+  const saved = settings.find((s) => s.setting_key === "industry")?.value; // the default, not this visitor's own choice
+  const industry = isIndustry(saved) ? saved : "ecommerce";
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
@@ -88,9 +92,10 @@ export default async function SettingsPage() {
           <p className="text-sm text-gray-500">Platform settings. Every change is checked by the database and saved in the audit log.</p>
         </div>
         {error && <p role="alert" className="rounded-md bg-red-50 p-3 text-red-700">{error}</p>}
+        <IndustryPicker current={industry} packs={Object.values(PACKS)} action={switchIndustry} />
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           {SECTIONS.map((sec) => {
-            const rows = settings.filter((s) => s.category === sec.category);
+            const rows = settings.filter((s) => s.category === sec.category && s.setting_key !== "industry");
             if (rows.length === 0) return null;
             return (
               <section key={sec.category} className="rounded-xl border bg-white p-4">

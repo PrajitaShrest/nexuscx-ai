@@ -8,6 +8,8 @@ import { getKnowledgeDoc } from "@/lib/data/knowledge";
 import { dayTime } from "@/lib/format";
 import { KnowledgeForm, StatusButtons } from "../KnowledgeForm";
 import { KB_STATUS } from "../StatusPill";
+import { getIndustry } from "@/lib/industry";
+import { KB_CATS } from "@/lib/packs";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Knowledge article" };
@@ -18,7 +20,7 @@ export default async function KnowledgeDocPage({ params }: { params: Promise<{ i
   if (!can(me, "manage_knowledge")) return <NoAccess me={me} page="Knowledge Base" needs="manage_knowledge" />;
   const { id } = await params;
   const isNew = id === "new";
-  const doc = isNew ? null : await getKnowledgeDoc(id);
+  const [doc, industry] = await Promise.all([isNew ? null : getKnowledgeDoc(id), getIndustry()]);
   if (!isNew && !doc) notFound();
 
   return (
@@ -32,7 +34,7 @@ export default async function KnowledgeDocPage({ params }: { params: Promise<{ i
           {doc && <span className="text-sm text-gray-500">{doc.version}</span>}
         </div>
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-          <div className="xl:col-span-2"><KnowledgeForm doc={doc ?? undefined} /></div>
+          <div className="xl:col-span-2"><KnowledgeForm doc={doc ?? undefined} cats={KB_CATS[industry]} /></div>
           {doc && (
             <aside className="space-y-4">
               <section className="rounded-xl border bg-white p-4">

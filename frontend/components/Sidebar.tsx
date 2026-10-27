@@ -4,6 +4,8 @@ import { menuUser, type Me } from "@/lib/data/me";
 import UserMenu from "./UserMenu";
 import MobileStaffNav from "./MobileStaffNav";
 import { unreadCount } from "@/lib/data/workspace";
+import { getPack } from "@/lib/industry";
+import PackSwitch from "./PackSwitch";
 
 // Menu from the Figma prototype. Each item needs one permission; a role
 // without it never sees the item. The same permission is checked on the
@@ -35,20 +37,36 @@ export const NAV: { section: string; items: { label: string; href?: string; week
   ]},
 ];
 
+// Shop screens only exist in the e-commerce pack
+const SHOP_ONLY = new Set(["/orders", "/returns"]);
+
 export default async function Sidebar({ me, active }: { me: Me; active: string }) {
-  const unread = await unreadCount();
-  const groups = NAV.map((g) => ({
+  const [unread, pack] = await Promise.all([unreadCount(), getPack()]);
+  // The menu for this person and this industry pack ("Customers" becomes "Students", and so on)
+  const nav = NAV.map((g) => ({
     section: g.section,
-    items: g.items.filter((i) => me.permissions.includes(i.needs)).map((i) => ({ label: i.label, href: i.href, week: i.week, badge: i.href === "/inbox" ? unread : undefined })),
+    items: g.items
+      .filter((i) => me.permissions.includes(i.needs) && (pack.shop || !SHOP_ONLY.has(i.href ?? "")))
+      .map((i) => (i.href === "/customers" ? { ...i, label: pack.people } : i)),
+  }));
+  const groups = nav.map((g) => ({
+    section: g.section,
+    items: g.items.map((i) => ({ label: i.label, href: i.href, week: i.week, badge: i.href === "/inbox" ? unread : undefined })),
   })).filter((g) => g.items.length > 0);
   return (
     <>
-    <MobileStaffNav groups={groups} active={active} user={menuUser(me)} />
+    <MobileStaffNav groups={groups} active={active} user={menuUser(me)} industry={pack.id} />
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-navy text-slate-300 md:flex">
-      <div className="px-5 py-5"><Logo tone="light" size={34} /></div>
+      <div className="px-5 py-5">
+        <Logo tone="light" size={34} />
+        <p className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-indigo-200">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> {pack.org}
+        </p>
+        <div className="mt-2"><PackSwitch current={pack.id} tone="dark" /></div>
+      </div>
       <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4">
-        {NAV.map((group) => {
-          const items = group.items.filter((i) => me.permissions.includes(i.needs));
+        {nav.map((group) => {
+          const items = group.items;
           if (items.length === 0) return null;
           return (
             <div key={group.section || "main"}>

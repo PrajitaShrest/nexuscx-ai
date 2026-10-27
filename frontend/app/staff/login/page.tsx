@@ -1,14 +1,15 @@
 import Link from "next/link";
 import AuthCard from "@/components/AuthCard";
 import LoginForm from "@/components/LoginForm";
+import { getIndustry } from "@/lib/industry";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Staff sign in" };
 
 export default async function StaffLoginPage({ searchParams }: { searchParams: Promise<{ expired?: string }> }) {
-  const { expired } = await searchParams;
+  const [{ expired }, industry] = await Promise.all([searchParams, getIndustry()]);
   return (
-    <AuthCard variant="staff" title="Staff sign-in" subtitle="For support agents, team leaders, knowledge managers and administrators.">
+    <AuthCard industry={industry} variant="staff" title="Staff sign-in" subtitle="For support agents, team leaders, knowledge managers and administrators.">
       {expired && (
         <p role="status" className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-3.5 py-3 text-sm text-amber-800">
           You were signed out after 30 minutes of no activity. Please sign in again.

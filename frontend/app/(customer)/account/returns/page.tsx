@@ -6,10 +6,12 @@ import { EmptyState, RETURN_REASONS, ReturnPill, ReturnSteps, btnGhost, btnPrima
 import { RepeatIcon } from "@/components/Icons";
 import { day, money } from "@/lib/format";
 import type { Metadata } from "next";
+import { requireShop } from "@/lib/industry";
 
 export const metadata: Metadata = { title: "Returns & exchanges" };
 
 export default async function MyReturnsPage() {
+  await requireShop("/support");
   const returns = await listMyReturns();
   const photoUrls = await signPhotos(returns.flatMap((r) => r.photos ?? []));
   return (

@@ -1,13 +1,33 @@
 import Logo from "./Logo";
 import TeamCredit from "./TeamCredit";
+import PackSwitch from "./PackSwitch";
+import type { Industry } from "@/lib/packs";
 
 // Sign-in and sign-up frame. Left: what NexusCX does, shown as one real
 // conversation being classified and routed. Right: the form.
 // The staff variant swaps the story for what staff do with that conversation.
-export default function AuthCard({ title, subtitle, children, variant = "customer" }: {
+// The example conversation on the left follows the chosen demo pack
+const STORY = {
+  ecommerce: {
+    ask: "I was charged twice for my subscription this month.",
+    tags: ["Billing", "Risk: high", "96% confident"], flag: "Refund needs a person",
+    reply: "Refunds are approved by our billing team, so I've passed this to a specialist. They'll reply in about 2 minutes.",
+    source: "Source: Refund Policy v4.2",
+  },
+  university: {
+    ask: "Can I work more hours on my student visa this semester?",
+    tags: ["Student Services", "Language: English", "92% confident"], flag: "Personal visa question needs a person",
+    reply: "I can share general visa information only, so I've passed this to our International Student Advisers. The official rules are on homeaffairs.gov.au.",
+    source: "Source: Student visa conditions v1.0",
+  },
+};
+
+export default function AuthCard({ title, subtitle, children, variant = "customer", industry }: {
   title: string; subtitle: string; children: React.ReactNode; variant?: "customer" | "staff";
+  industry?: Industry; // given on the sign-in pages: shows the "Choose a demo" switch
 }) {
   const staff = variant === "staff";
+  const story = STORY[industry ?? "ecommerce"];
   return (
     <div className="flex min-h-screen bg-white">
       <aside className={`hidden w-[46%] flex-col justify-between p-12 text-white lg:sticky lg:top-0 lg:flex lg:h-screen ${staff ? "bg-[#0a1326]" : "bg-navy"}`}>
@@ -40,17 +60,15 @@ export default function AuthCard({ title, subtitle, children, variant = "custome
             <h1 className="text-[2.6rem] font-bold leading-[1.1] tracking-tight">Smarter support. Human when it matters.</h1>
             <div className="mt-10 space-y-3" aria-hidden="true">
               <div className="rise ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-sm bg-indigo-500 px-4 py-3 text-sm">
-                I was charged twice for my subscription this month.
+                {story.ask}
               </div>
               <div className="rise rise-2 flex flex-wrap gap-2 text-xs">
-                <span className="rounded-full bg-white/10 px-3 py-1">Billing</span>
-                <span className="rounded-full bg-white/10 px-3 py-1">Risk: high</span>
-                <span className="rounded-full bg-white/10 px-3 py-1">96% confident</span>
-                <span className="rounded-full bg-amber-400/20 px-3 py-1 text-amber-200">Refund needs a person</span>
+                {story.tags.map((t) => <span key={t} className="rounded-full bg-white/10 px-3 py-1">{t}</span>)}
+                <span className="rounded-full bg-amber-400/20 px-3 py-1 text-amber-200">{story.flag}</span>
               </div>
               <div className="rise rise-3 w-fit max-w-[85%] rounded-2xl rounded-bl-sm bg-navy-soft px-4 py-3 text-sm text-slate-200">
-                Refunds are approved by our billing team, so I&apos;ve passed this to a specialist. They&apos;ll reply in about 2 minutes.
-                <p className="mt-2 text-xs text-slate-400">Source: Refund Policy v4.2</p>
+                {story.reply}
+                <p className="mt-2 text-xs text-slate-400">{story.source}</p>
               </div>
             </div>
           </div>
@@ -69,6 +87,12 @@ export default function AuthCard({ title, subtitle, children, variant = "custome
       <main className="flex flex-1 items-center justify-center px-5 py-10 sm:px-10">
         <div className="w-full max-w-[26rem]">
           <div className="mb-8 lg:hidden"><Logo /></div>
+          {industry && (
+            <div className="mb-6 flex flex-wrap items-center gap-2 text-xs text-muted">
+              <span>Choose a demo:</span>
+              <PackSwitch current={industry} />
+            </div>
+          )}
           <h2 className="text-2xl font-bold text-ink">{title}</h2>
           <p className="mb-7 mt-1 text-muted">{subtitle}</p>
           {children}

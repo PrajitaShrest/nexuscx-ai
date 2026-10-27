@@ -6,7 +6,9 @@ import { PlusIcon } from "@/components/Icons";
 import { can, getMe } from "@/lib/data/me";
 import { listKnowledge } from "@/lib/data/knowledge";
 import { ago } from "@/lib/format";
-import { KB_CATEGORY, KB_STATUS } from "./StatusPill";
+import { KB_STATUS } from "./StatusPill";
+import { getIndustry } from "@/lib/industry";
+import { KB_CATS, kbLabel } from "@/lib/packs";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Knowledge Base" };
@@ -17,7 +19,7 @@ export default async function KnowledgePage({ searchParams }: { searchParams: Pr
   const me = await getMe();
   if (!can(me, "manage_knowledge")) return <NoAccess me={me} page="Knowledge Base" needs="manage_knowledge" />;
   const { tab = "all", cat = "" } = await searchParams;
-  const { data: all, error } = await listKnowledge();
+  const [{ data: all, error }, industry] = await Promise.all([listKnowledge(), getIndustry()]);
   const count = (s: string) => (s === "all" ? all.length : all.filter((d) => d.status === s).length);
   const rows = all.filter((d) => (tab === "all" || d.status === tab) && (!cat || d.category === cat));
   const qs = (t: string, c: string) => `/knowledge?tab=${t}${c ? `&cat=${c}` : ""}`;
@@ -43,7 +45,7 @@ export default async function KnowledgePage({ searchParams }: { searchParams: Pr
         </nav>
         <nav aria-label="Category" className="mb-4 flex flex-wrap gap-2 text-xs">
           <Link href={qs(tab, "")} className={`rounded px-2 py-1 ${!cat ? "bg-gray-800 text-white" : "bg-white text-gray-600 border"}`}>All topics</Link>
-          {Object.entries(KB_CATEGORY).map(([c, l]) => (
+          {KB_CATS[industry].map(([c, l]) => (
             <Link key={c} href={qs(tab, c)} className={`rounded px-2 py-1 ${cat === c ? "bg-gray-800 text-white" : "bg-white text-gray-600 border"}`}>{l}</Link>
           ))}
         </nav>
@@ -58,7 +60,7 @@ export default async function KnowledgePage({ searchParams }: { searchParams: Pr
                 <tr key={d.document_id} className="hover:bg-indigo-50/40">
                   <td className="px-4 py-3"><Link href={`/knowledge/${d.document_id}`} className="font-medium text-indigo-700 hover:underline">{d.title}</Link>
                     {d.keywords && <p className="max-w-md truncate text-xs text-gray-500">{d.keywords}</p>}</td>
-                  <td className="whitespace-nowrap px-4 py-3">{KB_CATEGORY[d.category] ?? d.category}</td>
+                  <td className="whitespace-nowrap px-4 py-3">{kbLabel(d.category)}</td>
                   <td className="px-4 py-3"><span className="whitespace-nowrap"><Pill map={KB_STATUS} value={d.status} /></span></td>
                   <td className="px-4 py-3">{d.version}</td>
                   <td className="px-4 py-3">{d.uses_30d}</td>

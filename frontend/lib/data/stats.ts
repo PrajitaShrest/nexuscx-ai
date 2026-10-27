@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import type { Industry } from "@/lib/packs";
 
 // Numbers and chart series for the dashboard, from public.case_stats() (migration 014).
 // Row Level Security still decides which cases are counted.
@@ -6,16 +7,25 @@ import { createClient } from "@/lib/supabase/server";
 export type StatsFilters = { days: number; topic: string; sentiment: string; priority: string };
 
 // Topic filter groups the raw AI intents into the same labels used across the app.
-export const TOPICS: Record<string, { label: string; intents: string[] }> = {
-  orders: { label: "Orders & delivery", intents: ["order_status", "return_request"] },
-  billing: { label: "Billing & refunds", intents: ["billing_question", "refund_request"] },
-  technical: { label: "Technical", intents: ["technical_issue"] },
-  account: { label: "Account", intents: ["account"] },
-  general: { label: "General", intents: ["general", "unknown"] },
+// Each topic belongs to one industry pack (migration 017); filters show the active pack's topics.
+export const TOPICS: Record<string, { label: string; intents: string[]; industry: Industry }> = {
+  orders: { label: "Orders & delivery", intents: ["order_status", "return_request"], industry: "ecommerce" },
+  billing: { label: "Billing & refunds", intents: ["billing_question", "refund_request"], industry: "ecommerce" },
+  technical: { label: "Technical", intents: ["technical_issue"], industry: "ecommerce" },
+  account: { label: "Account", intents: ["account"], industry: "ecommerce" },
+  general: { label: "General", intents: ["general", "unknown"], industry: "ecommerce" },
+  admissions: { label: "Admissions", intents: ["admissions"], industry: "university" },
+  fees: { label: "Finance & fees", intents: ["fees"], industry: "university" },
+  it_support: { label: "IT support", intents: ["it_support"], industry: "university" },
+  academic: { label: "Academic, exams & results", intents: ["academic"], industry: "university" },
+  student_services: { label: "Student services", intents: ["student_services"], industry: "university" },
+  uni_general: { label: "General", intents: ["general", "unknown"], industry: "university" },
 };
+export const topicsFor = (industry: Industry) => Object.entries(TOPICS).filter(([, t]) => t.industry === industry);
 export const ISSUE_LABEL: Record<string, string> = {
   order_status: "Order status", return_request: "Returns & exchanges", billing_question: "Billing questions",
   refund_request: "Refunds", technical_issue: "Technical problems", account: "Account & login", general: "General", unknown: "General",
+  admissions: "Admissions", fees: "Finance & fees", it_support: "IT support", academic: "Academic, exams & results", student_services: "Student services",
 };
 export const SENTIMENTS = ["angry", "negative", "neutral", "positive"] as const;
 export const PRIORITIES = ["urgent", "high", "medium", "normal", "low"] as const;

@@ -13,7 +13,6 @@ export type KnowledgeRow = {
 };
 export type KnowledgeDoc = KnowledgeRow & { content: string };
 
-export const KB_CATEGORIES = ["orders", "billing", "technical", "account", "general"] as const;
 
 export async function listKnowledge(): Promise<{ data: KnowledgeRow[]; error?: string }> {
   const supabase = await createClient();

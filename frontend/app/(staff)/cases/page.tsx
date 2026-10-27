@@ -7,7 +7,8 @@ import { CATEGORY, STATUS, Pill } from "@/components/Badges";
 import { getMe } from "@/lib/data/me";
 import { listCaseQueue } from "@/lib/data/cases";
 import FilterBar from "@/components/FilterBar";
-import { PRIORITIES, SENTIMENTS, TOPICS } from "@/lib/data/stats";
+import { PRIORITIES, SENTIMENTS, TOPICS, topicsFor } from "@/lib/data/stats";
+import { getPack } from "@/lib/industry";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Cases" };
@@ -22,7 +23,7 @@ function sla(mins: number | null, status: string) {
 }
 
 export default async function CasesPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
-  const me = await getMe();
+  const [me, pack] = await Promise.all([getMe(), getPack()]);
   if (!can(me, "view_cases")) return <NoAccess me={me} page="Cases" needs="view_cases" />;
   const sp = await searchParams;
   const pick = <T extends string>(v: string | undefined, list: readonly T[]) => (v && (list as readonly string[]).includes(v) ? v : undefined);
@@ -45,7 +46,7 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
         <div className="mb-4">
           <FilterBar search={{ name: "q", label: "Search", placeholder: "Case, customer or issue" }} filters={[
             { name: "status", label: "Status", options: [["", "Not closed"], ["open", "Open (not resolved)"], ["escalated", "Escalated"], ["ai_handling", "AI handling"], ["human_handling", "Human handling"], ["waiting", "Waiting for customer"], ["resolved", "Resolved"], ["closed", "Closed"], ["all", "All, including closed"]] },
-            { name: "topic", label: "Issue", options: [["", "All issues"], ...Object.entries(TOPICS).map(([k, t]) => [k, t.label] as [string, string])] },
+            { name: "topic", label: "Issue", options: [["", "All issues"], ...topicsFor(pack.id).map(([k, t]) => [k, t.label] as [string, string])] },
             { name: "priority", label: "Priority", options: [["", "All priorities"], ...PRIORITIES.map((p) => [p, cap(p)] as [string, string])] },
             { name: "sentiment", label: "Sentiment", options: [["", "All sentiment"], ...SENTIMENTS.map((x) => [x, cap(x)] as [string, string])] },
             { name: "assigned", label: "Assigned to", options: [["", "Anyone"], ["me", "Me"], ["nobody", "Nobody yet"]] },
@@ -61,7 +62,7 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
         <div className="overflow-x-auto rounded-lg border bg-white">
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 text-xs uppercase text-gray-500">
-              <tr>{["Case ID", "Customer", "Issue", "Intent", "Priority", "Sentiment", "Assigned to", "SLA", "Status"].map((h) => <th key={h} className="px-4 py-3">{h}</th>)}</tr>
+              <tr>{["Case ID", pack.person, "Issue", "Intent", "Priority", "Sentiment", "Assigned to", "SLA", "Status"].map((h) => <th key={h} className="px-4 py-3">{h}</th>)}</tr>
             </thead>
             <tbody className="divide-y">
               {cases.map((c) => (

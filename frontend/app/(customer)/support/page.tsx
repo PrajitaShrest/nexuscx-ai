@@ -4,6 +4,7 @@ import { getMe, isStaff } from "@/lib/data/me";
 import { listCaseQueue } from "@/lib/data/cases";
 import EnquiryForm from "./EnquiryForm";
 import MyRequests, { type RequestCard } from "./MyRequests";
+import { getPack } from "@/lib/industry";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Help & chat" };
@@ -22,7 +23,7 @@ function ago(iso: string) {
 export default async function SupportPage() {
   const me = await getMe();
   if (isStaff(me)) redirect("/conversations");
-  const { data: myCases } = await listCaseQueue(); // RLS returns only this customer's cases
+  const [{ data: myCases }, pack] = await Promise.all([listCaseQueue(), getPack()]); // RLS returns only this person's cases
   const first = me.name.split(" ")[0];
 
   const items: RequestCard[] = myCases.map((c) => ({
@@ -47,7 +48,11 @@ export default async function SupportPage() {
                 <span className="h-2 w-2 rounded-full bg-emerald-300" /> Support is online now
               </p>
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">How can we help, {first}?</h1>
-              <p className="mt-2 max-w-md text-indigo-100">Our AI answers in seconds from approved help articles, and a real person steps in whenever you need one.</p>
+              <p className="mt-2 max-w-md text-indigo-100">
+                {pack.id === "university"
+                  ? "Northbridge's AI answers in seconds from approved university information, and the right department steps in whenever you need a person."
+                  : "Our AI answers in seconds from approved help articles, and a real person steps in whenever you need one."}
+              </p>
             </div>
             <div className="flex gap-3">
               {stats.map((s) => (
@@ -62,15 +67,17 @@ export default async function SupportPage() {
         </section>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="min-w-0 lg:col-span-2"><EnquiryForm firstName={first} /></div>
+          <div className="min-w-0 lg:col-span-2"><EnquiryForm firstName={first} industry={pack.id} /></div>
           <aside className="min-w-0 space-y-6">
-            <MyRequests items={items} />
+            <MyRequests items={items} industry={pack.id} />
             <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
               <h2 className="mb-3 font-bold">Why you can trust our answers</h2>
               <ul className="space-y-3 text-sm">
                 {[
                   [<BookIcon key="b" className="h-4 w-4" />, "Answers come only from approved help articles, with the source shown."],
-                  [<HeadsetIcon key="h" className="h-4 w-4" />, "Refunds, account changes and urgent issues always go to a person."],
+                  [<HeadsetIcon key="h" className="h-4 w-4" />, pack.id === "university"
+                    ? "Wellbeing, personal visa questions, special consideration and refunds always go to a person."
+                    : "Refunds, account changes and urgent issues always go to a person."],
                   [<ShieldIcon key="s" className="h-4 w-4" />, "Your details are private and every action is recorded."],
                 ].map(([icon, text], i) => (
                   <li key={i} className="flex gap-3">

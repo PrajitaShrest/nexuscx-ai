@@ -1,14 +1,15 @@
 import Link from "next/link";
 import AuthCard from "@/components/AuthCard";
 import LoginForm from "@/components/LoginForm";
+import { getIndustry } from "@/lib/industry";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Sign in" };
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ suspended?: string; expired?: string }> }) {
-  const { suspended, expired } = await searchParams;
+  const [{ suspended, expired }, industry] = await Promise.all([searchParams, getIndustry()]);
   return (
-    <AuthCard title="Welcome back" subtitle="Sign in with your username or email.">
+    <AuthCard industry={industry} title="Welcome back" subtitle="Sign in with your username or email.">
       {suspended && (
         <p role="alert" className="mb-5 rounded-lg border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-bad">
           Your account is suspended. Please contact your administrator.

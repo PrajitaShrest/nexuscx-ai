@@ -76,6 +76,7 @@ In Supabase, create a new project. Then open **SQL Editor → New query** and ru
 | 13 | `014_dashboard_stats.sql` | Dashboard charts and filters |
 | 14 | `015_admin_screens.sql` | AI Agents, Routing & Escalation, Settings, Analytics, Team Operations |
 | 15 | `016_rate_limits_and_photos.sql` | Message limits, private return photos, live chat updates |
+| 16 | `017_university_pack.sql` | Industry packs: the E-commerce / University switch, 5 university agents, 25 university articles, language detection, wellbeing and visa safety rules |
 
 Each file ends with a small check query. A table of results means it worked.
 
@@ -165,6 +166,25 @@ Customers sign in at `/login`. Staff sign in at `/staff/login` (choose your role
 
 **Profile (`/profile`)**
 - Edit name, username, and (customers) mobile, date of birth and address; profile strength meter; change password (current password required); "What you can do" for staff. Saving returns to your home page with a confirmation message.
+
+## Industry packs (E-commerce and University)
+
+NexusCX is one platform that can be set up for different kinds of business. Each **industry pack** has its own AI agents, knowledge base, routing rules, cases and wording. An administrator switches packs in **Settings → Industry pack**; every page changes straight away and the switch is saved in the audit log.
+
+| Pack | Organisation | Departments / agents |
+|---|---|---|
+| E-commerce | NexusCX Store | Orders, Billing, Technical Support |
+| University | Northbridge University (made up for the demo) | Admissions, Finance, IT Support, Academic (incl. exams and results), Student Services (incl. ID cards, international students and visa information) |
+
+University flow: student message → Orchestrator → classify intent, **language**, sentiment, urgency and risk → department agent → that department's approved articles → answer with the source → policy, confidence and risk check → answer the student, or create a ticket for a person → staff resolve → feedback → analytics.
+
+Safety rules in the University pack:
+- Wellbeing messages (for example "I can't cope") always go to a person as **urgent**, and the student sees 000 and Lifeline 13 11 14.
+- Personal visa questions always go to a person. The AI only gives general information and points to homeaffairs.gov.au.
+- Special consideration, academic integrity, grade appeals, refunds and hardship are decided by staff.
+- Messages in other languages (for example Nepali, Hindi or Chinese) are passed to a person.
+
+Coming next: fast food, retail stores, internet and telco, banking and finance, hospitals.
 
 ## Deploy to Vercel
 

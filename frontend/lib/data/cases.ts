@@ -20,6 +20,8 @@ export type CaseRow = {
 
 export type EnquiryResult = {
   case_number: string;
+  language?: string;
+  department?: string | null;
   status: string;
   intent: string;
   sentiment: string;

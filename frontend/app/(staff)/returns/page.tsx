@@ -6,11 +6,13 @@ import { listReturnQueue } from "@/lib/data/workspace";
 import { RETURN_REASONS, ReturnPill } from "@/components/ShopUI";
 import { dayTime, money } from "@/lib/format";
 import type { Metadata } from "next";
+import { requireShop } from "@/lib/industry";
 
 export const metadata: Metadata = { title: "Returns" };
 
 // All return and exchange requests. Each one opens its case, where staff chat and approve.
 export default async function ReturnsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  await requireShop("/dashboard");
   const me = await getMe();
   if (!can(me, "view_cases")) return <NoAccess me={me} page="Returns" needs="view_cases" />;
   const { tab = "open" } = await searchParams;

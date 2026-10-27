@@ -5,12 +5,14 @@ import { useEffect, useState } from "react";
 import Logo from "./Logo";
 import UserMenu, { type MenuUser } from "./UserMenu";
 import { XIcon } from "./Icons";
+import PackSwitch from "./PackSwitch";
+import type { Industry } from "@/lib/packs";
 
 type Group = { section: string; items: { label: string; href?: string; week?: number; badge?: number }[] };
 
 // Staff navigation for phones and small tablets: a top bar with a menu button
 // that opens the same menu as the desktop sidebar in a slide-out panel.
-export default function MobileStaffNav({ groups, active, user }: { groups: Group[]; active: string; user: MenuUser }) {
+export default function MobileStaffNav({ groups, active, user, industry }: { groups: Group[]; active: string; user: MenuUser; industry: Industry }) {
   const [open, setOpen] = useState(false);
   const current = groups.flatMap((g) => g.items).find((i) => i.href && active.startsWith(i.href))?.label;
 
@@ -40,6 +42,7 @@ export default function MobileStaffNav({ groups, active, user }: { groups: Group
               <Logo tone="light" size={30} />
               <button type="button" onClick={() => setOpen(false)} aria-label="Close menu" className="rounded-md p-1.5 hover:bg-white/10"><XIcon className="h-5 w-5" /></button>
             </div>
+            <div className="px-4 pb-3"><PackSwitch current={industry} tone="dark" /></div>
             <div className="flex-1 space-y-5 overflow-y-auto px-3 pb-4">
               {groups.map((g) => (
                 <div key={g.section || "main"}>

@@ -5,4 +5,4 @@ export const KB_STATUS: Record<string, { label: string; style: string }> = {
   disabled: { label: "Disabled", style: "border-red-300 bg-red-50 text-red-700" },
   archived: { label: "Archived", style: "border-gray-300 bg-gray-100 text-gray-500" },
 };
-export const KB_CATEGORY: Record<string, string> = { orders: "Orders & delivery", billing: "Billing & refunds", technical: "Technical", account: "Account", general: "General" };
+export { kbLabel } from "@/lib/packs";

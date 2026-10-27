@@ -3,12 +3,14 @@ import { getOrder, listAddresses, listProducts } from "@/lib/data/shop";
 import { PageHead } from "@/components/CustomerShell";
 import ShopClient from "./ShopClient";
 import type { Metadata } from "next";
+import { requireShop } from "@/lib/industry";
 
 export const metadata: Metadata = { title: "Shop" };
 
 // Shop: browse products, build a cart, check out to a saved address.
 // ?reorder=<order id> fills the cart with a past order ("Buy again").
 export default async function ShopPage({ searchParams }: { searchParams: Promise<{ reorder?: string }> }) {
+  await requireShop("/support");
   await getMe();
   const { reorder } = await searchParams;
   const [products, addresses, past] = await Promise.all([listProducts(), listAddresses(), reorder ? getOrder(reorder) : null]);

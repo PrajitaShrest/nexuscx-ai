@@ -5,9 +5,7 @@ import Link from "next/link";
 import Field, { inputClass } from "@/components/Field";
 import { changeStatus, saveDoc, type KbState } from "./actions";
 
-const CATS = [["orders", "Orders & delivery"], ["billing", "Billing & refunds"], ["technical", "Technical"], ["account", "Account"], ["general", "General"]];
-
-export function KnowledgeForm({ doc }: { doc?: { document_id: string; title: string; category: string; content: string; keywords: string; status: string } }) {
+export function KnowledgeForm({ doc, cats }: { doc?: { document_id: string; title: string; category: string; content: string; keywords: string; status: string }; cats: [string, string][] }) {
   const [state, action, pending] = useActionState<KbState, FormData>(saveDoc, {});
   const err = (f: string) => (state.field === f ? state.error : undefined);
   const [len, setLen] = useState(doc?.content.length ?? 0);
@@ -19,13 +17,13 @@ export function KnowledgeForm({ doc }: { doc?: { document_id: string; title: str
           This article is live. Saving changes sends it back for review, and the AI stops using it until it is approved again.
         </p>
       )}
-      <Field label="Title" htmlFor="title" error={err("title")} hint="Write it the way a customer would ask, e.g. “How do I track my parcel?”">
+      <Field label="Title" htmlFor="title" error={err("title")} hint="Write it the way a person would ask, e.g. “How do I track my parcel?”">
         <input id="title" name="title" defaultValue={doc?.title} required minLength={5} maxLength={150} className={inputClass(!!err("title"))} />
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Category" htmlFor="category" error={err("category")}>
           <select id="category" name="category" defaultValue={doc?.category ?? "general"} className={inputClass(!!err("category"))}>
-            {CATS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            {cats.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </select>
         </Field>
         <Field label="Keywords" htmlFor="keywords" error={err("keywords")} hint="Comma separated words customers use. Helps the AI find this article.">

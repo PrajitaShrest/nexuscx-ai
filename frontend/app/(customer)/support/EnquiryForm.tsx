@@ -3,7 +3,8 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import type { EnquiryResult } from "@/lib/data/cases";
 import { sendEnquiry } from "./actions";
-import { TOPICS, CUSTOMER_STATUS, topicForIntent } from "./topics";
+import { TOPIC_SETS, CUSTOMER_STATUS, topicForIntent } from "./topics";
+import { LANGUAGE_NAME, PACKS, type Industry } from "@/lib/packs";
 import { BookIcon, BotIcon, CheckIcon, ChevronIcon, HeadsetIcon, SendIcon, ShieldIcon } from "@/components/Icons";
 
 type Turn = { text: string; result: EnquiryResult };
@@ -41,9 +42,9 @@ function Tracker({ r }: { r: EnquiryResult }) {
   );
 }
 
-function Reply({ text, result: r }: Turn) {
+function Reply({ text, result: r, industry }: Turn & { industry: Industry }) {
   const status = CUSTOMER_STATUS[r.status] ?? CUSTOMER_STATUS.ai_handling;
-  const topic = topicForIntent(r.intent);
+  const topic = topicForIntent(r.intent, industry);
   const conf = Math.round(Number(r.confidence) * 100);
   return (
     <div className="space-y-4">
@@ -71,8 +72,9 @@ function Reply({ text, result: r }: Turn) {
               <summary className="flex cursor-pointer list-none items-center gap-1 font-medium text-indigo-700">
                 How our AI understood this <ChevronIcon className="h-3.5 w-3.5 transition group-open:rotate-180" />
               </summary>
-              <dl className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {[["Topic", topic.label], ["Mood", MOOD[r.sentiment] ?? r.sentiment], ["Urgency", r.urgency], ["Handled by", r.routed_to]].map(([k, v]) => (
+              <dl className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
+                {[["Topic", topic.label], ["Language", LANGUAGE_NAME[r.language ?? "en"] ?? r.language ?? "English"], ["Mood", MOOD[r.sentiment] ?? r.sentiment],
+                  ["Urgency", r.urgency], ["Handled by", r.status === "ai_handling" ? r.routed_to : r.department ? `${r.department} team` : "Our team"]].map(([k, v]) => (
                   <div key={k} className="rounded-lg bg-white px-2.5 py-1.5 ring-1 ring-slate-200">
                     <dt className="text-muted">{k}</dt><dd className="font-semibold capitalize text-ink">{v}</dd>
                   </div>
@@ -98,7 +100,9 @@ function Reply({ text, result: r }: Turn) {
   );
 }
 
-export default function EnquiryForm({ firstName }: { firstName: string }) {
+export default function EnquiryForm({ firstName, industry }: { firstName: string; industry: Industry }) {
+  const TOPICS = TOPIC_SETS[industry];
+  const pack = PACKS[industry];
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState("");
   const [topicId, setTopicId] = useState<string | null>(null);
@@ -131,7 +135,7 @@ export default function EnquiryForm({ firstName }: { firstName: string }) {
       <div className="flex items-center gap-3 border-b bg-gradient-to-r from-indigo-50 via-white to-violet-50 px-5 py-4">
         <BotAvatar />
         <div className="flex-1">
-          <p className="font-semibold text-ink">NexusCX Assistant</p>
+          <p className="font-semibold text-ink">{pack.assistant}</p>
           <p className="flex items-center gap-1.5 text-xs text-muted">
             <span className="h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-emerald-100" /> Online · usually replies in seconds
           </p>
@@ -147,7 +151,7 @@ export default function EnquiryForm({ firstName }: { firstName: string }) {
         <div className="flex gap-3">
           <BotAvatar />
           <div className="max-w-[85%] rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 text-[15px] text-ink shadow-sm">
-            Hi {firstName}! I&apos;m your NexusCX assistant. Pick a topic below or just type your question.
+            Hi {firstName}! I&apos;m the {pack.assistant}. Pick a topic below or just type your question, in any language.
             If anything needs a person, I&apos;ll pass it to our team straight away.
           </div>
         </div>
@@ -166,7 +170,7 @@ export default function EnquiryForm({ firstName }: { firstName: string }) {
           </div>
         )}
 
-        {chat.turns.map((t) => <Reply key={t.result.case_number} {...t} />)}
+        {chat.turns.map((t) => <Reply key={t.result.case_number} {...t} industry={industry} />)}
 
         {pending && (
           <div className="space-y-4">
