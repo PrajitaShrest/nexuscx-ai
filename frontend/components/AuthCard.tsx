@@ -6,6 +6,12 @@ import type { Industry } from "@/lib/packs";
 // Sign-in and sign-up frame. Left: what NexusCX does, shown as one real
 // conversation being classified and routed. Right: the form.
 // The staff variant swaps the story for what staff do with that conversation.
+// The staff example on the left follows the chosen demo pack
+const STAFF_STORY = {
+  ecommerce: { name: "Sarah Chen", id: "CX-10428", text: "Duplicate subscription payment. Refund requested.", why: "Why it came to you: refunds need staff approval", badge: "Staff portal" },
+  university: { name: "Priya Sharma", id: "CX-10512", text: "Special consideration for the Data Mining final exam (medical certificate attached).", why: "Why it came to you: special consideration is decided by staff", badge: "Northbridge staff portal" },
+};
+
 // The example conversation on the left follows the chosen demo pack
 const STORY = {
   ecommerce: {
@@ -28,12 +34,13 @@ export default function AuthCard({ title, subtitle, children, variant = "custome
 }) {
   const staff = variant === "staff";
   const story = STORY[industry ?? "ecommerce"];
+  const staffStory = STAFF_STORY[industry ?? "ecommerce"];
   return (
     <div className="flex min-h-screen bg-white">
       <aside className={`hidden w-[46%] flex-col justify-between p-12 text-white lg:sticky lg:top-0 lg:flex lg:h-screen ${staff ? "bg-[#0a1326]" : "bg-navy"}`}>
         <div className="flex items-center justify-between">
           <Logo tone="light" />
-          {staff && <span className="rounded-full border border-amber-300/40 px-3 py-1 text-xs font-medium text-amber-200">Staff portal</span>}
+          {staff && <span className="rounded-full border border-amber-300/40 px-3 py-1 text-xs font-medium text-amber-200">{staffStory.badge}</span>}
         </div>
 
         {staff ? (
@@ -42,11 +49,11 @@ export default function AuthCard({ title, subtitle, children, variant = "custome
             <div className="mt-10 space-y-3" aria-hidden="true">
               <div className="rise rounded-xl border border-white/10 bg-white/5 p-4 text-sm">
                 <div className="flex items-center justify-between">
-                  <span><span className="font-semibold">Sarah Chen</span> <span className="ml-1 text-slate-400">CX-10428</span></span>
+                  <span><span className="font-semibold">{staffStory.name}</span> <span className="ml-1 text-slate-400">{staffStory.id}</span></span>
                   <span className="rounded-full bg-red-500/20 px-2.5 py-0.5 text-xs text-red-200">Escalated</span>
                 </div>
-                <p className="mt-2 text-slate-300">Duplicate subscription payment. Refund requested.</p>
-                <p className="mt-3 text-xs text-slate-400">Why it came to you: refunds need staff approval</p>
+                <p className="mt-2 text-slate-300">{staffStory.text}</p>
+                <p className="mt-3 text-xs text-slate-400">{staffStory.why}</p>
               </div>
               <div className="rise rise-2 flex gap-2 text-xs">
                 <span className="rounded-full bg-white/10 px-3 py-1">Take over</span>
@@ -88,9 +95,9 @@ export default function AuthCard({ title, subtitle, children, variant = "custome
         <div className="w-full max-w-[26rem]">
           <div className="mb-8 lg:hidden"><Logo /></div>
           {industry && (
-            <div className="mb-6 flex flex-wrap items-center gap-2 text-xs text-muted">
-              <span>Choose a demo:</span>
-              <PackSwitch current={industry} />
+            <div className="mb-8 rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+              <p className="mb-2.5 px-1 text-sm font-semibold text-ink">Choose a demo</p>
+              <PackSwitch current={industry} size="lg" />
             </div>
           )}
           <h2 className="text-2xl font-bold text-ink">{title}</h2>

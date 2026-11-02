@@ -49,3 +49,10 @@ export const kbLabel = (c: string) => Object.values(KB_CATS).flat().find(([k]) =
 export const LANGUAGE_NAME: Record<string, string> = {
   en: "English", ne: "Nepali", hi: "Hindi", zh: "Chinese", ja: "Japanese", ko: "Korean", ar: "Arabic", th: "Thai", vi: "Vietnamese", es: "Spanish",
 };
+
+// Knowledge base category for an AI topic (used to pre-fill a draft article)
+export function categoryForIntent(intent: string | null, industry: Industry): string {
+  if (industry === "university") return KB_CATS.university.some(([k]) => k === intent) ? intent! : "general";
+  return ({ order_status: "orders", return_request: "orders", billing_question: "billing", refund_request: "billing",
+    technical_issue: "technical", account: "account" } as Record<string, string>)[intent ?? ""] ?? "general";
+}

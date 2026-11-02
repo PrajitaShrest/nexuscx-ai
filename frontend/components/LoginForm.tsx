@@ -6,6 +6,16 @@ import { login, type FormState } from "@/app/auth/actions";
 import Field, { inputClass } from "./Field";
 import FormMessage from "./FormMessage";
 import PasswordInput from "./PasswordInput";
+import type { Industry } from "@/lib/packs";
+
+// University staff see university job titles for the same roles
+const UNI_ROLE_LABEL: Record<string, string> = {
+  support_agent: "Student Support Officer or Lecturer",
+  team_leader: "Department Lead",
+  knowledge_manager: "Knowledge Manager",
+  business_specialist: "Faculty Specialist",
+  administrator: "University Administrator",
+};
 
 const STAFF_ROLES = [
   { value: "support_agent", label: "Support Agent" },
@@ -28,7 +38,8 @@ const DEMO: Record<"customer" | "staff", { label: string; username: string; role
   ],
 };
 
-export default function LoginForm({ portal }: { portal: "customer" | "staff" }) {
+export default function LoginForm({ portal, industry = "ecommerce" }: { portal: "customer" | "staff"; industry?: Industry }) {
+  const uni = industry === "university";
   const [state, action, pending] = useActionState<FormState, FormData>(login, {});
   const [identifier, setIdentifier] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
@@ -46,7 +57,7 @@ export default function LoginForm({ portal }: { portal: "customer" | "staff" }) 
             <select id="role" name="role" required value={shownRole} onChange={(e) => setRole(e.target.value)}
               className={inputClass(Boolean(err("role")))}>
               <option value="" disabled>Choose your role</option>
-              {STAFF_ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+              {STAFF_ROLES.map((r) => <option key={r.value} value={r.value}>{uni ? UNI_ROLE_LABEL[r.value] ?? r.label : r.label}</option>)}
             </select>
           </Field>
         )}
@@ -85,7 +96,7 @@ export default function LoginForm({ portal }: { portal: "customer" | "staff" }) 
             <button key={d.username} type="button" onClick={() => { setIdentifier(d.username); if (d.role) setRole(d.role); }}
               className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
                 shownId === d.username ? "border-indigo-500 bg-indigo-50 text-indigo-700" : "border-slate-300 text-ink hover:border-indigo-400"}`}>
-              {d.label}
+              {uni ? d.label.replace("(customer)", "(student)").replace("Support Agent", "Support Officer") : d.label}
             </button>
           ))}
         </div>

@@ -17,7 +17,7 @@ export default async function CustomerShell({ me, children }: { me: Me; children
         <div className="px-5 py-5">
           <Link href={pack.shop ? "/account" : "/support"}><Logo tone="light" size={34} /></Link>
           <span className="mt-2 inline-block rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-indigo-200">{pack.account}</span>
-          <div className="mt-3"><PackSwitch current={pack.id} tone="dark" /></div>
+          <div className="mt-3"><PackSwitch current={pack.id} tone="dark" block /></div>
         </div>
         <SideLinks unread={unread} shop={pack.shop} />
         <div className="border-t border-white/10 p-3">

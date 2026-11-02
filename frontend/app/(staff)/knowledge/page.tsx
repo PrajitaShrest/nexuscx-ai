@@ -33,7 +33,10 @@ export default async function KnowledgePage({ searchParams }: { searchParams: Pr
             <h1 className="text-xl font-semibold">Knowledge Base</h1>
             <p className="text-sm text-gray-500">The AI only answers from <strong>approved</strong> articles. New and edited articles need a second person to approve them.</p>
           </div>
-          <Link href="/knowledge/new" className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"><PlusIcon className="h-4 w-4" /> New article</Link>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/knowledge/gaps" className="inline-flex items-center gap-1.5 rounded-lg border bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Knowledge gaps</Link>
+            <Link href="/knowledge/new" className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"><PlusIcon className="h-4 w-4" /> New article</Link>
+          </div>
         </div>
         <nav aria-label="Status" className="mb-3 flex flex-wrap gap-2">
           {TABS.map(([t, l]) => (

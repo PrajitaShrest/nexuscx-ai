@@ -159,3 +159,35 @@ export async function getTeamStats(days: number) {
   const r = await rpc("team_stats", { p_days: days }, "loading team operations");
   return { data: (r.data as TeamStats | undefined) ?? null, error: r.error };
 }
+
+// ---------- duty of care (migration 019) ----------
+export type Simulation = {
+  days: number; total: number; hard_stops: number;
+  now: { ai: number; person: number }; proposed: { ai: number; person: number };
+  reasons: Record<string, number>;
+  changed: { case_number: string; question: string; before: string; after: string; to_person: boolean }[];
+};
+export type SimInput = { days: number; threshold: number | null; angry: boolean | null; highRisk: boolean | null; paused: string | null };
+export async function simulateRules(i: SimInput) {
+  const r = await rpc("simulate_rules", { p_days: i.days, p_threshold: i.threshold, p_angry: i.angry, p_high_risk: i.highRisk, p_paused: i.paused }, "running the simulator");
+  return { data: r.data as Simulation | undefined, error: r.error };
+}
+
+export type GapGroup = { topic: string; count: number; intent: string | null; questions: string[]; cases: string[] };
+export async function getKnowledgeGaps(days: number) {
+  const r = await rpc("knowledge_gaps", { p_days: days }, "finding knowledge gaps");
+  return { data: r.data as { days: number; unanswered: number; groups: GapGroup[] } | undefined, error: r.error };
+}
+
+export type CareCase = { case_id: string; case_number: string; flag: string; priority: string; status: string; created_at: string; to_person: boolean; pickup_min: number | null; target_min: number | null };
+export type CareReport = {
+  days: number; industry: string; generated_at: string; cases: number; ai_answered: number; to_person: number;
+  sensitive: number; sensitive_ai_only: number; by_flag: Record<string, number>; picked_up: number; waiting_now: number;
+  median_pickup_min: number | null; within_target: number;
+  wellbeing: { cases: number; urgent: number; median_pickup_min: number | null; waiting_now: number };
+  other_languages: number; other_languages_to_person: number; injections_blocked: number; audit_entries: number; list: CareCase[];
+};
+export async function getCareReport(days: number) {
+  const r = await rpc("duty_of_care_report", { p_days: days }, "building the duty-of-care report");
+  return { data: r.data as CareReport | undefined, error: r.error };
+}

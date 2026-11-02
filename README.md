@@ -77,6 +77,8 @@ In Supabase, create a new project. Then open **SQL Editor → New query** and ru
 | 14 | `015_admin_screens.sql` | AI Agents, Routing & Escalation, Settings, Analytics, Team Operations |
 | 15 | `016_rate_limits_and_photos.sql` | Message limits, private return photos, live chat updates |
 | 16 | `017_university_pack.sql` | Industry packs: the E-commerce / University switch, 5 university agents, 25 university articles, language detection, wellbeing and visa safety rules |
+| 17 | `018_visitor_industry.sql` | Each visitor can choose the E-commerce or University demo in their own browser |
+| 18 | `019_duty_of_care.sql` | Duty-of-care features: rule simulator, knowledge gaps, duty-of-care report; off-topic questions go to a person instead of a wrong article |
 
 Each file ends with a small check query. A table of results means it worked.
 
@@ -169,7 +171,7 @@ Customers sign in at `/login`. Staff sign in at `/staff/login` (choose your role
 
 ## Industry packs (E-commerce and University)
 
-NexusCX is one platform that can be set up for different kinds of business. Each **industry pack** has its own AI agents, knowledge base, routing rules, cases and wording. An administrator switches packs in **Settings → Industry pack**; every page changes straight away and the switch is saved in the audit log.
+NexusCX is one platform that can be set up for different kinds of business. Each **industry pack** has its own AI agents, knowledge base, routing rules, cases and wording. Anyone can choose **E-commerce** or **University** with the switch on the sign-in page and in the menu. The choice is saved in their own browser only, so other people are not affected. An administrator sets the **default** pack in **Settings → Default industry pack** (saved in the audit log).
 
 | Pack | Organisation | Departments / agents |
 |---|---|---|
@@ -183,6 +185,12 @@ Safety rules in the University pack:
 - Personal visa questions always go to a person. The AI only gives general information and points to homeaffairs.gov.au.
 - Special consideration, academic integrity, grade appeals, refunds and hardship are decided by staff.
 - Messages in other languages (for example Nepali, Hindi or Chinese) are passed to a person.
+
+### Duty-of-care features (what makes NexusCX different)
+
+- **Test before you switch** (`/simulator`): replay real questions from the last 7, 30 or 90 days with a proposed confidence threshold, escalation switches or a paused agent, and see what would change before saving. Hard stops (wellbeing, personal visa) are never affected.
+- **Knowledge gaps** (`/knowledge/gaps`): questions the AI could not answer, grouped by topic, with a "Draft an article" button. Drafts still need a second person to approve them; once approved, those questions drop off the list.
+- **Duty-of-care report** (`/duty-of-care`): proof that every sensitive case went to a person, how fast staff picked them up, and how many steps were recorded. Print or save as PDF, or download a CSV.
 
 Coming next: fast food, retail stores, internet and telco, banking and finance, hospitals.
 

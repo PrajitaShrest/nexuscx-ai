@@ -1,13 +1,18 @@
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { PACKS, isIndustry, type Industry, type Pack } from "./packs";
+import { cookies } from "next/headers";
+import { CHOICE_COOKIE, PACKS, isIndustry, type Industry, type Pack } from "./packs";
 
 export { PACKS, type Industry, type Pack } from "./packs";
 
 // The active industry pack (setting "industry", migration 017).
 // One lookup per request. Works signed in or signed out.
+// The visitor's own choice (cookie) wins; the database sees the same choice
+// through the x-nexus-industry header. Otherwise the default from Settings.
 export const getIndustry = cache(async function getIndustry(): Promise<Industry> {
+  const choice = (await cookies()).get(CHOICE_COOKIE)?.value;
+  if (isIndustry(choice)) return choice;
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("current_industry");
   if (error) console.error("[getIndustry]", error.message);

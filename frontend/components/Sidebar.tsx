@@ -25,10 +25,13 @@ export const NAV: { section: string; items: { label: string; href?: string; week
     { label: "AI Agents", href: "/ai-agents", needs: "configure_ai" },
     { label: "Routing & Escalation", href: "/routing", needs: "configure_ai" },
     { label: "Knowledge Base", href: "/knowledge", needs: "manage_knowledge" },
+    { label: "Knowledge gaps", href: "/knowledge/gaps", needs: "manage_knowledge" },
+    { label: "Test before you switch", href: "/simulator", needs: "configure_ai" },
   ]},
   { section: "Insights", items: [
     { label: "Analytics", href: "/analytics", needs: "view_analytics" },
     { label: "Team Operations", href: "/team", needs: "view_analytics" },
+    { label: "Duty of care", href: "/duty-of-care", needs: "view_analytics" },
   ]},
   { section: "Administration", items: [
     { label: "Users & Roles", href: "/users", needs: "manage_users" },
@@ -49,20 +52,22 @@ export default async function Sidebar({ me, active }: { me: Me; active: string }
       .filter((i) => me.permissions.includes(i.needs) && (pack.shop || !SHOP_ONLY.has(i.href ?? "")))
       .map((i) => (i.href === "/customers" ? { ...i, label: pack.people } : i)),
   }));
+  // Highlight the closest match ("/knowledge/gaps" lights up Knowledge gaps, not Knowledge Base)
+  const best = nav.flatMap((g) => g.items).map((i) => i.href ?? "").filter((h) => h && active.startsWith(h)).sort((a, b) => b.length - a.length)[0];
   const groups = nav.map((g) => ({
     section: g.section,
     items: g.items.map((i) => ({ label: i.label, href: i.href, week: i.week, badge: i.href === "/inbox" ? unread : undefined })),
   })).filter((g) => g.items.length > 0);
   return (
     <>
-    <MobileStaffNav groups={groups} active={active} user={menuUser(me)} industry={pack.id} />
+    <MobileStaffNav groups={groups} active={best ?? active} user={menuUser(me)} industry={pack.id} />
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-navy text-slate-300 md:flex">
       <div className="px-5 py-5">
         <Logo tone="light" size={34} />
         <p className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-indigo-200">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> {pack.org}
         </p>
-        <div className="mt-2"><PackSwitch current={pack.id} tone="dark" /></div>
+        <div className="mt-2"><PackSwitch current={pack.id} tone="dark" block /></div>
       </div>
       <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4">
         {nav.map((group) => {
@@ -74,7 +79,7 @@ export default async function Sidebar({ me, active }: { me: Me; active: string }
               {items.map((item) =>
                 item.href ? (
                   <Link key={item.label} href={item.href}
-                    className={`flex items-center justify-between rounded-md px-2 py-2 text-sm ${active.startsWith(item.href) ? "bg-indigo-600 text-white" : "hover:bg-white/5"}`}>
+                    className={`flex items-center justify-between rounded-md px-2 py-2 text-sm ${item.href === best ? "bg-indigo-600 text-white" : "hover:bg-white/5"}`}>
                     {item.label}
                     {item.href === "/inbox" && unread > 0 && <span className="rounded-full bg-rose-500 px-1.5 text-[11px] font-semibold text-white">{unread > 99 ? "99+" : unread}</span>}
                   </Link>

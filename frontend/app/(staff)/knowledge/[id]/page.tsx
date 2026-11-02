@@ -15,10 +15,13 @@ import type { Metadata } from "next";
 export const metadata: Metadata = { title: "Knowledge article" };
 
 // /knowledge/new creates an article; /knowledge/<id> edits one and moves it through review.
-export default async function KnowledgeDocPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function KnowledgeDocPage({ params, searchParams }: {
+  params: Promise<{ id: string }>; searchParams: Promise<{ title?: string; category?: string; keywords?: string; from?: string }>;
+}) {
   const me = await getMe();
   if (!can(me, "manage_knowledge")) return <NoAccess me={me} page="Knowledge Base" needs="manage_knowledge" />;
   const { id } = await params;
+  const pre = await searchParams; // pre-filled from Knowledge gaps
   const isNew = id === "new";
   const [doc, industry] = await Promise.all([isNew ? null : getKnowledgeDoc(id), getIndustry()]);
   if (!isNew && !doc) notFound();
@@ -34,7 +37,13 @@ export default async function KnowledgeDocPage({ params }: { params: Promise<{ i
           {doc && <span className="text-sm text-gray-500">{doc.version}</span>}
         </div>
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-          <div className="xl:col-span-2"><KnowledgeForm doc={doc ?? undefined} cats={KB_CATS[industry]} /></div>
+          <div className="xl:col-span-2">{isNew && pre.from === "gaps" && (
+              <p className="mb-3 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm text-indigo-800">
+                Started from a knowledge gap. Write the answer, save it as a draft, then ask a second person to approve it.
+              </p>
+            )}
+            <KnowledgeForm doc={doc ?? undefined} cats={KB_CATS[industry]}
+              prefill={isNew ? { title: pre.title?.slice(0, 150), category: KB_CATS[industry].some(([k]) => k === pre.category) ? pre.category : undefined, keywords: pre.keywords?.slice(0, 300) } : undefined} /></div>
           {doc && (
             <aside className="space-y-4">
               <section className="rounded-xl border bg-white p-4">
