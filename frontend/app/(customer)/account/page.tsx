@@ -6,11 +6,13 @@ import { ago, day, greeting, money } from "@/lib/format";
 import { ArrowRightIcon, BellIcon, CartIcon, ChatIcon, ClockIcon, HeadsetIcon, MapPinIcon, PackageIcon, RepeatIcon, TruckIcon } from "@/components/Icons";
 import { ChatPill, EmptyState, OrderPill, OrderTracker, Panel, ProductTile, btnGhost, btnPrimary } from "@/components/ShopUI";
 import type { Metadata } from "next";
+import { requireShop } from "@/lib/industry";
 
 export const metadata: Metadata = { title: "My account" };
 
 // Customer home: what is happening with my orders and chats, in one place.
 export default async function AccountHome() {
+  await requireShop("/support");
   const me = await getMe();
   const [orders, chats, addresses, notices] = await Promise.all([listMyOrders(), listMyChats(), listAddresses(), listNotifications(4)]);
   const first = me.name.split(" ")[0];

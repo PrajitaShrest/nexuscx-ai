@@ -16,7 +16,7 @@ const done = (id: string, ok: string): CaseActionState => {
 export async function take(_p: CaseActionState, f: FormData): Promise<CaseActionState> {
   const id = String(f.get("case_id"));
   const r = await staffTakeCase(id);
-  return r.error ? { error: r.error } : done(id, "You have taken this case. The customer has been told.");
+  return r.error ? { error: r.error } : done(id, "You have taken this case. They have been told.");
 }
 
 export async function reply(_p: CaseActionState, f: FormData): Promise<CaseActionState> {
@@ -26,14 +26,14 @@ export async function reply(_p: CaseActionState, f: FormData): Promise<CaseActio
   const r = await staffReply(id, message);
   if (r.error) return { error: r.error };
   if (then) await staffSetStatus(id, then, "");
-  return done(id, "Sent to the customer.");
+  return done(id, "Sent.");
 }
 
 export async function setStatus(_p: CaseActionState, f: FormData): Promise<CaseActionState> {
   const id = String(f.get("case_id"));
   const status = String(f.get("status"));
   const r = await staffSetStatus(id, status, String(f.get("note") ?? ""));
-  const label: Record<string, string> = { waiting: "Waiting for the customer.", resolved: "Case resolved.", closed: "Case closed.", human_handling: "Case reopened." };
+  const label: Record<string, string> = { waiting: "Waiting for their reply.", resolved: "Case resolved.", closed: "Case closed.", human_handling: "Case reopened." };
   return r.error ? { error: r.error } : done(id, label[status] ?? "Updated.");
 }
 

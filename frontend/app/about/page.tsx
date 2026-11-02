@@ -2,14 +2,19 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import Logo from "@/components/Logo";
 import TeamCredit from "@/components/TeamCredit";
-import { BotIcon, HeadsetIcon, ShieldIcon } from "@/components/Icons";
+import { BotIcon, GradCapIcon, HeadsetIcon, ShieldIcon, StoreIcon } from "@/components/Icons";
 
 export const metadata: Metadata = { title: "About us" };
 
 const IDEAS = [
-  { icon: <BotIcon className="h-5 w-5" />, title: "AI answers first", text: "Specialist AI agents answer common questions in seconds, using only approved help articles." },
-  { icon: <HeadsetIcon className="h-5 w-5" />, title: "People when it matters", text: "Refunds, angry customers and anything risky go straight to a person, with the full story attached." },
-  { icon: <ShieldIcon className="h-5 w-5" />, title: "Safe by design", text: "Every rule is checked in the database, every action is logged, and customers only ever see their own data." },
+  { icon: <BotIcon className="h-5 w-5" />, title: "AI answers first", text: "Specialist AI agents answer common questions in seconds, using only approved articles, and say who to contact." },
+  { icon: <HeadsetIcon className="h-5 w-5" />, title: "People when it matters", text: "Wellbeing, visas, refunds, appeals and anything risky always go to a person, with a ready-made draft reply." },
+  { icon: <ShieldIcon className="h-5 w-5" />, title: "Safe, and it can prove it", text: "Every rule is checked in the database, every step is logged, and a duty-of-care report shows sensitive cases reached a person." },
+];
+// Organisations already on the platform, each with its own agents, articles, staff and accounts
+const PACKS = [
+  { icon: <StoreIcon className="h-5 w-5" />, name: "NexusCX Store", kind: "E-commerce", text: "Orders, delivery, returns, billing and accounts." },
+  { icon: <GradCapIcon className="h-5 w-5" />, name: "Northbridge University", kind: "University", text: "Admissions, fees, IT, exams and results, student services and international students." },
 ];
 const STACK = ["Next.js", "React", "Tailwind CSS", "Supabase (PostgreSQL)", "Row Level Security", "Playwright", "GitHub Actions"];
 
@@ -27,8 +32,10 @@ export default function AboutPage() {
           <p className="text-sm font-semibold text-indigo-300">About us</p>
           <h1 className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">Smarter support. Human when it matters.</h1>
           <p className="mt-4 max-w-2xl text-slate-300">
-            NexusCX AI is a multi-agent customer service platform. AI agents answer everyday questions, and real people step in
-            for anything sensitive. We built it as our PROF910 IT Project. It is a student project, not a real company.
+            NexusCX AI is a duty-of-care AI support platform for organisations where a wrong answer can hurt someone.
+            AI agents answer everyday questions, and real people step in for anything sensitive. One platform serves many
+            organisations, each with its own industry pack. We built it as our PROF910 IT Project. It is a student project:
+            NexusCX AI, NexusCX Store and Northbridge University are not real organisations.
           </p>
         </div>
       </section>
@@ -42,6 +49,19 @@ export default function AboutPage() {
               <p className="mt-1 text-sm text-muted">{i.text}</p>
             </div>
           ))}
+        </section>
+
+        <section aria-labelledby="packs">
+          <h2 id="packs" className="text-xs font-semibold uppercase tracking-wider text-muted">One platform, two organisations (so far)</h2>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            {PACKS.map((p) => (
+              <div key={p.name} className="flex gap-3 rounded-2xl border border-slate-200 p-5">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">{p.icon}</span>
+                <div><p className="font-semibold">{p.name} <span className="text-xs font-normal text-muted">· {p.kind} pack</span></p><p className="mt-1 text-sm text-muted">{p.text}</p></div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-sm text-muted">Coming next: fast food, retail stores, internet and telco, banking and finance, hospitals.</p>
         </section>
 
         <TeamCredit size="large" />

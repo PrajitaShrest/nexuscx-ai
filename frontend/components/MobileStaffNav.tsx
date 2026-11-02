@@ -5,14 +5,16 @@ import { useEffect, useState } from "react";
 import Logo from "./Logo";
 import UserMenu, { type MenuUser } from "./UserMenu";
 import { XIcon } from "./Icons";
+import PackSwitch from "./PackSwitch";
+import type { Industry } from "@/lib/packs";
 
 type Group = { section: string; items: { label: string; href?: string; week?: number; badge?: number }[] };
 
 // Staff navigation for phones and small tablets: a top bar with a menu button
 // that opens the same menu as the desktop sidebar in a slide-out panel.
-export default function MobileStaffNav({ groups, active, user }: { groups: Group[]; active: string; user: MenuUser }) {
+export default function MobileStaffNav({ groups, active, user, industry }: { groups: Group[]; active: string; user: MenuUser; industry: Industry | null }) {
   const [open, setOpen] = useState(false);
-  const current = groups.flatMap((g) => g.items).find((i) => i.href && active.startsWith(i.href))?.label;
+  const current = groups.flatMap((g) => g.items).find((i) => i.href && active === i.href)?.label;
 
   useEffect(() => {
     if (!open) return;
@@ -40,13 +42,14 @@ export default function MobileStaffNav({ groups, active, user }: { groups: Group
               <Logo tone="light" size={30} />
               <button type="button" onClick={() => setOpen(false)} aria-label="Close menu" className="rounded-md p-1.5 hover:bg-white/10"><XIcon className="h-5 w-5" /></button>
             </div>
+            {industry && <div className="px-4 pb-3"><PackSwitch current={industry} tone="dark" block /></div>}
             <div className="flex-1 space-y-5 overflow-y-auto px-3 pb-4">
               {groups.map((g) => (
                 <div key={g.section || "main"}>
                   {g.section && <p className="px-2 pb-1 text-xs font-semibold text-slate-500">{g.section}</p>}
                   {g.items.map((item) => item.href ? (
-                    <Link key={item.label} href={item.href} onClick={() => setOpen(false)} aria-current={active.startsWith(item.href) ? "page" : undefined}
-                      className={`flex items-center justify-between rounded-md px-2 py-2.5 text-sm ${active.startsWith(item.href) ? "bg-indigo-600 text-white" : "hover:bg-white/5"}`}>
+                    <Link key={item.label} href={item.href} onClick={() => setOpen(false)} aria-current={active === item.href ? "page" : undefined}
+                      className={`flex items-center justify-between rounded-md px-2 py-2.5 text-sm ${active === item.href ? "bg-indigo-600 text-white" : "hover:bg-white/5"}`}>
                       {item.label}
                       {!!item.badge && <span className="rounded-full bg-rose-500 px-1.5 text-[11px] font-semibold text-white">{item.badge > 99 ? "99+" : item.badge}</span>}
                     </Link>

@@ -4,10 +4,12 @@ import { PageHead } from "@/components/CustomerShell";
 import { btnPrimary } from "@/components/ShopUI";
 import OrderList from "./OrderList";
 import type { Metadata } from "next";
+import { requireShop } from "@/lib/industry";
 
 export const metadata: Metadata = { title: "My orders" };
 
 export default async function OrdersPage() {
+  await requireShop("/support");
   const orders = await listMyOrders();
   return (
     <>

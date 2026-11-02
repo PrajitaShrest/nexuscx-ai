@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import type { Person } from "@/lib/data/admin";
 
 const LABEL: Record<string, string> = {
-  customer: "Customer", support_agent: "Support Agent", team_leader: "Team Leader",
+  customer: "Customer / student", support_agent: "Support Agent", team_leader: "Team Leader",
   knowledge_manager: "Knowledge Manager", business_specialist: "Business Specialist", administrator: "Administrator",
 };
 const PRESENCE: Record<string, string> = { online: "bg-green-500", busy: "bg-amber-500", away: "bg-slate-400", offline: "bg-slate-300" };
@@ -29,7 +29,7 @@ export default function PeopleTable({ people, meId }: { people: Person[]; meId: 
           {(["staff", "customer", "all"] as const).map((g) => (
             <button key={g} type="button" onClick={() => setGroup(g)} aria-pressed={group === g}
               className={`rounded-md px-3 py-1.5 ${group === g ? "bg-indigo-600 text-white" : "text-ink hover:bg-slate-100"}`}>
-              {g === "staff" ? "Staff" : g === "customer" ? "Customers" : "Everyone"}
+              {g === "staff" ? "Staff" : g === "customer" ? "Customers & students" : "Everyone"}
             </button>
           ))}
         </div>

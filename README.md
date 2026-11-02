@@ -76,6 +76,13 @@ In Supabase, create a new project. Then open **SQL Editor → New query** and ru
 | 13 | `014_dashboard_stats.sql` | Dashboard charts and filters |
 | 14 | `015_admin_screens.sql` | AI Agents, Routing & Escalation, Settings, Analytics, Team Operations |
 | 15 | `016_rate_limits_and_photos.sql` | Message limits, private return photos, live chat updates |
+| 16 | `017_university_pack.sql` | Industry packs: the E-commerce / University switch, 5 university agents, 25 university articles, language detection, wellbeing and visa safety rules |
+| 17 | `018_visitor_industry.sql` | Each visitor can choose the E-commerce or University demo in their own browser |
+| 18 | `019_duty_of_care.sql` | Duty-of-care features: rule simulator, knowledge gaps, duty-of-care report; off-topic questions go to a person instead of a wrong article |
+| 19 | `020_less_work_for_staff.sql` | Ask before escalating (topic buttons), "Did this help?" 👍/👎, AI-drafted replies for staff |
+| 20 | `021_separate_organisations.sql` | Each account belongs to one organisation (store or Northbridge); Northbridge demo students and staff |
+| 21 | `022_better_answers.sql` | Who-to-contact line on every answer (departments table), 17 more specific Northbridge articles, confidence that reflects how well the article matches |
+| 22 | `023_university_staff.sql` | Northbridge staff job titles and teams (lecturer, librarian, reception, IT, admissions & finance); Team Operations shows each organisation's own staff |
 
 Each file ends with a small check query. A table of results means it worked.
 
@@ -130,6 +137,20 @@ Customers can register at `/signup`. Staff accounts are made by an administrator
 | Business Specialist | `drew.singh` | drew.singh@example.test |
 | Administrator | `avery.admin` | avery.admin@example.test |
 
+Northbridge University (University pack) demo people:
+
+| Role | Username | Email |
+|---|---|---|
+| Student | `priya.sharma` | priya.sharma@example.test |
+| Student Services Officer (Student Services) | `ella.martin` | ella.martin@example.test |
+| Senior Lecturer & Academic Adviser (Academic Services) | `chris.wong` | chris.wong@example.test |
+| Librarian (Library) | `grace.kim` | grace.kim@example.test |
+| Student Centre Receptionist (Student Centre) | `tom.nguyen` | tom.nguyen@example.test |
+| IT Service Desk Officer (IT Service Desk) | `raj.mehta` | raj.mehta@example.test |
+| Admissions & Finance Officer (Admissions & Finance) | `lucy.park` | lucy.park@example.test |
+
+Each account belongs to **one** organisation: store customers and staff only ever see the store, and Northbridge students and staff only ever see the university (enforced in the database). Only the platform team (administrators, knowledge managers, business specialists) can switch between packs, which is how both are shown in a demo. New sign-ups belong to the demo chosen on the sign-up page.
+
 Passwords are not stored in this repository. Ask the team.
 
 Customers sign in at `/login`. Staff sign in at `/staff/login` (choose your role from the list).
@@ -165,6 +186,40 @@ Customers sign in at `/login`. Staff sign in at `/staff/login` (choose your role
 
 **Profile (`/profile`)**
 - Edit name, username, and (customers) mobile, date of birth and address; profile strength meter; change password (current password required); "What you can do" for staff. Saving returns to your home page with a confirmation message.
+
+## Industry packs (E-commerce and University)
+
+NexusCX is one platform that can be set up for different kinds of business. Each **industry pack** has its own AI agents, knowledge base, routing rules, cases and wording. Anyone can choose **E-commerce** or **University** with the switch on the sign-in page and in the menu. The choice is saved in their own browser only, so other people are not affected. An administrator sets the **default** pack in **Settings → Default industry pack** (saved in the audit log).
+
+| Pack | Organisation | Departments / agents |
+|---|---|---|
+| E-commerce | NexusCX Store | Orders, Billing, Technical Support |
+| University | Northbridge University (made up for the demo) | Admissions, Finance, IT Support, Academic (incl. exams and results), Student Services (incl. ID cards, international students and visa information) |
+
+University flow: student message → Orchestrator → classify intent, **language**, sentiment, urgency and risk → department agent → that department's approved articles → answer with the source → policy, confidence and risk check → answer the student, or create a ticket for a person → staff resolve → feedback → analytics.
+
+Safety rules in the University pack:
+- Wellbeing messages (for example "I can't cope") always go to a person as **urgent**, and the student sees 000 and Lifeline 13 11 14.
+- Personal visa questions always go to a person. The AI only gives general information and points to homeaffairs.gov.au.
+- Special consideration, academic integrity, grade appeals, refunds and hardship are decided by staff.
+- Messages in other languages (for example Nepali, Hindi or Chinese) are passed to a person.
+
+### Duty-of-care features (what makes NexusCX different)
+
+- **Test before you switch** (`/simulator`): replay real questions from the last 7, 30 or 90 days with a proposed confidence threshold, escalation switches or a paused agent, and see what would change before saving. Hard stops (wellbeing, personal visa) are never affected.
+- **Knowledge gaps** (`/knowledge/gaps`): questions the AI could not answer, grouped by topic, with a "Draft an article" button. Drafts still need a second person to approve them; once approved, those questions drop off the list.
+- **Duty-of-care report** (`/duty-of-care`): proof that every sensitive case went to a person, how fast staff picked them up, and how many steps were recorded. Print or save as PDF, or download a CSV.
+
+### Fewer cases for people, faster when they come
+
+Hard stops always go to a person. For everything else the AI tries harder first:
+- **Ask before escalating**: when the AI is unsure it offers up to 3 likely topics as buttons ("None of these" still reaches a person).
+- **Did this help?**: 👍 closes the request; 👎 passes it to the right team. Articles that did not help are listed on Knowledge gaps.
+- **AI-drafted replies**: on a case with a person, staff see a summary, why it came to them, and a suggested reply ("Use AI draft"). Staff decide what is sent.
+
+Next step (not built yet): share new cases automatically with the least busy person in the right team.
+
+Coming next: fast food, retail stores, internet and telco, banking and finance, hospitals.
 
 ## Deploy to Vercel
 

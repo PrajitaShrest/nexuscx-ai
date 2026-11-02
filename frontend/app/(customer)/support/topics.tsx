@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
-import { CardIcon, HelpIcon, PackageIcon, ReturnIcon, UserIcon, WrenchIcon } from "@/components/Icons";
+import { BookIcon, CardIcon, GlobeIcon, GradCapIcon, HelpIcon, IdCardIcon, LaptopIcon, PackageIcon, ReturnIcon, UserIcon, WrenchIcon } from "@/components/Icons";
+import type { Industry } from "@/lib/packs";
 
 // The help topics a customer can pick, with starter questions.
 // Starter questions go to the AI like any message, so answers always
 // come from the approved knowledge base.
 export type Topic = { id: string; label: string; blurb: string; icon: ReactNode; tint: string; questions: string[] };
 
-export const TOPICS: Topic[] = [
+const SHOP_TOPICS: Topic[] = [
   { id: "orders", label: "Orders & Delivery", blurb: "Track a parcel or change an order", icon: <PackageIcon className="h-6 w-6" />,
     tint: "bg-sky-50 text-sky-600 ring-sky-200",
     questions: ["Where is my order?", "My parcel hasn't arrived yet", "Can I change my delivery address?"] },
@@ -27,11 +28,40 @@ export const TOPICS: Topic[] = [
     questions: ["I have a question about a product", "I'd like to give feedback"] },
 ];
 
+// Northbridge University: the five departments from the team's flowchart,
+// with international students shown on their own tile (Student Services handles them).
+const UNI_TOPICS: Topic[] = [
+  { id: "admissions", label: "Admissions", blurb: "Applying, offers and intakes", icon: <GradCapIcon className="h-6 w-6" />,
+    tint: "bg-sky-50 text-sky-600 ring-sky-200",
+    questions: ["When does the next intake close?", "What are the entry requirements?", "Can I get credit for previous study?"] },
+  { id: "fees", label: "Fees & Finance", blurb: "Tuition, payment plans, scholarships", icon: <CardIcon className="h-6 w-6" />,
+    tint: "bg-emerald-50 text-emerald-600 ring-emerald-200",
+    questions: ["When are my tuition fees due?", "Can I set up a payment plan?", "How do I apply for a scholarship?"] },
+  { id: "it_support", label: "IT Support", blurb: "Password, Wi-Fi, Moodle, email", icon: <LaptopIcon className="h-6 w-6" />,
+    tint: "bg-orange-50 text-orange-600 ring-orange-200",
+    questions: ["How do I reset my student password?", "I can't connect to campus Wi-Fi", "Moodle is not showing my unit"] },
+  { id: "academic", label: "Exams & Results", blurb: "Enrolment, timetables, exams, results", icon: <BookIcon className="h-6 w-6" />,
+    tint: "bg-violet-50 text-violet-600 ring-violet-200",
+    questions: ["Where is my exam timetable?", "When are results released?", "When is the census date?"] },
+  { id: "student_services", label: "Student Services", blurb: "ID card, wellbeing, careers", icon: <IdCardIcon className="h-6 w-6" />,
+    tint: "bg-amber-50 text-amber-600 ring-amber-200",
+    questions: ["I lost my student ID card", "How do I book a counsellor?", "Where can I get help with my resume?"] },
+  { id: "international", label: "International", blurb: "CoE, OSHC and visa information", icon: <GlobeIcon className="h-6 w-6" />,
+    tint: "bg-rose-50 text-rose-600 ring-rose-200",
+    questions: ["What are my student visa conditions?", "How do I get my CoE?", "What is OSHC health cover?"] },
+];
+
+export const TOPIC_SETS: Record<Industry, Topic[]> = { ecommerce: SHOP_TOPICS, university: UNI_TOPICS };
+
+const OTHER: Topic = { id: "other", label: "Something Else", blurb: "Tell us in your own words", icon: <HelpIcon className="h-6 w-6" />,
+  tint: "bg-slate-100 text-slate-600 ring-slate-200", questions: [] };
+
 // Which topic a case belongs to (from the AI's intent)
-export function topicForIntent(intent: string | null): Topic {
+export function topicForIntent(intent: string | null, industry: Industry = "ecommerce"): Topic {
   const id = { order_status: "orders", billing_question: "billing", refund_request: "billing", return_request: "returns",
-    technical_issue: "technical", account: "account" }[intent ?? ""] ?? "other";
-  return TOPICS.find((t) => t.id === id)!;
+    technical_issue: "technical", account: "account", admissions: "admissions", fees: "fees", it_support: "it_support",
+    academic: "academic", student_services: "student_services" }[intent ?? ""] ?? "other";
+  return TOPIC_SETS[industry].find((t) => t.id === id) ?? OTHER;
 }
 
 // Friendly status words for customers (staff see the technical ones)

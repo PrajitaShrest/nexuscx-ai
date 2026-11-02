@@ -43,6 +43,27 @@ export async function saveSetting(_p: AdminFormState, f: FormData): Promise<Admi
   return r.error ? { error: r.error } : done(["/settings", "/routing"], "Saved.");
 }
 
+// Change the default industry pack for everyone who has not chosen their own (migrations 017, 018).
+export async function switchIndustry(_p: AdminFormState, f: FormData): Promise<AdminFormState> {
+  const industry = str(f, "value");
+  if (industry !== "ecommerce" && industry !== "university") return { error: "Choose E-commerce or University." };
+  const r = await updateSetting("industry", industry);
+  if (r.error) return { error: r.error };
+  revalidatePath("/", "layout"); // every page changes: menus, words, agents, articles and cases
+  return { ok: `${industry === "university" ? "University" : "E-commerce"} is now the default pack.`, at: Date.now() };
+}
+
+// "Test before you switch": save the settings the admin just tried in the simulator.
+export async function applySimulation(_p: AdminFormState, f: FormData): Promise<AdminFormState> {
+  const threshold = Number(str(f, "threshold"));
+  if (!Number.isFinite(threshold)) return { error: "Enter a confidence between 0.30 and 0.95." };
+  for (const [key, value] of [["confidence_threshold", threshold], ["auto_escalate_angry", str(f, "angry") === "on"], ["auto_escalate_high_risk", str(f, "high") === "on"]] as const) {
+    const r = await updateSetting(key, value);
+    if (r.error) return { error: r.error };
+  }
+  return done(["/settings", "/routing", "/simulator"], "Saved. New messages now use these settings.");
+}
+
 export async function saveSla(_p: AdminFormState, f: FormData): Promise<AdminFormState> {
   const r = await updateSla(str(f, "priority"), int(f, "first"), int(f, "resolution"));
   return r.error ? { error: r.error } : done(["/settings"], "Saved. New cases use these targets.");

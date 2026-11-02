@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ALL_KB_CATS } from "@/lib/packs";
 import { normaliseMobile } from "@/lib/auth/phone";
 
 // IDs use guid() (any 8-4-4-4-12 hex id), because some seed rows use fixed ids that are not strict v4 UUIDs.
@@ -105,7 +106,7 @@ export const returnSchema = z.object({
 export const knowledgeSchema = z.object({
   document_id: z.string().optional().transform((v) => v || null),
   title: text(5, 150, "Give the article a title (at least 5 characters).", "Titles can be up to 150 characters."),
-  category: z.enum(["orders", "billing", "technical", "account", "general"], { message: "Please choose a category." }),
+  category: z.string().refine((c) => ALL_KB_CATS.includes(c), { message: "Please choose a category." }),
   content: text(30, 8000, "Write the answer (at least 30 characters).", "Articles can be up to 8000 characters."),
   keywords: z.string().max(300, "Keywords can be up to 300 characters.").optional().default(""),
 });

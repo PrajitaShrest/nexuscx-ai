@@ -7,6 +7,7 @@ import { can, getMe } from "@/lib/data/me";
 import { getBreakdowns } from "@/lib/data/ops";
 import { getCaseStats, PERIODS, readFilters } from "@/lib/data/stats";
 import type { Metadata } from "next";
+import { getPack } from "@/lib/industry";
 
 export const metadata: Metadata = { title: "Analytics" };
 
@@ -26,7 +27,7 @@ function Card({ title, sub, children, wide }: { title: string; sub?: string; chi
 }
 
 export default async function AnalyticsPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
-  const me = await getMe();
+  const [me, pack] = await Promise.all([getMe(), getPack()]);
   if (!can(me, "view_analytics")) return <NoAccess me={me} page="Analytics" needs="view_analytics" />;
   const f = readFilters(await searchParams);
   const [{ data: st, error: e1 }, { data: b, error: e2 }] = await Promise.all([getCaseStats({ ...f, topic: "", sentiment: "", priority: "" }), getBreakdowns(f.days)]);
@@ -41,7 +42,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-xl font-semibold">Analytics</h1>
-            <p className="text-sm text-gray-500">How customers use the service, why cases need people, and what the AI relies on.</p>
+            <p className="text-sm text-gray-500">{`How ${pack.people.toLowerCase()} use the service, why cases need people, and what the AI relies on.`}</p>
           </div>
           <FilterBar filters={[{ name: "days", label: "Period", options: PERIODS.map((p) => [String(p), `Last ${p} days`] as [string, string]) }]} />
         </div>
@@ -49,7 +50,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
         {st && b && (
           <>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              {[["Cases", st.summary.cases], ["Handled by AI only", `${pct(st.summary.ai_only, st.summary.cases)}%`], ["Customer satisfaction", rated ? `${pct(happy, rated)}%` : "—"], ["Security events", Object.values(b.security).reduce((a, n) => a + n, 0)]].map(([k, v]) => (
+              {[["Cases", st.summary.cases], ["Handled by AI only", `${pct(st.summary.ai_only, st.summary.cases)}%`], [`${pack.person} satisfaction`, rated ? `${pct(happy, rated)}%` : "—"], ["Security events", Object.values(b.security).reduce((a, n) => a + n, 0)]].map(([k, v]) => (
                 <div key={k} className="rounded-xl border bg-white px-4 py-3"><p className="text-xs text-gray-500">{k}</p><p className="mt-1 text-2xl font-semibold">{v}</p></div>
               ))}
             </div>
@@ -68,8 +69,8 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
               <Card title="Busiest days">
                 <Columns title="Cases by day of week" values={b.weekdays} labels={DAYS} color={SERIES.blue} />
               </Card>
-              <Card title="Customer ratings" sub={`${rated} ratings · ${rated ? pct(happy, rated) : 0}% gave 4 or 5 stars`}>
-                <LabelBars title="Customer ratings" rows={ratings} />
+              <Card title={`${pack.person} ratings`} sub={`${rated} ratings · ${rated ? pct(happy, rated) : 0}% gave 4 or 5 stars`}>
+                <LabelBars title={`${pack.person} ratings`} rows={ratings} />
               </Card>
               <Card title="Most used knowledge articles" sub="Articles the AI answered from">
                 {b.top_articles.length ? <LabelBars title="Most used articles" rows={b.top_articles.map((a) => ({ label: a.title, value: a.n, color: SERIES.aqua }))} wideLabels /> : <p className="text-sm text-gray-500">No AI answers used an article in this period.</p>}

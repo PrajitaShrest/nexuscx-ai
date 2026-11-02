@@ -5,10 +5,12 @@ import { PageHead } from "@/components/CustomerShell";
 import { Panel } from "@/components/ShopUI";
 import ReturnForm from "./ReturnForm";
 import type { Metadata } from "next";
+import { requireShop } from "@/lib/industry";
 
 export const metadata: Metadata = { title: "Return or exchange" };
 
 export default async function ReturnPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireShop("/support");
   const { id } = await params;
   const o = await getOrder(id);
   if (!o) notFound();

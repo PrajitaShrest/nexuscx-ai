@@ -28,11 +28,16 @@ export const CUSTOMER_NAV: { section: string; items: { label: string; href: stri
 
 const isActive = (path: string, href: string, exact?: boolean) => (exact ? path === href : path === href || path.startsWith(`${href}/`));
 
-export function SideLinks({ unread = 0 }: { unread?: number }) {
+// The overview, shopping and addresses only exist in the e-commerce pack (other packs start at Help & chat)
+const SHOP_ONLY = new Set(["/account", "/shop", "/account/orders", "/account/returns", "/account/addresses"]);
+const navFor = (shop: boolean) =>
+  CUSTOMER_NAV.map((g) => ({ ...g, items: g.items.filter((i) => shop || !SHOP_ONLY.has(i.href)) })).filter((g) => g.items.length > 0);
+
+export function SideLinks({ unread = 0, shop = true }: { unread?: number; shop?: boolean }) {
   const path = usePathname();
   return (
     <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4">
-      {CUSTOMER_NAV.map((g) => (
+      {navFor(shop).map((g) => (
         <div key={g.section || "main"}>
           {g.section && <p className="px-2 pb-1 text-xs font-semibold text-slate-500">{g.section}</p>}
           {g.items.map((i) => {
@@ -52,11 +57,11 @@ export function SideLinks({ unread = 0 }: { unread?: number }) {
 }
 
 // Phone and tablet: a scrollable row of tabs under the top bar
-export function TopTabs({ unread = 0 }: { unread?: number }) {
+export function TopTabs({ unread = 0, shop = true }: { unread?: number; shop?: boolean }) {
   const path = usePathname();
   return (
     <nav className="flex gap-1 overflow-x-auto px-3 pb-2" aria-label="Account menu">
-      {CUSTOMER_NAV.flatMap((g) => g.items).map((i) => {
+      {navFor(shop).flatMap((g) => g.items).map((i) => {
         const on = isActive(path, i.href, i.exact);
         return (
           <Link key={i.href} href={i.href} aria-current={on ? "page" : undefined}

@@ -13,16 +13,16 @@ export const metadata: Metadata = { title: "Routing & Escalation" };
 // What each escalation condition means, in plain words, and which thresholds make sense.
 const CONDITION: Record<string, { text: string; options?: string[]; number?: boolean; locked?: boolean }> = {
   confidence_below: { text: "AI confidence is below", number: true },
-  sentiment_equals: { text: "Customer sentiment is", options: ["angry", "negative"] },
+  sentiment_equals: { text: "Their mood is", options: ["angry", "negative"] },
   urgency_equals: { text: "Urgency is", options: ["medium", "high", "critical"] },
   risk_equals: { text: "Risk is", options: ["medium", "high", "critical"] },
-  sensitive_action: { text: "The customer asks for a refund, a bank or card change, account closure or mentions legal action", locked: true },
+  sensitive_action: { text: "The message is sensitive: a refund, bank or card change, account closure or legal action; for universities also wellbeing, a personal visa question, special consideration or an appeal", locked: true },
   prompt_injection: { text: "The message tries to trick the AI (prompt injection)", locked: true },
   agent_cannot_answer: { text: "No approved article answers the question" },
-  customer_requests_human: { text: "The customer asks for a person" },
+  customer_requests_human: { text: "They ask for a person" },
 };
 const ACTION: Record<string, string> = { escalate_to_human: "Escalate to a person", human_queue: "Put in the human queue", block_and_escalate: "Block the reply and escalate" };
-const STEPS = ["Customer message", "Safety Checker", "Intent Classifier", "Escalation rules", "Routing rules", "Specialist agent or a person"];
+const STEPS = ["Incoming message", "Safety Checker", "Intent Classifier", "Escalation rules", "Routing rules", "Specialist agent or a person"];
 
 export default async function RoutingPage() {
   const me = await getMe();

@@ -6,10 +6,12 @@ import { ChatPill, OrderPill, OrderTracker, Panel, ProductTile, ReturnPill, btnG
 import { MapPinIcon, RepeatIcon, TruckIcon } from "@/components/Icons";
 import { AskForm, CancelButton } from "./OrderActions";
 import type { Metadata } from "next";
+import { requireShop } from "@/lib/industry";
 
 export const metadata: Metadata = { title: "Order" };
 
 export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireShop("/support");
   const { id } = await params;
   const o = await getOrder(id);
   if (!o) notFound();

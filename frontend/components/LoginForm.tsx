@@ -6,6 +6,16 @@ import { login, type FormState } from "@/app/auth/actions";
 import Field, { inputClass } from "./Field";
 import FormMessage from "./FormMessage";
 import PasswordInput from "./PasswordInput";
+import type { Industry } from "@/lib/packs";
+
+// University staff see university job titles for the same roles
+const UNI_ROLE_LABEL: Record<string, string> = {
+  support_agent: "Support staff (officer, librarian, reception, IT)",
+  team_leader: "Senior Lecturer or Department Lead",
+  knowledge_manager: "Knowledge Manager",
+  business_specialist: "Faculty Specialist",
+  administrator: "University Administrator",
+};
 
 const STAFF_ROLES = [
   { value: "support_agent", label: "Support Agent" },
@@ -27,8 +37,19 @@ const DEMO: Record<"customer" | "staff", { label: string; username: string; role
     { label: "Administrator", username: "avery.admin", role: "administrator" },
   ],
 };
+// Northbridge University demo people (migration 021)
+const UNI_DEMO: typeof DEMO = {
+  customer: [{ label: "Priya (student)", username: "priya.sharma" }],
+  staff: [
+    { label: "Student Services Officer", username: "ella.martin", role: "support_agent" },
+    { label: "Librarian", username: "grace.kim", role: "support_agent" },
+    { label: "Senior Lecturer", username: "chris.wong", role: "team_leader" },
+    { label: "Administrator", username: "avery.admin", role: "administrator" },
+  ],
+};
 
-export default function LoginForm({ portal }: { portal: "customer" | "staff" }) {
+export default function LoginForm({ portal, industry = "ecommerce" }: { portal: "customer" | "staff"; industry?: Industry }) {
+  const uni = industry === "university";
   const [state, action, pending] = useActionState<FormState, FormData>(login, {});
   const [identifier, setIdentifier] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
@@ -46,7 +67,7 @@ export default function LoginForm({ portal }: { portal: "customer" | "staff" }) 
             <select id="role" name="role" required value={shownRole} onChange={(e) => setRole(e.target.value)}
               className={inputClass(Boolean(err("role")))}>
               <option value="" disabled>Choose your role</option>
-              {STAFF_ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+              {STAFF_ROLES.map((r) => <option key={r.value} value={r.value}>{uni ? UNI_ROLE_LABEL[r.value] ?? r.label : r.label}</option>)}
             </select>
           </Field>
         )}
@@ -81,7 +102,7 @@ export default function LoginForm({ portal }: { portal: "customer" | "staff" }) 
       {SHOW_DEMO && <div className="mt-8 border-t border-slate-200 pt-6">
         <p className="text-sm text-muted">Demo accounts: tap one to fill in the details.</p>
         <div className="mt-3 flex flex-wrap gap-2">
-          {DEMO[portal].map((d) => (
+          {(uni ? UNI_DEMO : DEMO)[portal].map((d) => (
             <button key={d.username} type="button" onClick={() => { setIdentifier(d.username); if (d.role) setRole(d.role); }}
               className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
                 shownId === d.username ? "border-indigo-500 bg-indigo-50 text-indigo-700" : "border-slate-300 text-ink hover:border-indigo-400"}`}>

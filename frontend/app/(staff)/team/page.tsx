@@ -30,7 +30,7 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-xl font-semibold">Team Operations</h1>
-            <p className="text-sm text-gray-500">Who is available, how full each person is, and how fast escalated customers get a person.</p>
+            <p className="text-sm text-gray-500">Who is available, how full each person is, and how fast people who need help get a person.</p>
           </div>
           <FilterBar filters={[{ name: "days", label: "Period", options: PERIODS.map((p) => [String(p), `Last ${p} days`] as [string, string]) }]} />
         </div>
@@ -68,7 +68,7 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
                             <td className="py-2.5 pr-4">
                               <span className="flex items-center gap-2.5">
                                 <Avatar name={p.name} size={30} presence={p.presence} />
-                                <span><span className="block font-medium">{p.name}</span><span className="block text-xs text-gray-500">{ROLE_LABEL[p.role] ?? p.role} · {PRESENCE[p.presence]?.label ?? p.presence}</span></span>
+                                <span><span className="block font-medium">{p.name}</span><span className="block text-xs text-gray-500">{p.job_title ?? ROLE_LABEL[p.role] ?? p.role} · {PRESENCE[p.presence]?.label ?? p.presence}</span></span>
                               </span>
                             </td>
                             <td className="min-w-40 pr-4">
@@ -92,7 +92,7 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
               </section>
             ))}
             {people.length === 0 && <p className="rounded-xl border border-dashed bg-white p-8 text-center text-sm text-gray-500">No support staff yet. Add people on the Users & Roles page.</p>}
-            <p className="text-xs text-gray-400">Avg pickup = time from escalation until someone took the case. Replies = messages sent to customers in the period.</p>
+            <p className="text-xs text-gray-400">Avg pickup = time from escalation until someone took the case. Replies = messages sent to the people asking for help in the period.</p>
           </>
         )}
       </main>

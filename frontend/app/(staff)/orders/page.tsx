@@ -4,11 +4,13 @@ import { can, getMe } from "@/lib/data/me";
 import { listOrderQueue } from "@/lib/data/shop";
 import OrderQueue from "./OrderQueue";
 import type { Metadata } from "next";
+import { requireShop } from "@/lib/industry";
 
 export const metadata: Metadata = { title: "Orders" };
 
 // Staff view of every customer order, matching the customer's My orders page.
 export default async function StaffOrdersPage() {
+  await requireShop("/dashboard");
   const me = await getMe();
   if (!can(me, "view_cases")) return <NoAccess me={me} page="Orders" needs="view_cases" />;
   const { data: orders, error } = await listOrderQueue();

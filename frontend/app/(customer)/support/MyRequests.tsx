@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { CUSTOMER_STATUS, topicForIntent } from "./topics";
 import { InboxIcon } from "@/components/Icons";
+import type { Industry } from "@/lib/packs";
 
 export type RequestCard = { id: string; number: string; subject: string; intent: string | null; status: string; ago: string };
 
-export default function MyRequests({ items }: { items: RequestCard[] }) {
+export default function MyRequests({ items, industry }: { items: RequestCard[]; industry: Industry }) {
   const [tab, setTab] = useState<"open" | "done" | "all">("open");
   const [more, setMore] = useState(false);
   const isDone = (s: string) => s === "resolved" || s === "closed";
@@ -39,7 +40,7 @@ export default function MyRequests({ items }: { items: RequestCard[] }) {
       ) : (
         <ul className="space-y-3">
           {shown.map((c) => {
-            const t = topicForIntent(c.intent);
+            const t = topicForIntent(c.intent, industry);
             const s = CUSTOMER_STATUS[c.status] ?? CUSTOMER_STATUS.ai_handling;
             return (
               <li key={c.id}><Link href={`/account/chats/${c.id}`} className="block rounded-2xl border border-slate-200 p-3.5 transition hover:border-indigo-300 hover:shadow-md">

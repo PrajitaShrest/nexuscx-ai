@@ -48,3 +48,8 @@ export const ArrowRightIcon = (p: P) => <Svg {...p}><path d="M5 12h14M12 5l7 7-7
 export const RepeatIcon = (p: P) => <Svg {...p}><path d="m17 2 4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="m7 22-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></Svg>;
 export const BellIcon = (p: P) => <Svg {...p}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></Svg>;
 export const StarIcon = (p: P) => <Svg {...p}><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></Svg>;
+export const GradCapIcon = (p: P) => <Svg {...p}><path d="M22 10 12 5 2 10l10 5 10-5Z" /><path d="M6 12v5c3 2.5 9 2.5 12 0v-5" /><path d="M22 10v6" /></Svg>;
+export const IdCardIcon = (p: P) => <Svg {...p}><rect width="20" height="14" x="2" y="5" rx="2" /><circle cx="8" cy="12" r="2" /><path d="M5 16c.6-1.2 1.7-2 3-2s2.4.8 3 2" /><path d="M14 10h5M14 14h3" /></Svg>;
+export const GlobeIcon = (p: P) => <Svg {...p}><circle cx="12" cy="12" r="10" /><path d="M2 12h20" /><path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20" /></Svg>;
+export const HeartIcon = (p: P) => <Svg {...p}><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z" /></Svg>;
+export const StoreIcon = (p: P) => <Svg {...p}><path d="m2 7 2-4h16l2 4" /><path d="M2 7h20v3a3 3 0 0 1-5 2 3 3 0 0 1-5 0 3 3 0 0 1-5 0 3 3 0 0 1-5-2Z" /><path d="M4 12v9h16v-9" /><path d="M10 21v-5h4v5" /></Svg>;

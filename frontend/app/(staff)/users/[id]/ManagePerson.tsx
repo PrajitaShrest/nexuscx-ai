@@ -82,7 +82,7 @@ export default function ManagePerson({ person: p, teams }: { person: Overview; t
           </label>
           <fieldset disabled={isCustomer}>
             <legend className="text-sm font-medium">Extra roles <span className="font-normal text-muted">({extra.length}/2)</span></legend>
-            {isCustomer && <p className="text-xs text-muted">Customers can&apos;t hold staff roles.</p>}
+            {isCustomer && <p className="text-xs text-muted">Customers and students can&apos;t hold staff roles.</p>}
             <div className="mt-2 grid grid-cols-2 gap-2">
               {STAFF.filter((r) => r !== primary).map((r) => {
                 const on = extra.includes(r);

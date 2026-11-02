@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { REMEMBER_COOKIE, SEEN_COOKIE } from "@/lib/auth/cookies";
 import { passwordProblem } from "@/lib/auth/password";
+import { CHOICE_COOKIE, isIndustry } from "@/lib/packs";
 
 // field = which input the error belongs to, so the page can show it under that box
 export type FormState = { error?: string; field?: string; ok?: string; values?: Record<string, string> };
@@ -100,7 +101,7 @@ export async function login(_prev: FormState, formData: FormData): Promise<FormS
   // Check the account's real role (from the database, not from the form)
   const { data: claims } = await supabase.auth.getClaims();
   const { data: me } = await supabase.from("users")
-    .select("user_id, role, status, must_change_password").eq("auth_user_id", claims?.claims.sub ?? "").single();
+    .select("user_id, role, status, must_change_password, industry").eq("auth_user_id", claims?.claims.sub ?? "").single();
   const role = me?.role ?? "customer";
 
   if (me && me.status !== "active") {
@@ -124,9 +125,13 @@ export async function login(_prev: FormState, formData: FormData): Promise<FormS
     }
   }
 
+  // Accounts belong to one organisation: open their own pack, whatever demo was chosen
+  if (isIndustry(me?.industry)) {
+    (await cookies()).set(CHOICE_COOKIE, me.industry, { path: "/", sameSite: "lax", maxAge: 60 * 60 * 24 * 30, secure: process.env.NODE_ENV === "production" });
+  }
   revalidatePath("/", "layout");
   if (me?.must_change_password) redirect("/reset-password?forced=1");
-  redirect(role === "customer" ? "/account" : "/dashboard");
+  redirect(role === "customer" ? (me?.industry === "university" ? "/support" : "/account") : "/dashboard");
 }
 
 // ---------------------------------------------------------------------
@@ -196,6 +201,8 @@ export async function signup(_prev: FormState, formData: FormData): Promise<Form
       data: {
         full_name: fullName, username, date_of_birth: dobText,
         phone: phone ?? "", terms_accepted_at: new Date().toISOString(),
+        // the organisation this account belongs to: the demo chosen on the sign-up page
+        industry: isIndustry(cookieStore.get(CHOICE_COOKIE)?.value) ? cookieStore.get(CHOICE_COOKIE)?.value : "ecommerce",
       },
     },
   });

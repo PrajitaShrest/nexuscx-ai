@@ -31,7 +31,7 @@ export function StatusBar({ caseId, status, mine, canEdit }: { caseId: string; s
         {!closed && (
           <form action={statusAct} className="flex flex-wrap gap-2">
             <input type="hidden" name="case_id" value={caseId} />
-            {status !== "waiting" && <button name="status" value="waiting" disabled={setting} className={`${btn} border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100`}>Waiting for customer</button>}
+            {status !== "waiting" && <button name="status" value="waiting" disabled={setting} className={`${btn} border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100`}>Waiting for their reply</button>}
             {status !== "resolved" && !resolving && <button type="button" onClick={() => setResolving(true)} className={`${btn} border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100`}>Resolve</button>}
             {status === "resolved" && <button name="status" value="human_handling" disabled={setting} className={`${btn} border border-gray-300 bg-white hover:bg-gray-50`}>Reopen</button>}
             <button name="status" value="closed" disabled={setting} className={`${btn} border border-gray-300 bg-white text-gray-700 hover:bg-gray-50`}>Close case</button>
@@ -47,7 +47,7 @@ export function StatusBar({ caseId, status, mine, canEdit }: { caseId: string; s
         <form action={statusAct} className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-2">
           <input type="hidden" name="case_id" value={caseId} />
           <input type="hidden" name="status" value="resolved" />
-          <input name="note" maxLength={200} placeholder="Summary for the customer (optional)" className="min-w-0 flex-1 rounded-md border border-emerald-200 px-2.5 py-1.5 text-sm" />
+          <input name="note" maxLength={200} placeholder="Short summary for them (optional)" className="min-w-0 flex-1 rounded-md border border-emerald-200 px-2.5 py-1.5 text-sm" />
           <button disabled={setting} className={`${btn} bg-emerald-600 text-white hover:bg-emerald-700`}>Mark resolved</button>
           <button type="button" onClick={() => setResolving(false)} className={`${btn} text-gray-600`}>Cancel</button>
         </form>
@@ -57,16 +57,28 @@ export function StatusBar({ caseId, status, mine, canEdit }: { caseId: string; s
   );
 }
 
-const QUICK = [
-  "Thanks for your patience. I'm looking into this now.",
-  "Could you send a photo of the item so we can check it?",
-  "I've arranged a replacement. You'll get a tracking number by email.",
-  "Your refund has been processed and should appear in 3 to 5 business days.",
-  "Is there anything else I can help you with?",
-];
+// Quick phrases for the reply box, for each industry pack
+const QUICK: Record<"ecommerce" | "university", string[]> = {
+  ecommerce: [
+    "Thanks for your patience. I'm looking into this now.",
+    "Could you send a photo of the item so we can check it?",
+    "I've arranged a replacement. You'll get a tracking number by email.",
+    "Your refund has been processed and should appear in 3 to 5 business days.",
+    "Is there anything else I can help you with?",
+  ],
+  university: [
+    "Thanks for your patience. I'm looking into this now.",
+    "Could you upload your supporting document (for example a medical certificate) in the Student Hub?",
+    "I've booked you an appointment. You'll get a confirmation email shortly.",
+    "This has been approved and will show in the Student Hub within 2 business days.",
+    "Is there anything else I can help you with?",
+  ],
+};
 
 // Reply box for staff
-export function Composer({ caseId, disabled, firstName }: { caseId: string; disabled: boolean; firstName: string }) {
+export function Composer({ caseId, disabled, firstName, draft, industry = "ecommerce" }: {
+  caseId: string; disabled: boolean; firstName: string; draft?: string; industry?: "ecommerce" | "university";
+}) {
   const [s, act, pending] = useActionState(reply, empty);
   const [text, setText] = useState("");
   const [then, setThen] = useState("");
@@ -78,28 +90,34 @@ export function Composer({ caseId, disabled, firstName }: { caseId: string; disa
   return (
     <form ref={ref} action={act} className="space-y-2 border-t bg-white p-4">
       <input type="hidden" name="case_id" value={caseId} />
+      {draft && !text && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-sm text-violet-900">
+          <span>✨ The AI has drafted a reply for you. Check it before sending.</span>
+          <button type="button" onClick={() => setText(draft)} className="rounded-md bg-violet-600 px-3 py-1 text-xs font-semibold text-white hover:bg-violet-700">Use AI draft</button>
+        </div>
+      )}
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {[`Hi ${firstName}, `, ...QUICK].map((q) => (
+        {[`Hi ${firstName}, `, ...QUICK[industry]].map((q) => (
           <button key={q} type="button" onClick={() => setText((t) => (q.startsWith("Hi ") ? q + t : (t ? `${t} ${q}` : q)))}
             className="shrink-0 rounded-full bg-indigo-50 px-3 py-1 text-xs text-indigo-700 hover:bg-indigo-100">{q.length > 40 ? `${q.slice(0, 38)}…` : q}</button>
         ))}
       </div>
       <div className="flex items-end gap-2 rounded-xl border border-gray-300 p-2 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-100">
-        <label htmlFor="staff-reply" className="sr-only">Reply to the customer</label>
+        <label htmlFor="staff-reply" className="sr-only">Reply</label>
         <textarea id="staff-reply" name="message" rows={3} maxLength={2000} value={text} onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) ref.current?.requestSubmit(); }}
-          placeholder="Write to the customer… (Ctrl/⌘ + Enter to send)" className="min-h-16 flex-1 resize-none bg-transparent px-2 py-1 text-sm outline-none" />
+          placeholder={`Write to the ${industry === "university" ? "student" : "customer"}… (Ctrl/⌘ + Enter to send)`} className="min-h-16 flex-1 resize-none bg-transparent px-2 py-1 text-sm outline-none" />
         <button disabled={pending || text.trim().length < 2} aria-label="Send reply" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-40"><SendIcon className="h-4 w-4" /></button>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
         <label className="flex items-center gap-2">After sending:
           <select name="then" value={then} onChange={(e) => setThen(e.target.value)} className="rounded-md border border-gray-300 px-2 py-1 text-xs">
             <option value="">Keep working on it</option>
-            <option value="waiting">Wait for the customer</option>
+            <option value="waiting">Wait for their reply</option>
             <option value="resolved">Mark resolved</option>
           </select>
         </label>
-        <span>The customer sees this straight away and gets a notification.</span>
+        <span>They see this straight away and get a notification.</span>
       </div>
       <Msg s={s} />
     </form>

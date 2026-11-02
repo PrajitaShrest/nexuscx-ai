@@ -5,9 +5,10 @@ import Link from "next/link";
 import Field, { inputClass } from "@/components/Field";
 import { changeStatus, saveDoc, type KbState } from "./actions";
 
-const CATS = [["orders", "Orders & delivery"], ["billing", "Billing & refunds"], ["technical", "Technical"], ["account", "Account"], ["general", "General"]];
-
-export function KnowledgeForm({ doc }: { doc?: { document_id: string; title: string; category: string; content: string; keywords: string; status: string } }) {
+export function KnowledgeForm({ doc, cats, prefill }: {
+  doc?: { document_id: string; title: string; category: string; content: string; keywords: string; status: string }; cats: [string, string][];
+  prefill?: { title?: string; category?: string; keywords?: string }; // from Knowledge gaps
+}) {
   const [state, action, pending] = useActionState<KbState, FormData>(saveDoc, {});
   const err = (f: string) => (state.field === f ? state.error : undefined);
   const [len, setLen] = useState(doc?.content.length ?? 0);
@@ -19,20 +20,20 @@ export function KnowledgeForm({ doc }: { doc?: { document_id: string; title: str
           This article is live. Saving changes sends it back for review, and the AI stops using it until it is approved again.
         </p>
       )}
-      <Field label="Title" htmlFor="title" error={err("title")} hint="Write it the way a customer would ask, e.g. “How do I track my parcel?”">
-        <input id="title" name="title" defaultValue={doc?.title} required minLength={5} maxLength={150} className={inputClass(!!err("title"))} />
+      <Field label="Title" htmlFor="title" error={err("title")} hint="Write it the way a person would ask, e.g. “How do I track my parcel?”">
+        <input id="title" name="title" defaultValue={doc?.title ?? prefill?.title} required minLength={5} maxLength={150} className={inputClass(!!err("title"))} />
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Category" htmlFor="category" error={err("category")}>
-          <select id="category" name="category" defaultValue={doc?.category ?? "general"} className={inputClass(!!err("category"))}>
-            {CATS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          <select id="category" name="category" defaultValue={doc?.category ?? prefill?.category ?? "general"} className={inputClass(!!err("category"))}>
+            {cats.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </select>
         </Field>
-        <Field label="Keywords" htmlFor="keywords" error={err("keywords")} hint="Comma separated words customers use. Helps the AI find this article.">
-          <input id="keywords" name="keywords" defaultValue={doc?.keywords} maxLength={300} placeholder="parcel, tracking, where is my order" className={inputClass(!!err("keywords"))} />
+        <Field label="Keywords" htmlFor="keywords" error={err("keywords")} hint="Comma separated words people use. Helps the AI find this article.">
+          <input id="keywords" name="keywords" defaultValue={doc?.keywords ?? prefill?.keywords} maxLength={300} placeholder="parcel, tracking, where is my order" className={inputClass(!!err("keywords"))} />
         </Field>
       </div>
-      <Field label="Answer" htmlFor="content" error={err("content")} hint={`${len} / 8000 characters. Plain, friendly sentences. This is what the customer reads.`}>
+      <Field label="Answer" htmlFor="content" error={err("content")} hint={`${len} / 8000 characters. Plain, friendly sentences. This is what the person asking reads.`}>
         <textarea id="content" name="content" rows={10} defaultValue={doc?.content} required minLength={30} maxLength={8000}
           onChange={(e) => setLen(e.target.value.length)} className={inputClass(!!err("content"))} />
       </Field>
