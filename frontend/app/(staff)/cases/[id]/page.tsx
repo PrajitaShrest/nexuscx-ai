@@ -167,7 +167,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
             {c.order && (
               <Box title={`Order ${c.order.order_number}`}>
                 <div className="mb-2 flex items-center justify-between"><OrderPill status={c.order.status} /><span className="text-sm font-semibold">{money(c.order.total_cents)}</span></div>
-                <ul className="space-y-1 text-sm text-gray-700">{c.order.order_items.map((i) => <li key={i.order_item_id}>{i.quantity} × {i.product_name}</li>)}</ul>
+                <ul className="space-y-1 text-sm text-gray-700">{c.order.order_items.map((i) => <li key={i.order_item_id}>{i.quantity} × {i.product_name}{i.variant && <span className="text-gray-500"> ({i.variant})</span>}</li>)}</ul>
                 {c.order.tracking_number && <p className="mt-2 font-mono text-xs text-gray-500">Tracking {c.order.tracking_number}</p>}
                 <Link href="/orders" className="mt-2 inline-block text-xs font-semibold text-indigo-700 hover:underline">Open in Orders →</Link>
               </Box>

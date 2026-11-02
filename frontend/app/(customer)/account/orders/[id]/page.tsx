@@ -50,7 +50,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                 <li key={i.order_item_id} className="flex items-center gap-3 py-3">
                   <ProductTile category={i.category} />
                   <span className="min-w-0 flex-1">
-                    <span className="block font-semibold">{i.product_name}</span>
+                    <span className="block font-semibold">{i.product_name}{i.variant && <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">{i.variant}</span>}</span>
                     <span className="block text-sm text-muted">{i.quantity} × {money(i.unit_price_cents)}</span>
                   </span>
                   <span className="font-semibold">{money(i.line_total_cents)}</span>

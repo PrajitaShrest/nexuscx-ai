@@ -4,10 +4,11 @@ import { useActionState, useEffect, useRef, useState, useTransition } from "reac
 import type { EnquiryResult } from "@/lib/data/cases";
 import { sendEnquiry, sendFeedback } from "./actions";
 import { TOPIC_SETS } from "./topics";
+import OrderChange, { CHANGE_REQUEST } from "./OrderChange";
 import { PACKS, type Industry } from "@/lib/packs";
 import { BookIcon, BotIcon, HeadsetIcon, SendIcon, ShieldIcon } from "@/components/Icons";
 
-type Turn = { text: string; result: EnquiryResult };
+type Turn = { text: string; result: EnquiryResult; change?: boolean };
 type ChatState = { turns: Turn[]; error?: string; failed?: string };
 const MAX = 2000;
 
@@ -112,6 +113,12 @@ export default function EnquiryForm({ firstName, industry }: { firstName: string
   const endRef = useRef<HTMLDivElement>(null);
 
   const [chat, action, pending] = useActionState<ChatState, FormData>(async (prev, fd) => {
+    // Store: "change the size/colour" is done by the Orders Agent itself, step by step in the chat
+    const text = String(fd.get("message") ?? "").trim();
+    if (pack.shop && CHANGE_REQUEST.test(text)) {
+      setDraft("");
+      return { turns: [...prev.turns, { text, result: { status: "order_change" } as unknown as EnquiryResult, change: true }] };
+    }
     const r = await sendEnquiry({}, fd);
     if (r.result) {
       setDraft("");
@@ -178,7 +185,9 @@ export default function EnquiryForm({ firstName, industry }: { firstName: string
           </div>
         )}
 
-        {chat.turns.map((t, i) => t.result.status === "clarify"
+        {chat.turns.map((t, i) => t.change
+          ? <OrderChange key={`o${i}`} text={t.text} onHuman={askHuman} />
+          : t.result.status === "clarify"
           ? <Clarify key={`c${i}`} {...t} onChoose={(title) => choose(t.text, title)} />
           : <Reply key={t.result.case_number ?? i} {...t} />)}
 

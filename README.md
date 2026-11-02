@@ -84,6 +84,7 @@ In Supabase, create a new project. Then open **SQL Editor → New query** and ru
 | 21 | `022_better_answers.sql` | Who-to-contact line on every answer (departments table), 17 more specific Northbridge articles, confidence that reflects how well the article matches |
 | 22 | `023_university_staff.sql` | Northbridge staff job titles and teams (lecturer, librarian, reception, IT, admissions & finance); Team Operations shows each organisation's own staff |
 | 23 | `024_student_wording.sql` | Inbox items and new audit entries for university cases say "student" instead of "customer" |
+| 24 | `025_ai_order_changes.sql` | The Orders Agent changes a size or colour itself: checks order number + delivery postcode, ordered in the last 2 days, not shipped; logs it and closes the case. Re-run to refresh the demo order |
 
 Each file ends with a small check query. A table of results means it worked.
 

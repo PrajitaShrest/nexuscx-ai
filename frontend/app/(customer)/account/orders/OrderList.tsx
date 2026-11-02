@@ -47,7 +47,7 @@ export default function OrderList({ orders }: { orders: Order[] }) {
                 </div>
                 <div className="mt-4 flex items-center gap-2">
                   {o.order_items.slice(0, 4).map((i) => <ProductTile key={i.order_item_id} category={i.category} size="sm" />)}
-                  <span className="ml-1 min-w-0 flex-1 truncate text-sm text-muted">{o.order_items.map((i) => `${i.quantity} × ${i.product_name}`).join(", ")}</span>
+                  <span className="ml-1 min-w-0 flex-1 truncate text-sm text-muted">{o.order_items.map((i) => `${i.quantity} × ${i.product_name}${i.variant ? ` (${i.variant})` : ""}`).join(", ")}</span>
                 </div>
                 <div className="mt-4"><OrderTracker status={o.status} compact /></div>
                 <div className="mt-3 flex items-center justify-between text-sm">
