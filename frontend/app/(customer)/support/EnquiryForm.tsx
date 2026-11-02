@@ -3,42 +3,19 @@
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import type { EnquiryResult } from "@/lib/data/cases";
 import { sendEnquiry, sendFeedback } from "./actions";
-import { TOPIC_SETS, CUSTOMER_STATUS, topicForIntent } from "./topics";
-import { LANGUAGE_NAME, PACKS, type Industry } from "@/lib/packs";
-import { BookIcon, BotIcon, CheckIcon, ChevronIcon, HeadsetIcon, SendIcon, ShieldIcon } from "@/components/Icons";
+import { TOPIC_SETS } from "./topics";
+import { PACKS, type Industry } from "@/lib/packs";
+import { BookIcon, BotIcon, HeadsetIcon, SendIcon, ShieldIcon } from "@/components/Icons";
 
 type Turn = { text: string; result: EnquiryResult };
 type ChatState = { turns: Turn[]; error?: string; failed?: string };
 const MAX = 2000;
-const MOOD: Record<string, string> = { positive: "Happy", neutral: "Calm", negative: "Unhappy", angry: "Upset" };
 
 function BotAvatar() {
   return (
     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-sm">
       <BotIcon className="h-5 w-5" />
     </div>
-  );
-}
-
-// Received -> Understood -> Answered / With a specialist -> Resolved
-function Tracker({ r }: { r: EnquiryResult }) {
-  const human = r.status !== "ai_handling";
-  const steps = human
-    ? [["Received", true], ["Understood", true], ["With a specialist", "now"], ["Resolved", false]]
-    : [["Received", true], ["Understood", true], ["Answered", true]];
-  return (
-    <ol className="flex flex-wrap items-center gap-x-1 gap-y-2 text-xs" aria-label="Request progress">
-      {steps.map(([label, done], i) => (
-        <li key={String(label)} className="flex items-center gap-1">
-          {i > 0 && <span className={`h-px w-4 ${done ? "bg-indigo-300" : "bg-slate-200"}`} />}
-          <span className={`flex h-5 w-5 items-center justify-center rounded-full ${
-            done === true ? "bg-indigo-600 text-white" : done === "now" ? "bg-amber-400 text-white ring-4 ring-amber-100" : "bg-slate-200 text-slate-400"}`}>
-            {done === true ? <CheckIcon className="h-3 w-3" /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
-          </span>
-          <span className={done ? "font-medium text-ink" : "text-muted"}>{label}</span>
-        </li>
-      ))}
-    </ol>
   );
 }
 
@@ -99,10 +76,7 @@ function Clarify({ text, result: r, onChoose }: Turn & { onChoose: (title: strin
   );
 }
 
-function Reply({ text, result: r, industry }: Turn & { industry: Industry }) {
-  const status = CUSTOMER_STATUS[r.status] ?? CUSTOMER_STATUS.ai_handling;
-  const topic = topicForIntent(r.intent, industry);
-  const conf = Math.round(Number(r.confidence) * 100);
+function Reply({ text, result: r }: Turn) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -111,45 +85,13 @@ function Reply({ text, result: r, industry }: Turn & { industry: Industry }) {
       <div className="flex gap-3">
         <BotAvatar />
         <div className="max-w-[85%] space-y-3">
-          <div className="rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 text-[15px] text-ink shadow-sm">
+          <div className="whitespace-pre-line rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 text-[15px] text-ink shadow-sm">
             {r.reply}
             {r.source && (
               <p className="mt-3 flex items-center gap-1.5 border-t pt-2 text-xs text-muted">
                 <BookIcon className="h-3.5 w-3.5" /> Source: {r.source}
               </p>
             )}
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-            <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
-              <span className="text-xs font-semibold text-muted">Case {r.case_number}</span>
-              <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ${status.style}`}>{status.label}</span>
-            </div>
-            <Tracker r={r} />
-            <details className="group mt-3 text-xs">
-              <summary className="flex cursor-pointer list-none items-center gap-1 font-medium text-indigo-700">
-                How our AI understood this <ChevronIcon className="h-3.5 w-3.5 transition group-open:rotate-180" />
-              </summary>
-              <dl className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
-                {[["Topic", topic.label], ["Language", LANGUAGE_NAME[r.language ?? "en"] ?? r.language ?? "English"], ["Mood", MOOD[r.sentiment] ?? r.sentiment],
-                  ["Urgency", r.urgency], ["Handled by", r.status === "ai_handling" ? r.routed_to : r.department ? `${r.department} team` : "Our team"]].map(([k, v]) => (
-                  <div key={k} className="rounded-lg bg-white px-2.5 py-1.5 ring-1 ring-slate-200">
-                    <dt className="text-muted">{k}</dt><dd className="font-semibold capitalize text-ink">{v}</dd>
-                  </div>
-                ))}
-              </dl>
-              <div className="mt-2 flex items-center gap-2">
-                <span className="text-muted">Confidence</span>
-                <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200">
-                  <span className="block h-full rounded-full bg-indigo-500" style={{ width: `${conf}%` }} />
-                </span>
-                <span className="font-semibold">{conf}%</span>
-              </div>
-              {r.escalation_rule && (
-                <p className="mt-2 flex items-center gap-1.5 text-amber-800">
-                  <ShieldIcon className="h-3.5 w-3.5" /> Passed to a person because: {r.escalation_rule}
-                </p>
-              )}
-            </details>
           </div>
           {r.status === "ai_handling" && r.case_id && <Helpful caseId={r.case_id} />}
         </div>
@@ -238,7 +180,7 @@ export default function EnquiryForm({ firstName, industry }: { firstName: string
 
         {chat.turns.map((t, i) => t.result.status === "clarify"
           ? <Clarify key={`c${i}`} {...t} onChoose={(title) => choose(t.text, title)} />
-          : <Reply key={t.result.case_number ?? i} {...t} industry={industry} />)}
+          : <Reply key={t.result.case_number ?? i} {...t} />)}
 
         {pending && (
           <div className="space-y-4">

@@ -75,7 +75,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
                   {human ? <HeadsetIcon className="h-5 w-5" /> : <BotIcon className="h-5 w-5" />}
                 </span>
                 <div className="max-w-[80%]">
-                  <div className="rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 text-[15px] shadow-sm">{m.content}</div>
+                  <div className="whitespace-pre-line rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 text-[15px] shadow-sm">{m.content}</div>
                   <span className="mt-1 block text-xs text-muted">{human ? (pack.shop ? "Support team" : `${pack.org} staff`) : pack.assistant} · {dayTime(m.sent_at)}</span>
                 </div>
               </div>

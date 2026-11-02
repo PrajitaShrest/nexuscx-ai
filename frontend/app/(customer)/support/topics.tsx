@@ -66,7 +66,7 @@ export function topicForIntent(intent: string | null, industry: Industry = "ecom
 
 // Friendly status words for customers (staff see the technical ones)
 export const CUSTOMER_STATUS: Record<string, { label: string; style: string; step: number }> = {
-  ai_handling: { label: "Answered by AI", style: "bg-indigo-50 text-indigo-700 ring-indigo-200", step: 2 },
+  ai_handling: { label: "Answered", style: "bg-indigo-50 text-indigo-700 ring-indigo-200", step: 2 },
   escalated: { label: "With a specialist", style: "bg-amber-50 text-amber-800 ring-amber-200", step: 2 },
   human_handling: { label: "Agent working on it", style: "bg-sky-50 text-sky-700 ring-sky-200", step: 2 },
   waiting: { label: "Waiting for you", style: "bg-rose-50 text-rose-700 ring-rose-200", step: 2 },
