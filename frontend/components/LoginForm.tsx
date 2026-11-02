@@ -10,8 +10,8 @@ import type { Industry } from "@/lib/packs";
 
 // University staff see university job titles for the same roles
 const UNI_ROLE_LABEL: Record<string, string> = {
-  support_agent: "Student Support Officer or Lecturer",
-  team_leader: "Department Lead",
+  support_agent: "Support staff (officer, librarian, reception, IT)",
+  team_leader: "Senior Lecturer or Department Lead",
   knowledge_manager: "Knowledge Manager",
   business_specialist: "Faculty Specialist",
   administrator: "University Administrator",
@@ -41,8 +41,9 @@ const DEMO: Record<"customer" | "staff", { label: string; username: string; role
 const UNI_DEMO: typeof DEMO = {
   customer: [{ label: "Priya (student)", username: "priya.sharma" }],
   staff: [
-    { label: "Support Officer", username: "ella.martin", role: "support_agent" },
-    { label: "Department Lead", username: "chris.wong", role: "team_leader" },
+    { label: "Student Services Officer", username: "ella.martin", role: "support_agent" },
+    { label: "Librarian", username: "grace.kim", role: "support_agent" },
+    { label: "Senior Lecturer", username: "chris.wong", role: "team_leader" },
     { label: "Administrator", username: "avery.admin", role: "administrator" },
   ],
 };

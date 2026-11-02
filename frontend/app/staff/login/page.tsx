@@ -1,13 +1,13 @@
 import Link from "next/link";
 import AuthCard from "@/components/AuthCard";
 import LoginForm from "@/components/LoginForm";
-import { getIndustry } from "@/lib/industry";
+import { getChosenIndustry } from "@/lib/industry";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Staff sign in" };
 
 export default async function StaffLoginPage({ searchParams }: { searchParams: Promise<{ expired?: string }> }) {
-  const [{ expired }, industry] = await Promise.all([searchParams, getIndustry()]);
+  const [{ expired }, industry] = await Promise.all([searchParams, getChosenIndustry()]);
   const uni = industry === "university";
   return (
     <AuthCard industry={industry} variant="staff" title={uni ? "Northbridge staff sign-in" : "Staff sign-in"}

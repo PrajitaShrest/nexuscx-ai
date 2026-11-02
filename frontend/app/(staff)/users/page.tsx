@@ -19,7 +19,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
   const staff = people.filter((p) => p.role !== "customer");
   const stats = [
     ["Staff", staff.length],
-    ["Customers", people.length - staff.length],
+    ["Customers & students", people.length - staff.length],
     ["Suspended", people.filter((p) => p.status === "suspended").length],
     ["No login yet", staff.filter((p) => !p.has_login).length],
   ] as const;

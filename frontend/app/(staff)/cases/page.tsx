@@ -42,9 +42,9 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
       <Sidebar me={me} active="/cases" />
       <main className="flex-1 p-6">
         <h1 className="flex items-center gap-3 text-xl font-semibold">Case Queue <LiveRefresh name="cases" watch={[{ table: "cases" }]} /></h1>
-        <p className="mb-4 text-sm text-gray-500">AI-powered customer service management. Click a case to open it, chat with the customer and resolve it.</p>
+        <p className="mb-4 text-sm text-gray-500">{`Every ${pack.person.toLowerCase()} request in ${pack.org}. Click a case to open it, reply and resolve it.`}</p>
         <div className="mb-4">
-          <FilterBar search={{ name: "q", label: "Search", placeholder: "Case, customer or issue" }} filters={[
+          <FilterBar search={{ name: "q", label: "Search", placeholder: `Case, ${pack.person.toLowerCase()} or issue` }} filters={[
             { name: "status", label: "Status", options: [["", "Not closed"], ["open", "Open (not resolved)"], ["escalated", "Escalated"], ["ai_handling", "AI handling"], ["human_handling", "Human handling"], ["waiting", "Waiting for customer"], ["resolved", "Resolved"], ["closed", "Closed"], ["all", "All, including closed"]] },
             { name: "topic", label: "Issue", options: [["", "All issues"], ...topicsFor(pack.id).map(([k, t]) => [k, t.label] as [string, string])] },
             { name: "priority", label: "Priority", options: [["", "All priorities"], ...PRIORITIES.map((p) => [p, cap(p)] as [string, string])] },

@@ -81,6 +81,8 @@ In Supabase, create a new project. Then open **SQL Editor → New query** and ru
 | 18 | `019_duty_of_care.sql` | Duty-of-care features: rule simulator, knowledge gaps, duty-of-care report; off-topic questions go to a person instead of a wrong article |
 | 19 | `020_less_work_for_staff.sql` | Ask before escalating (topic buttons), "Did this help?" 👍/👎, AI-drafted replies for staff |
 | 20 | `021_separate_organisations.sql` | Each account belongs to one organisation (store or Northbridge); Northbridge demo students and staff |
+| 21 | `022_better_answers.sql` | Who-to-contact line on every answer (departments table), 17 more specific Northbridge articles, confidence that reflects how well the article matches |
+| 22 | `023_university_staff.sql` | Northbridge staff job titles and teams (lecturer, librarian, reception, IT, admissions & finance); Team Operations shows each organisation's own staff |
 
 Each file ends with a small check query. A table of results means it worked.
 
@@ -140,8 +142,12 @@ Northbridge University (University pack) demo people:
 | Role | Username | Email |
 |---|---|---|
 | Student | `priya.sharma` | priya.sharma@example.test |
-| Student Support Officer / Lecturer | `ella.martin` | ella.martin@example.test |
-| Department Lead | `chris.wong` | chris.wong@example.test |
+| Student Services Officer (Student Services) | `ella.martin` | ella.martin@example.test |
+| Senior Lecturer & Academic Adviser (Academic Services) | `chris.wong` | chris.wong@example.test |
+| Librarian (Library) | `grace.kim` | grace.kim@example.test |
+| Student Centre Receptionist (Student Centre) | `tom.nguyen` | tom.nguyen@example.test |
+| IT Service Desk Officer (IT Service Desk) | `raj.mehta` | raj.mehta@example.test |
+| Admissions & Finance Officer (Admissions & Finance) | `lucy.park` | lucy.park@example.test |
 
 Each account belongs to **one** organisation: store customers and staff only ever see the store, and Northbridge students and staff only ever see the university (enforced in the database). Only the platform team (administrators, knowledge managers, business specialists) can switch between packs, which is how both are shown in a demo. New sign-ups belong to the demo chosen on the sign-up page.
 

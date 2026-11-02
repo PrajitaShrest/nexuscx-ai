@@ -151,7 +151,7 @@ export async function getBreakdowns(days: number) {
 }
 
 export type TeamStats = {
-  people: { user_id: string; name: string; role: string; team: string | null; presence: string; max_active_cases: number; last_active_at: string | null;
+  people: { user_id: string; name: string; role: string; job_title?: string | null; team: string | null; presence: string; max_active_cases: number; last_active_at: string | null;
     active_cases: number; taken: number; resolved: number; pickup_min: number | null; rating: number | null; replies: number }[];
   queue: { waiting: number; oldest_wait_min: number | null; sla_breached: number; unassigned_high: number };
 };

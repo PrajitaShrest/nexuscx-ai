@@ -7,9 +7,9 @@ import { ago } from "@/lib/format";
 import { ChatPill, EmptyState, btnPrimary } from "@/components/ShopUI";
 import { BotIcon, ChatIcon, HeadsetIcon, PackageIcon, SearchIcon, UserIcon } from "@/components/Icons";
 
-const WHO: Record<string, string> = { customer: "You", ai_agent: "Assistant", human_agent: "Support team", system: "NexusCX" };
+const WHO: Record<string, string> = { customer: "You", ai_agent: "Assistant", human_agent: "Support team", system: "Update" };
 
-export default function ChatList({ chats }: { chats: Chat[] }) {
+export default function ChatList({ chats, shop = true, staffName = "Support team" }: { chats: Chat[]; shop?: boolean; staffName?: string }) {
   const [tab, setTab] = useState<"open" | "done" | "all">("all");
   const [q, setQ] = useState("");
   const done = (s: string) => s === "resolved" || s === "closed";
@@ -34,7 +34,7 @@ export default function ChatList({ chats }: { chats: Chat[] }) {
         <label className="relative w-full sm:w-72">
           <span className="sr-only">Search chats</span>
           <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by topic, case or order number"
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={shop ? "Search by topic, case or order number" : "Search by topic or case number"}
             className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
         </label>
       </div>
@@ -53,7 +53,7 @@ export default function ChatList({ chats }: { chats: Chat[] }) {
                     <span className="truncate font-semibold">{c.subject?.replace(/^About my order [A-Z0-9-]+: /, "") ?? "Support request"}</span>
                     <ChatPill status={c.status} />
                   </span>
-                  {c.last && <span className="mt-1 line-clamp-1 block text-sm text-muted"><span className="font-medium text-ink">{WHO[by]}:</span> {c.last.content}</span>}
+                  {c.last && <span className="mt-1 line-clamp-1 block text-sm text-muted"><span className="font-medium text-ink">{by === "human_agent" ? staffName : WHO[by]}:</span> {c.last.content}</span>}
                   <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
                     <span>{c.case_number}</span><span>{c.count} message{c.count === 1 ? "" : "s"}</span><span>{ago(c.last?.sent_at ?? c.created_at)}</span>
                     {c.order && <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-slate-700"><PackageIcon className="h-3 w-3" />{c.order.order_number}</span>}

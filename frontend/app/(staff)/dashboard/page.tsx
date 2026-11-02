@@ -111,7 +111,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           <Tile label="Waiting for a person" value={d.waitingCount} href="/conversations?tab=escalated" tone={d.waitingCount ? "text-red-600" : ""} />
           <Tile label="SLA due within 1h" value={d.slaRisk} href="/cases?sla=risk" tone={d.slaRisk ? "text-amber-600" : ""} />
           <Tile label="New today" value={d.openToday} hint={`${d.resolvedToday} resolved today`} />
-          <Tile label="Orders to process" value={d.ordersToProcess} href="/orders" />
+          {pack.shop && <Tile label="Orders to process" value={d.ordersToProcess} href="/orders" />}
           <Tile label="Returns to review" value={d.returnsToReview} href="/returns" />
         </div>
 

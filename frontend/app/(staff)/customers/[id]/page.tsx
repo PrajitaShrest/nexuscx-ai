@@ -10,12 +10,15 @@ import { can, getMe } from "@/lib/data/me";
 import { getCustomer } from "@/lib/data/customers";
 import { ago, day, money } from "@/lib/format";
 import type { Metadata } from "next";
+import { getPack } from "@/lib/industry";
 
-export const metadata: Metadata = { title: "Customer" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getPack()).person };
+}
 
 export default async function CustomerPage({ params }: { params: Promise<{ id: string }> }) {
-  const me = await getMe();
-  if (!can(me, "view_cases")) return <NoAccess me={me} page="Customers" needs="view_cases" />;
+  const [me, pack] = await Promise.all([getMe(), getPack()]);
+  if (!can(me, "view_cases")) return <NoAccess me={me} page={pack.people} needs="view_cases" />;
   const { id } = await params;
   const c = await getCustomer(id);
   if (!c) notFound();
@@ -24,15 +27,16 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
     <div className="flex min-h-screen flex-col md:flex-row bg-gray-50 text-gray-900">
       <Sidebar me={me} active="/customers" />
       <main className="min-w-0 flex-1 space-y-6 p-6">
-        <Link href="/customers" className="text-sm text-indigo-700 hover:underline">← All customers</Link>
+        <Link href="/customers" className="text-sm text-indigo-700 hover:underline">← All {pack.people.toLowerCase()}</Link>
         <section className="flex flex-wrap items-center gap-4 rounded-xl border bg-white p-5">
           <Avatar name={c.name} size={56} />
           <div className="min-w-0 flex-1">
             <h1 className="text-xl font-semibold">{c.name}</h1>
-            <p className="text-sm text-gray-500">{c.email}{c.phone ? ` · ${displayMobile(c.phone)}` : ""} · <span className="capitalize">{c.tier}</span> customer since {day(c.created_at)}</p>
+            <p className="text-sm text-gray-500">{c.email}{c.phone ? ` · ${displayMobile(c.phone)}` : ""} · {pack.shop ? <><span className="capitalize">{c.tier}</span> customer</> : <>{pack.org} student</>} since {day(c.created_at)}</p>
           </div>
           <dl className="grid grid-cols-4 gap-6 text-center text-sm">
-            {[["Orders", c.orders], ["Spent", money(c.spent_cents)], ["Cases", c.cases], ["Rating", c.avg_rating !== null ? `${c.avg_rating} ★` : "—"]].map(([k, v]) => (
+            {(pack.shop ? [["Orders", c.orders], ["Spent", money(c.spent_cents)], ["Cases", c.cases], ["Rating", c.avg_rating !== null ? `${c.avg_rating} ★` : "—"]]
+              : [["Cases", c.cases], ["Rating", c.avg_rating !== null ? `${c.avg_rating} ★` : "—"]]).map(([k, v]) => (
               <div key={k}><dt className="text-xs text-gray-500">{k}</dt><dd className="text-lg font-semibold">{v}</dd></div>
             ))}
           </dl>
@@ -51,7 +55,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
               ))}</ul>
             )}
           </section>
-          <section className="rounded-xl border bg-white p-4">
+          {pack.shop && <section className="rounded-xl border bg-white p-4">
             <h2 className="mb-2 font-semibold">Orders</h2>
             {c.recentOrders.length === 0 ? <p className="text-sm text-gray-500">No orders yet.</p> : (
               <ul className="divide-y">{c.recentOrders.map((o) => (
@@ -64,7 +68,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
               ))}</ul>
             )}
             <Link href="/orders" className="mt-3 inline-block text-xs font-semibold text-indigo-700 hover:underline">Open the order queue</Link>
-          </section>
+          </section>}
         </div>
       </main>
     </div>

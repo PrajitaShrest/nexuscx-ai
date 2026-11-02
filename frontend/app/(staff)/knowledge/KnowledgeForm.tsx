@@ -29,11 +29,11 @@ export function KnowledgeForm({ doc, cats, prefill }: {
             {cats.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </select>
         </Field>
-        <Field label="Keywords" htmlFor="keywords" error={err("keywords")} hint="Comma separated words customers use. Helps the AI find this article.">
+        <Field label="Keywords" htmlFor="keywords" error={err("keywords")} hint="Comma separated words people use. Helps the AI find this article.">
           <input id="keywords" name="keywords" defaultValue={doc?.keywords ?? prefill?.keywords} maxLength={300} placeholder="parcel, tracking, where is my order" className={inputClass(!!err("keywords"))} />
         </Field>
       </div>
-      <Field label="Answer" htmlFor="content" error={err("content")} hint={`${len} / 8000 characters. Plain, friendly sentences. This is what the customer reads.`}>
+      <Field label="Answer" htmlFor="content" error={err("content")} hint={`${len} / 8000 characters. Plain, friendly sentences. This is what the person asking reads.`}>
         <textarea id="content" name="content" rows={10} defaultValue={doc?.content} required minLength={30} maxLength={8000}
           onChange={(e) => setLen(e.target.value.length)} className={inputClass(!!err("content"))} />
       </Field>

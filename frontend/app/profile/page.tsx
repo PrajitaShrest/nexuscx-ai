@@ -10,6 +10,7 @@ import { listCaseQueue } from "@/lib/data/cases";
 import { displayMobile } from "@/lib/auth/phone";
 import { DetailsForm, PasswordForm } from "./ProfileForms";
 import type { Metadata } from "next";
+import { getPack } from "@/lib/industry";
 
 export const metadata: Metadata = { title: "My profile" };
 
@@ -41,17 +42,17 @@ function Card({ title, icon, children, id }: { title: string; icon: React.ReactN
 export default async function ProfilePage() {
   const me = await getMe();
   const staff = isStaff(me);
-  const p = await getProfile(me);
+  const [p, pack] = await Promise.all([getProfile(me), getPack()]);
   const roles = [me.role, ...me.extraRoles].map((r) => ROLE_LABEL[r] ?? r);
 
-  const [cases, addresses, orders] = staff ? [[], [], []] : await Promise.all([listCaseQueue().then((r) => r.data), listAddresses(), listMyOrders()]);
+  const [cases, addresses, orders] = staff ? [[], [], []] : await Promise.all([listCaseQueue().then((r) => r.data), pack.shop ? listAddresses() : [], pack.shop ? listMyOrders() : []]);
 
   // Customers: how complete is the profile, and a summary of their requests
   const checks = [
     ["Full name", me.name.trim().length >= 2],
     ["Mobile number", !!p.phone],
     ["Date of birth", !!p.date_of_birth],
-    ["Delivery address", addresses.length > 0],
+    ...(pack.shop ? [["Delivery address", addresses.length > 0] as const] : []),
   ] as const;
   const percent = Math.round((checks.filter(([, ok]) => ok).length / checks.length) * 100);
   const openCount = cases.filter((c) => !["resolved", "closed"].includes(c.status)).length;
@@ -93,7 +94,7 @@ export default async function ProfilePage() {
         <div className="min-w-0 space-y-6 lg:col-span-2">
           <Card title="Personal details" icon={<UserIcon className="h-5 w-5" />}>
             <DetailsForm init={{
-              name: me.name, username: me.username, email: me.email, customer: !staff,
+              name: me.name, username: me.username, email: me.email, customer: !staff, shop: pack.shop,
               phone: displayMobile(p.phone), dob: p.date_of_birth ?? "",
             }} />
           </Card>
@@ -140,9 +141,9 @@ export default async function ProfilePage() {
               </Card>
               <Card title="My activity" icon={<ClockIcon className="h-5 w-5" />}>
                 <div className="grid grid-cols-2 gap-3">
-                  <Link href="/account/orders" className="rounded-2xl bg-sky-50 p-4 hover:ring-2 hover:ring-sky-200"><p className="text-2xl font-bold text-sky-700">{orders.length}</p><p className="text-xs text-sky-700">Orders</p></Link>
+                  {pack.shop && <Link href="/account/orders" className="rounded-2xl bg-sky-50 p-4 hover:ring-2 hover:ring-sky-200"><p className="text-2xl font-bold text-sky-700">{orders.length}</p><p className="text-xs text-sky-700">Orders</p></Link>}
                   <Link href="/account/chats" className="rounded-2xl bg-indigo-50 p-4 hover:ring-2 hover:ring-indigo-200"><p className="text-2xl font-bold text-indigo-700">{openCount}</p><p className="text-xs text-indigo-700">Open chats</p></Link>
-                  <Link href="/account/addresses" className="rounded-2xl bg-amber-50 p-4 hover:ring-2 hover:ring-amber-200"><p className="text-2xl font-bold text-amber-700">{addresses.length}</p><p className="text-xs text-amber-700">Addresses</p></Link>
+                  {pack.shop && <Link href="/account/addresses" className="rounded-2xl bg-amber-50 p-4 hover:ring-2 hover:ring-amber-200"><p className="text-2xl font-bold text-amber-700">{addresses.length}</p><p className="text-xs text-amber-700">Addresses</p></Link>}
                   <Link href="/account/chats" className="rounded-2xl bg-emerald-50 p-4 hover:ring-2 hover:ring-emerald-200"><p className="text-2xl font-bold text-emerald-700">{cases.length - openCount}</p><p className="text-xs text-emerald-700">Resolved chats</p></Link>
                 </div>
               </Card>

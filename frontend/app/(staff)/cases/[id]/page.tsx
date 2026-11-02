@@ -102,7 +102,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
                     </span>
                     <div className={`max-w-[75%] ${fromCustomer ? "" : "text-right"}`}>
                       <div className={`inline-block rounded-2xl px-3.5 py-2.5 text-left text-sm ${fromCustomer ? "rounded-tl-sm border bg-white" : human ? "rounded-tr-sm bg-sky-600 text-white" : "rounded-tr-sm bg-indigo-50 text-indigo-950"}`}>{m.content}</div>
-                      <p className="mt-1 text-[11px] text-gray-500">{fromCustomer ? customerName : human ? (m.sender_name ?? "Support team") : "AI assistant"} · {dayTime(m.sent_at)}</p>
+                      <p className="mt-1 text-[11px] text-gray-500">{fromCustomer ? customerName : human ? (m.sender_name ?? "Staff") : "AI assistant"} · {dayTime(m.sent_at)}</p>
                     </div>
                   </div>
                 );
@@ -133,7 +133,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
                 </div>
               </div>
               <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                <div><dt className="text-gray-500">Tier</dt><dd className="font-medium capitalize">{c.customer?.tier ?? "—"}</dd></div>
+                <div><dt className="text-gray-500">{pack.shop ? "Tier" : "Account"}</dt><dd className="font-medium capitalize">{pack.shop ? (c.customer?.tier ?? "—") : "Student"}</dd></div>
                 <div><dt className="text-gray-500">Mobile</dt><dd className="font-medium">{c.customer?.phone ? displayMobile(c.customer.phone) : "—"}</dd></div>
                 {pack.shop
                   ? <div><dt className="text-gray-500">Orders</dt><dd className="font-medium">{c.order_count}</dd></div>

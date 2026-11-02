@@ -8,7 +8,7 @@ const ROLES = [
   ["knowledge_manager", "Knowledge Manager"], ["business_specialist", "Business Specialist"],
 ] as const;
 const PERMS = [
-  ["view_cases", "View cases", "Conversations, Cases, Customers"],
+  ["view_cases", "View cases", "Conversations, Cases, Customers or Students"],
   ["resolve_cases", "Resolve cases", "Reply, take over, resolve"],
   ["manage_knowledge", "Manage knowledge", "Knowledge Base"],
   ["configure_ai", "Configure AI", "AI Agents, Routing, Settings"],
@@ -41,7 +41,7 @@ export default function PermissionMatrix({ granted }: { granted: string[] }) {
     <div className="rounded-xl border bg-white">
       <div className="border-b p-4">
         <h2 className="font-bold text-ink">What each role can do</h2>
-        <p className="text-sm text-muted">Tick or untick to change access. It applies the next time people open a page. Customers always see only their own requests.</p>
+        <p className="text-sm text-muted">Tick or untick to change access. It applies the next time people open a page. Customers and students always see only their own requests.</p>
         {error && <p role="alert" className="mt-2 text-sm text-bad">{error}</p>}
       </div>
       <div className="overflow-x-auto">

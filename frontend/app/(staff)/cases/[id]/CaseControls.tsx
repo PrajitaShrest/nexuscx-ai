@@ -31,7 +31,7 @@ export function StatusBar({ caseId, status, mine, canEdit }: { caseId: string; s
         {!closed && (
           <form action={statusAct} className="flex flex-wrap gap-2">
             <input type="hidden" name="case_id" value={caseId} />
-            {status !== "waiting" && <button name="status" value="waiting" disabled={setting} className={`${btn} border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100`}>Waiting for customer</button>}
+            {status !== "waiting" && <button name="status" value="waiting" disabled={setting} className={`${btn} border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100`}>Waiting for their reply</button>}
             {status !== "resolved" && !resolving && <button type="button" onClick={() => setResolving(true)} className={`${btn} border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100`}>Resolve</button>}
             {status === "resolved" && <button name="status" value="human_handling" disabled={setting} className={`${btn} border border-gray-300 bg-white hover:bg-gray-50`}>Reopen</button>}
             <button name="status" value="closed" disabled={setting} className={`${btn} border border-gray-300 bg-white text-gray-700 hover:bg-gray-50`}>Close case</button>
@@ -47,7 +47,7 @@ export function StatusBar({ caseId, status, mine, canEdit }: { caseId: string; s
         <form action={statusAct} className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-2">
           <input type="hidden" name="case_id" value={caseId} />
           <input type="hidden" name="status" value="resolved" />
-          <input name="note" maxLength={200} placeholder="Summary for the customer (optional)" className="min-w-0 flex-1 rounded-md border border-emerald-200 px-2.5 py-1.5 text-sm" />
+          <input name="note" maxLength={200} placeholder="Short summary for them (optional)" className="min-w-0 flex-1 rounded-md border border-emerald-200 px-2.5 py-1.5 text-sm" />
           <button disabled={setting} className={`${btn} bg-emerald-600 text-white hover:bg-emerald-700`}>Mark resolved</button>
           <button type="button" onClick={() => setResolving(false)} className={`${btn} text-gray-600`}>Cancel</button>
         </form>

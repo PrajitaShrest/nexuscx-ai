@@ -29,3 +29,12 @@ export async function getPack(): Promise<Pack> {
 export async function requireShop(home: "/support" | "/dashboard") {
   if (!(await getPack()).shop) redirect(home);
 }
+
+// Sign-in and sign-up pages: the demo the visitor picked wins, even if an old
+// session in this browser belongs to the other organisation. (Inside the app,
+// getIndustry() is used, where the account's own organisation always wins.)
+export async function getChosenIndustry(): Promise<Industry> {
+  const choice = (await cookies()).get(CHOICE_COOKIE)?.value;
+  if (isIndustry(choice)) return choice;
+  return getIndustry();
+}

@@ -13,7 +13,7 @@ const btn = "rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-
 const ghost = "rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-semibold text-ink hover:bg-slate-50";
 
 export type DetailsInit = {
-  name: string; username: string; email: string; customer: boolean;
+  name: string; username: string; email: string; customer: boolean; shop?: boolean;
   phone: string; dob: string;
 };
 
@@ -74,7 +74,7 @@ export function DetailsForm({ init }: { init: DetailsInit }) {
               <input id="date_of_birth" name="date_of_birth" type="date" value={v.dob} onChange={set("dob")}
                 max={new Date().toISOString().slice(0, 10)} className={inputClass(!!err("date_of_birth"))} />
             </Field>
-            <div className="flex flex-col justify-end text-sm text-muted">Delivery addresses are kept in your <Link href="/account/addresses" className="font-semibold text-indigo-700 hover:underline">address book</Link>.</div>
+            {init.shop !== false && <div className="flex flex-col justify-end text-sm text-muted">Delivery addresses are kept in your <Link href="/account/addresses" className="font-semibold text-indigo-700 hover:underline">address book</Link>.</div>}
           </>
         )}
       </div>

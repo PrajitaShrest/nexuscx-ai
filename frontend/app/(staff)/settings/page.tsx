@@ -16,13 +16,13 @@ export const metadata: Metadata = { title: "Settings" };
 const SECTIONS: { category: string; title: string; note: string }[] = [
   { category: "general", title: "General", note: "Name, language and time zone. The time zone is used for the busiest-hours chart." },
   { category: "ai_configuration", title: "AI behaviour", note: "These change how the AI answers. They stay in step with the matching escalation rules." },
-  { category: "ai_safety", title: "Safety", note: "Always on. They protect customers and cannot be switched off here or in the database." },
+  { category: "ai_safety", title: "Safety", note: "Always on. They protect the people you serve and cannot be switched off here or in the database." },
   { category: "notifications", title: "Notifications", note: "Saved now. Alerts will follow these switches once email alerts are added." },
   { category: "integrations", title: "Integrations", note: "Connection status of outside channels. Connecting a real channel is planned after Week 9." },
 ];
 const LABEL: Record<string, string> = {
   platform_name: "Platform name", default_language: "Default language", timezone: "Time zone",
-  confidence_threshold: "Confidence threshold", auto_escalate_angry: "Escalate angry customers", auto_escalate_high_risk: "Escalate high-risk cases",
+  confidence_threshold: "Confidence threshold", auto_escalate_angry: "Escalate angry messages", auto_escalate_high_risk: "Escalate high-risk cases",
   knowledge_approval_required: "Only use approved articles", prompt_injection_protection: "Prompt injection protection",
   sensitive_data_redaction: "Hide card numbers and personal data", policy_enforcement: "Block restricted actions", audit_logging: "Audit logging",
   notify_sla_breach: "SLA breach alerts", notify_new_escalation: "New escalation alerts", notify_low_confidence: "Low-confidence alerts",
