@@ -67,7 +67,7 @@ export default async function SupportPage() {
         </section>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="min-w-0 lg:col-span-2"><EnquiryForm firstName={first} industry={pack.id} /></div>
+          <div className="min-w-0 lg:col-span-2"><EnquiryForm key={pack.id} firstName={first} industry={pack.id} /></div>
           <aside className="min-w-0 space-y-6">
             <MyRequests items={items} industry={pack.id} />
             <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">

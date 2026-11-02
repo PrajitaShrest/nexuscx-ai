@@ -79,6 +79,8 @@ In Supabase, create a new project. Then open **SQL Editor → New query** and ru
 | 16 | `017_university_pack.sql` | Industry packs: the E-commerce / University switch, 5 university agents, 25 university articles, language detection, wellbeing and visa safety rules |
 | 17 | `018_visitor_industry.sql` | Each visitor can choose the E-commerce or University demo in their own browser |
 | 18 | `019_duty_of_care.sql` | Duty-of-care features: rule simulator, knowledge gaps, duty-of-care report; off-topic questions go to a person instead of a wrong article |
+| 19 | `020_less_work_for_staff.sql` | Ask before escalating (topic buttons), "Did this help?" 👍/👎, AI-drafted replies for staff |
+| 20 | `021_separate_organisations.sql` | Each account belongs to one organisation (store or Northbridge); Northbridge demo students and staff |
 
 Each file ends with a small check query. A table of results means it worked.
 
@@ -132,6 +134,16 @@ Customers can register at `/signup`. Staff accounts are made by an administrator
 | Knowledge Manager | `taylor.kim` | taylor.kim@example.test |
 | Business Specialist | `drew.singh` | drew.singh@example.test |
 | Administrator | `avery.admin` | avery.admin@example.test |
+
+Northbridge University (University pack) demo people:
+
+| Role | Username | Email |
+|---|---|---|
+| Student | `priya.sharma` | priya.sharma@example.test |
+| Student Support Officer / Lecturer | `ella.martin` | ella.martin@example.test |
+| Department Lead | `chris.wong` | chris.wong@example.test |
+
+Each account belongs to **one** organisation: store customers and staff only ever see the store, and Northbridge students and staff only ever see the university (enforced in the database). Only the platform team (administrators, knowledge managers, business specialists) can switch between packs, which is how both are shown in a demo. New sign-ups belong to the demo chosen on the sign-up page.
 
 Passwords are not stored in this repository. Ask the team.
 
@@ -191,6 +203,15 @@ Safety rules in the University pack:
 - **Test before you switch** (`/simulator`): replay real questions from the last 7, 30 or 90 days with a proposed confidence threshold, escalation switches or a paused agent, and see what would change before saving. Hard stops (wellbeing, personal visa) are never affected.
 - **Knowledge gaps** (`/knowledge/gaps`): questions the AI could not answer, grouped by topic, with a "Draft an article" button. Drafts still need a second person to approve them; once approved, those questions drop off the list.
 - **Duty-of-care report** (`/duty-of-care`): proof that every sensitive case went to a person, how fast staff picked them up, and how many steps were recorded. Print or save as PDF, or download a CSV.
+
+### Fewer cases for people, faster when they come
+
+Hard stops always go to a person. For everything else the AI tries harder first:
+- **Ask before escalating**: when the AI is unsure it offers up to 3 likely topics as buttons ("None of these" still reaches a person).
+- **Did this help?**: 👍 closes the request; 👎 passes it to the right team. Articles that did not help are listed on Knowledge gaps.
+- **AI-drafted replies**: on a case with a person, staff see a summary, why it came to them, and a suggested reply ("Use AI draft"). Staff decide what is sent.
+
+Next step (not built yet): share new cases automatically with the least busy person in the right team.
 
 Coming next: fast food, retail stores, internet and telco, banking and finance, hospitals.
 

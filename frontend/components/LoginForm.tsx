@@ -37,6 +37,15 @@ const DEMO: Record<"customer" | "staff", { label: string; username: string; role
     { label: "Administrator", username: "avery.admin", role: "administrator" },
   ],
 };
+// Northbridge University demo people (migration 021)
+const UNI_DEMO: typeof DEMO = {
+  customer: [{ label: "Priya (student)", username: "priya.sharma" }],
+  staff: [
+    { label: "Support Officer", username: "ella.martin", role: "support_agent" },
+    { label: "Department Lead", username: "chris.wong", role: "team_leader" },
+    { label: "Administrator", username: "avery.admin", role: "administrator" },
+  ],
+};
 
 export default function LoginForm({ portal, industry = "ecommerce" }: { portal: "customer" | "staff"; industry?: Industry }) {
   const uni = industry === "university";
@@ -92,11 +101,11 @@ export default function LoginForm({ portal, industry = "ecommerce" }: { portal: 
       {SHOW_DEMO && <div className="mt-8 border-t border-slate-200 pt-6">
         <p className="text-sm text-muted">Demo accounts: tap one to fill in the details.</p>
         <div className="mt-3 flex flex-wrap gap-2">
-          {DEMO[portal].map((d) => (
+          {(uni ? UNI_DEMO : DEMO)[portal].map((d) => (
             <button key={d.username} type="button" onClick={() => { setIdentifier(d.username); if (d.role) setRole(d.role); }}
               className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
                 shownId === d.username ? "border-indigo-500 bg-indigo-50 text-indigo-700" : "border-slate-300 text-ink hover:border-indigo-400"}`}>
-              {uni ? d.label.replace("(customer)", "(student)").replace("Support Agent", "Support Officer") : d.label}
+              {d.label}
             </button>
           ))}
         </div>

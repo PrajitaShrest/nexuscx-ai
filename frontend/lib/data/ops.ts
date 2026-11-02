@@ -191,3 +191,9 @@ export async function getCareReport(days: number) {
   const r = await rpc("duty_of_care_report", { p_days: days }, "building the duty-of-care report");
   return { data: r.data as CareReport | undefined, error: r.error };
 }
+
+export type UnhelpfulArticle = { document_id: string; title: string; helpful: number; not_helpful: number; questions: string[] | null };
+export async function getUnhelpfulArticles(days: number) {
+  const r = await rpc("unhelpful_articles", { p_days: days }, "loading article feedback");
+  return { data: (r.data as UnhelpfulArticle[] | undefined) ?? [], error: r.error };
+}

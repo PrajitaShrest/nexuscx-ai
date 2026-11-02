@@ -8,15 +8,16 @@ export { PACKS, type Industry, type Pack } from "./packs";
 
 // The active industry pack (setting "industry", migration 017).
 // One lookup per request. Works signed in or signed out.
-// The visitor's own choice (cookie) wins; the database sees the same choice
-// through the x-nexus-industry header. Otherwise the default from Settings.
+// The database decides (migration 021): the signed-in account's own organisation
+// first, then the visitor's chosen demo (sent as the x-nexus-industry header),
+// then the default from Settings.
 export const getIndustry = cache(async function getIndustry(): Promise<Industry> {
-  const choice = (await cookies()).get(CHOICE_COOKIE)?.value;
-  if (isIndustry(choice)) return choice;
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("current_industry");
+  if (!error && isIndustry(data)) return data;
   if (error) console.error("[getIndustry]", error.message);
-  return isIndustry(data) ? data : "ecommerce";
+  const choice = (await cookies()).get(CHOICE_COOKIE)?.value;
+  return isIndustry(choice) ? choice : "ecommerce";
 });
 
 export async function getPack(): Promise<Pack> {

@@ -66,7 +66,7 @@ export default function PackSwitch({ current, tone = "light", short = false, siz
         const on = o.id === current;
         return (
           <button key={o.id} type="button" role="radio" aria-checked={on} onClick={() => pick(o.id)} disabled={pending}
-            className={`flex items-center justify-center gap-1.5 rounded-full py-1.5 transition ${block ? "px-1.5 text-[13px]" : "px-3"} ${on
+            className={`flex items-center justify-center gap-1.5 rounded-full py-1.5 transition ${block ? "whitespace-nowrap px-1 text-xs" : "px-3"} ${on
               ? (dark ? "bg-white text-indigo-700 shadow" : "bg-white text-indigo-700 shadow-sm")
               : (dark ? "text-slate-300 hover:text-white" : "text-slate-500 hover:text-ink")}`}>
             {o.icon("h-4 w-4")}{short ? o.short : o.label}

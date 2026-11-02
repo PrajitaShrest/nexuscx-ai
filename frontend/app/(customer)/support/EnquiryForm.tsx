@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import type { EnquiryResult } from "@/lib/data/cases";
-import { sendEnquiry } from "./actions";
+import { sendEnquiry, sendFeedback } from "./actions";
 import { TOPIC_SETS, CUSTOMER_STATUS, topicForIntent } from "./topics";
 import { LANGUAGE_NAME, PACKS, type Industry } from "@/lib/packs";
 import { BookIcon, BotIcon, CheckIcon, ChevronIcon, HeadsetIcon, SendIcon, ShieldIcon } from "@/components/Icons";
@@ -39,6 +39,63 @@ function Tracker({ r }: { r: EnquiryResult }) {
         </li>
       ))}
     </ol>
+  );
+}
+
+// "Did this help?" under an AI answer: yes closes it, no passes it to a person
+function Helpful({ caseId }: { caseId: string }) {
+  const [pending, start] = useTransition();
+  const [done, setDone] = useState<{ helpful: boolean; text: string } | null>(null);
+  const [error, setError] = useState("");
+  const send = (helpful: boolean) => start(async () => {
+    const r = await sendFeedback(caseId, helpful);
+    if (r.error) { setError(r.error); return; }
+    setDone({ helpful, text: helpful ? "Great, glad that helped. We've closed this request." : r.reply ?? "Thanks. A person will reply here soon." });
+  });
+  if (done) {
+    return <p className={`rounded-xl px-3 py-2 text-sm ${done.helpful ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-900"}`}>{done.text}</p>;
+  }
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-sm" aria-busy={pending}>
+      <span className="text-muted">Did this answer your question?</span>
+      <button type="button" onClick={() => send(true)} disabled={pending}
+        className="rounded-full border border-emerald-300 bg-white px-3 py-1 font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50">👍 Yes, thanks</button>
+      <button type="button" onClick={() => send(false)} disabled={pending}
+        className="rounded-full border border-slate-300 bg-white px-3 py-1 font-medium text-ink hover:bg-slate-50 disabled:opacity-50">👎 No, I need a person</button>
+      {error && <span role="alert" className="text-bad">{error}</span>}
+    </div>
+  );
+}
+
+// The AI is unsure: it asks which topic the person means instead of passing it to a person
+function Clarify({ text, result: r, onChoose }: Turn & { onChoose: (title: string | null) => void }) {
+  const [chosen, setChosen] = useState<string | null | undefined>(undefined);
+  const choose = (t: string | null) => { setChosen(t); onChoose(t); };
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <div className="max-w-[80%] rounded-2xl rounded-br-md bg-gradient-to-br from-indigo-600 to-violet-600 px-4 py-3 text-[15px] text-white shadow-sm">{text}</div>
+      </div>
+      <div className="flex gap-3">
+        <BotAvatar />
+        <div className="max-w-[85%] space-y-3 rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 text-[15px] text-ink shadow-sm">
+          <p>{r.reply}</p>
+          <div className="flex flex-col gap-2">
+            {(r.options ?? []).map((o) => (
+              <button key={o.title} type="button" disabled={chosen !== undefined} onClick={() => choose(o.title)}
+                className={`rounded-xl border px-3 py-2 text-left text-sm font-medium transition ${chosen === o.title ? "border-indigo-500 bg-indigo-50 text-indigo-700" : "border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50"} disabled:cursor-default`}>
+                {o.title}
+              </button>
+            ))}
+            <button type="button" disabled={chosen !== undefined} onClick={() => choose(null)}
+              className={`rounded-xl border border-dashed px-3 py-2 text-left text-sm transition ${chosen === null ? "border-amber-400 bg-amber-50 text-amber-800" : "border-slate-300 text-muted hover:bg-slate-50"} disabled:cursor-default`}>
+              None of these: talk to a person
+            </button>
+          </div>
+          <p className="text-xs text-muted">Asking first means you get an answer straight away more often.</p>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -94,6 +151,7 @@ function Reply({ text, result: r, industry }: Turn & { industry: Industry }) {
               )}
             </details>
           </div>
+          {r.status === "ai_handling" && r.case_id && <Helpful caseId={r.case_id} />}
         </div>
       </div>
     </div>
@@ -106,6 +164,7 @@ export default function EnquiryForm({ firstName, industry }: { firstName: string
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState("");
   const [topicId, setTopicId] = useState<string | null>(null);
+  const [clarified, setClarified] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const boxRef = useRef<HTMLTextAreaElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -114,6 +173,7 @@ export default function EnquiryForm({ firstName, industry }: { firstName: string
     const r = await sendEnquiry({}, fd);
     if (r.result) {
       setDraft("");
+      setClarified(false);
       return { turns: [...prev.turns, { text: r.message ?? "", result: r.result }] };
     }
     return { ...prev, error: r.error ?? "Something went wrong. Please try again." };
@@ -126,6 +186,12 @@ export default function EnquiryForm({ firstName, industry }: { firstName: string
 
   const topic = TOPICS.find((t) => t.id === topicId);
   const pick = (q: string) => { setDraft(q); boxRef.current?.focus(); };
+  // A topic was picked after "Is your question about one of these?": send it, and do not ask again
+  const choose = (original: string, title: string | null) => {
+    setClarified(true);
+    setDraft(title ? `${original} (about: ${title})` : `${original}. None of those topics, I would like to speak to someone.`);
+    setTimeout(() => formRef.current?.requestSubmit(), 0);
+  };
   const askHuman = () => { setDraft("I would like to speak to a real person, please."); setTimeout(() => formRef.current?.requestSubmit(), 0); };
   const empty = chat.turns.length === 0 && !pending;
 
@@ -170,7 +236,9 @@ export default function EnquiryForm({ firstName, industry }: { firstName: string
           </div>
         )}
 
-        {chat.turns.map((t) => <Reply key={t.result.case_number} {...t} industry={industry} />)}
+        {chat.turns.map((t, i) => t.result.status === "clarify"
+          ? <Clarify key={`c${i}`} {...t} onChoose={(title) => choose(t.text, title)} />
+          : <Reply key={t.result.case_number ?? i} {...t} industry={industry} />)}
 
         {pending && (
           <div className="space-y-4">
@@ -210,6 +278,7 @@ export default function EnquiryForm({ firstName, industry }: { firstName: string
           </div>
         )}
         <form ref={formRef} action={action} onSubmit={() => setSending(draft.trim())}>
+          <input type="hidden" name="clarified" value={clarified ? "1" : ""} />
           <div className="flex items-end gap-2 rounded-2xl border border-slate-300 bg-white p-2 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-100">
             <label htmlFor="message" className="sr-only">Your message</label>
             <textarea id="message" ref={boxRef} name="message" rows={2} maxLength={MAX} value={draft}

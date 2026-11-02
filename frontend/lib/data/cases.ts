@@ -19,7 +19,9 @@ export type CaseRow = {
 };
 
 export type EnquiryResult = {
+  case_id?: string;
   case_number: string;
+  options?: { title: string; category: string }[]; // status "clarify": likely topics to pick from
   language?: string;
   department?: string | null;
   status: string;
@@ -59,9 +61,19 @@ export async function listCaseQueue(f: CaseFilters = {}): Promise<{ data: CaseRo
 
 // Core feature: send one enquiry. The database classifies, routes,
 // escalates and replies inside submit_enquiry() in one transaction.
-export async function submitEnquiry(message: string): Promise<{ data?: EnquiryResult; error?: string }> {
+// If the AI is unsure it may answer with status "clarify" and a few topics to pick
+// from (migration 020); the follow-up is sent with clarified = true.
+export async function submitEnquiry(message: string, clarified = false): Promise<{ data?: EnquiryResult; error?: string }> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("submit_enquiry", { p_message: message });
+  const { data, error } = await supabase.rpc("submit_enquiry", { p_message: message, p_clarified: clarified });
   if (error) return { error: friendlyError(error, "submitEnquiry") };
   return { data: data as EnquiryResult };
+}
+
+// "Did this help?" on an AI answer: yes closes the case, no passes it to a person.
+export async function answerFeedback(caseId: string, helpful: boolean): Promise<{ data?: { status: string; reply?: string }; error?: string }> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("answer_feedback", { p_case: caseId, p_helpful: helpful });
+  if (error) return { error: error.code === "22023" ? error.message : friendlyError(error, "answerFeedback") };
+  return { data: data as { status: string; reply?: string } };
 }

@@ -6,13 +6,14 @@ import { CATEGORY, STATUS, Pill, initials } from "@/components/Badges";
 import { OrderPill, RETURN_REASONS, ReturnPill, ReturnSteps } from "@/components/ShopUI";
 import { BotIcon, HeadsetIcon, ShieldIcon } from "@/components/Icons";
 import { can, getMe } from "@/lib/data/me";
-import { getCaseDetail, signPhotos } from "@/lib/data/workspace";
+import { getCaseDetail, getSuggestion, signPhotos } from "@/lib/data/workspace";
 import PhotoStrip from "@/components/PhotoStrip";
 import LiveRefresh from "@/components/LiveRefresh";
 import { dayTime, money } from "@/lib/format";
 import { displayMobile } from "@/lib/auth/phone";
 import { Composer, NoteForm, ReturnControls, StatusBar } from "./CaseControls";
 import type { Metadata } from "next";
+import { FLAG_LABEL } from "@/lib/care";
 
 export const metadata: Metadata = { title: "Case" };
 
@@ -38,6 +39,8 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const c = await getCaseDetail(id);
   if (!c) notFound();
+  // AI help for staff: only for cases that are with people
+  const tip = ["escalated", "human_handling", "waiting"].includes(c.status) ? await getSuggestion(c.case_id) : null;
   const photoUrls = await signPhotos(c.returns.flatMap((r) => r.photos ?? []));
   const canEdit = can(me, "resolve_cases");
   const active = c.assignments.find((a) => a.status === "active");
@@ -103,11 +106,22 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
                 );
               })}
             </div>
-            {canEdit && <Composer caseId={c.case_id} disabled={c.status === "closed"} firstName={customerName.split(" ")[0]} />}
+            {canEdit && <Composer caseId={c.case_id} disabled={c.status === "closed"} firstName={customerName.split(" ")[0]} draft={tip?.draft} />}
           </section>
 
           {/* Context */}
           <aside className="min-w-0 space-y-4">
+            {tip && (
+              <Box title="✨ AI assistant for staff" tone="border-violet-200 bg-violet-50/40">
+                <p className="text-sm">{tip.summary}</p>
+                <dl className="mt-3 space-y-1.5 text-xs">
+                  <div className="flex gap-2"><dt className="w-28 shrink-0 text-gray-500">Why it came to you</dt><dd className="font-medium">{tip.reason}</dd></div>
+                  {tip.source && <div className="flex gap-2"><dt className="w-28 shrink-0 text-gray-500">Draft based on</dt><dd className="font-medium">{tip.source}</dd></div>}
+                  {tip.flag && <div className="flex gap-2"><dt className="w-28 shrink-0 text-gray-500">Handle with care</dt><dd className="font-medium text-amber-800">{FLAG_LABEL[tip.flag] ?? tip.flag}</dd></div>}
+                </dl>
+                <p className="mt-3 text-xs text-gray-500">A suggested reply is ready in the reply box (&ldquo;Use AI draft&rdquo;). You decide what is sent.</p>
+              </Box>
+            )}
             <Box title="Customer">
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-500 text-sm font-semibold text-white">{initials(customerName)}</span>

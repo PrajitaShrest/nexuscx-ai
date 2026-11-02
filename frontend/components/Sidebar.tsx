@@ -60,14 +60,14 @@ export default async function Sidebar({ me, active }: { me: Me; active: string }
   })).filter((g) => g.items.length > 0);
   return (
     <>
-    <MobileStaffNav groups={groups} active={best ?? active} user={menuUser(me)} industry={pack.id} />
+    <MobileStaffNav groups={groups} active={best ?? active} user={menuUser(me)} industry={me.org === null ? pack.id : null} />
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-navy text-slate-300 md:flex">
       <div className="px-5 py-5">
         <Logo tone="light" size={34} />
         <p className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-indigo-200">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> {pack.org}
         </p>
-        <div className="mt-2"><PackSwitch current={pack.id} tone="dark" block /></div>
+        {me.org === null && <div className="mt-2"><PackSwitch current={pack.id} tone="dark" block /></div>}
       </div>
       <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4">
         {nav.map((group) => {

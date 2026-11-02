@@ -136,3 +136,13 @@ export const unreadCount = cache(async (): Promise<number> => {
   return count ?? 0;
 });
 export const markNotificationsRead = () => rpc("mark_notifications_read", {}, "markNotificationsRead");
+
+// AI-drafted reply for staff (migration 020): a summary, why it came to a person,
+// and a suggested reply from approved articles. Staff check and edit before sending.
+export type Suggestion = { summary: string; reason: string; flag: string | null; source: string | null; draft: string };
+export async function getSuggestion(caseId: string): Promise<Suggestion | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("suggest_reply", { p_case: caseId });
+  if (error) { console.error("[getSuggestion]", error.message); return null; }
+  return (data as Suggestion | null) ?? null;
+}

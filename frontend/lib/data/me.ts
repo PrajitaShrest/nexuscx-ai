@@ -12,6 +12,7 @@ export type Me = {
   team: string | null;
   presence: string;
   permissions: string[];
+  org: "ecommerce" | "university" | null; // the organisation the account belongs to (null = platform team)
 };
 
 export const ROLE_LABEL: Record<string, string> = {
@@ -35,7 +36,7 @@ export const getMe = cache(async function getMe(): Promise<Me> {
   // One trip for the person (with extra roles) and one for the small permissions table, side by side
   const [{ data: user, error }, { data: perms }] = await Promise.all([
     supabase.from("users")
-      .select("user_id, name, username, email, role, status, presence, must_change_password, teams(name), user_roles!user_roles_user_id_fkey(role)")
+      .select("user_id, name, username, email, role, status, presence, must_change_password, industry, teams(name), user_roles!user_roles_user_id_fkey(role)")
       .eq("auth_user_id", auth.claims.sub).single(),
     supabase.from("role_permissions").select("role, permission"),
   ]);
@@ -63,6 +64,7 @@ export const getMe = cache(async function getMe(): Promise<Me> {
     extraRoles,
     team,
     presence: user.presence ?? "online",
+    org: user.industry === "ecommerce" || user.industry === "university" ? user.industry : null,
     permissions: [...new Set((perms ?? []).filter((p) => roles.has(p.role)).map((p) => p.permission))],
   };
 });
