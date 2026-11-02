@@ -20,7 +20,7 @@ export default async function CustomerShell({ me, children }: { me: Me; children
         </div>
         <SideLinks unread={unread} shop={pack.shop} />
         <div className="border-t border-white/10 p-3">
-          <UserMenu user={menuUser(me)} dark up />
+          <UserMenu user={menuUser(me, pack.id)} dark up />
         </div>
       </aside>
       <div className="min-w-0 flex-1">
@@ -28,7 +28,7 @@ export default async function CustomerShell({ me, children }: { me: Me; children
           <div className="flex items-center justify-between gap-3 px-4 py-2.5">
             <Link href={pack.shop ? "/account" : "/support"}><Logo size={30} /></Link>
             <div className="flex items-center gap-2">
-              <div className="w-auto sm:w-56"><UserMenu user={menuUser(me)} /></div>
+              <div className="w-auto sm:w-56"><UserMenu user={menuUser(me, pack.id)} /></div>
             </div>
           </div>
           <TopTabs unread={unread} shop={pack.shop} />

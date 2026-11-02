@@ -4,7 +4,7 @@ import CustomerShell from "@/components/CustomerShell";
 import { listAddresses, listMyOrders } from "@/lib/data/shop";
 import Avatar, { PRESENCE } from "@/components/Avatar";
 import { CalendarIcon, CheckIcon, ClockIcon, KeyIcon, ShieldIcon, UserIcon, XIcon } from "@/components/Icons";
-import { getMe, isStaff, ROLE_LABEL } from "@/lib/data/me";
+import { getMe, isStaff, roleNames } from "@/lib/data/me";
 import { getProfile } from "@/lib/data/profile";
 import { listCaseQueue } from "@/lib/data/cases";
 import { displayMobile } from "@/lib/auth/phone";
@@ -43,7 +43,7 @@ export default async function ProfilePage() {
   const me = await getMe();
   const staff = isStaff(me);
   const [p, pack] = await Promise.all([getProfile(me), getPack()]);
-  const roles = [me.role, ...me.extraRoles].map((r) => ROLE_LABEL[r] ?? r);
+  const roles = roleNames(me, pack.id);
 
   const [cases, addresses, orders] = staff ? [[], [], []] : await Promise.all([listCaseQueue().then((r) => r.data), pack.shop ? listAddresses() : [], pack.shop ? listMyOrders() : []]);
 
@@ -80,11 +80,11 @@ export default async function ProfilePage() {
               {me.team && <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">Team: {me.team}</span>}
               {staff && <span className="flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
                 <span className={`h-2 w-2 rounded-full ${PRESENCE[me.presence]?.dot}`} />{PRESENCE[me.presence]?.label}</span>}
-              {p.tier && <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold capitalize text-amber-800 ring-1 ring-amber-200">{p.tier} member</span>}
+              {p.tier && pack.shop && <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold capitalize text-amber-800 ring-1 ring-amber-200">{p.tier} member</span>}
             </div>
           </div>
           <div className="flex gap-6 text-sm">
-            <div><p className="text-muted">Member since</p><p className="font-semibold">{date(p.created_at)}</p></div>
+            <div><p className="text-muted">{pack.shop ? "Member since" : "Joined"}</p><p className="font-semibold">{date(p.created_at)}</p></div>
             <div><p className="text-muted">Last sign-in</p><p className="font-semibold">{date(p.last_sign_in_at, true)}</p></div>
           </div>
         </div>

@@ -114,7 +114,12 @@ export async function login(_prev: FormState, formData: FormData): Promise<FormS
   if (portal === "staff") {
     if (!STAFF_ROLES.includes(role)) {
       await supabase.auth.signOut();
-      return { error: "This page is for NexusCX staff. Customers can sign in on the customer page.", values };
+      return {
+        error: me?.industry === "university"
+          ? "This page is for university staff. Students can sign in on the student page."
+          : "This page is for NexusCX staff. Customers can sign in on the customer page.",
+        values,
+      };
     }
     if (expectedRole && !allRoles.includes(expectedRole)) {
       await supabase.auth.signOut();

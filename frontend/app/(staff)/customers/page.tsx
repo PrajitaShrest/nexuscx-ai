@@ -42,7 +42,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
         <div className="overflow-x-auto rounded-xl border bg-white">
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 text-xs uppercase text-gray-500">
-              <tr>{[pack.person, "Tier", ...(pack.shop ? ["Orders", "Spent"] : []), "Cases", ...(pack.shop ? ["Returns"] : []), "Rating", "Last activity"].map((h) => <th key={h} className="whitespace-nowrap px-4 py-3">{h}</th>)}</tr>
+              <tr>{[pack.person, ...(pack.shop ? ["Tier", "Orders", "Spent"] : []), "Cases", ...(pack.shop ? ["Returns"] : []), "Rating", "Last activity"].map((h) => <th key={h} className="whitespace-nowrap px-4 py-3">{h}</th>)}</tr>
             </thead>
             <tbody className="divide-y">
               {rows.map((c) => (
@@ -53,7 +53,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                       <span><span className="block font-medium text-indigo-700">{c.name}</span><span className="block text-xs text-gray-500">{c.email}</span></span>
                     </Link>
                   </td>
-                  <td className="px-4 py-3"><span className={`rounded-full px-2 py-0.5 text-xs capitalize ${TIER[c.tier] ?? TIER.standard}`}>{c.tier}</span></td>
+                  {pack.shop && <td className="px-4 py-3"><span className={`rounded-full px-2 py-0.5 text-xs capitalize ${TIER[c.tier] ?? TIER.standard}`}>{c.tier}</span></td>}
                   {pack.shop && <td className="px-4 py-3">{c.orders}</td>}
                   {pack.shop && <td className="px-4 py-3 whitespace-nowrap">{money(c.spent_cents)}</td>}
                   <td className="px-4 py-3 whitespace-nowrap">{c.cases}{c.open_cases > 0 && <span className="ml-1.5 rounded-full bg-red-50 px-1.5 text-xs text-red-700">{c.open_cases} open</span>}</td>

@@ -79,10 +79,19 @@ export function can(me: Me, permission: string) {
   return me.permissions.includes(permission);
 }
 
+// The role names to show for a person: their job title if they have one,
+// "Student" for a university customer, otherwise the system role names.
+export function roleNames(me: Me, industry?: string): string[] {
+  const uni = (me.org ?? industry) === "university";
+  if (me.jobTitle) return [me.jobTitle];
+  return [me.role, ...me.extraRoles].map((r) =>
+    r === "customer" && uni ? "Student" : ROLE_LABEL[r] ?? r);
+}
+
 // What the account menu needs to show
-export function menuUser(me: Me) {
+export function menuUser(me: Me, industry?: string) {
   return {
     name: me.name, username: me.username, email: me.email, staff: isStaff(me), presence: me.presence,
-    roles: me.jobTitle ? [me.jobTitle] : [me.role, ...me.extraRoles].map((r) => ROLE_LABEL[r] ?? r),
+    roles: roleNames(me, industry),
   };
 }
