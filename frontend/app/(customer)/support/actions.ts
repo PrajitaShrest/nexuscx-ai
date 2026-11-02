@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { answerFeedback, submitEnquiry, type EnquiryResult } from "@/lib/data/cases";
 import { check, enquirySchema } from "@/lib/validation";
-import { aiChangeOrderOption, type ChangeResult } from "@/lib/data/shop";
+import { listMyOrders } from "@/lib/data/shop";
 
 export type EnquiryState = { error?: string; result?: EnquiryResult; message?: string };
 
@@ -28,15 +28,13 @@ export async function sendFeedback(caseId: string, helpful: boolean): Promise<{ 
   return { status: data.status, reply: data.reply };
 }
 
-// The Orders Agent: check the order (order number + delivery postcode), then change a size or colour
-export async function changeOrderOption(orderNumber: string, postcode: string, item: string | null, value: string | null): Promise<ChangeResult> {
-  const num = orderNumber.trim().toUpperCase();
-  const post = postcode.trim();
-  if (!/^NX-\d{3,8}$/.test(num)) return { status: "error", message: "Order numbers look like NX-1009. You can find yours in My orders." };
-  if (!/^\d{4}$/.test(post)) return { status: "error", message: "Please enter the 4-digit postcode of the delivery address." };
-  if (item && !/^[0-9a-f-]{36}$/i.test(item)) return { status: "error", message: "That item could not be found." };
-  const { data, error } = await aiChangeOrderOption(num, post, item, value ? value.slice(0, 30) : null);
-  if (error || !data) return { status: "error", message: error ?? "Something went wrong. Please try again." };
-  if (data.status === "changed") { revalidatePath("/support"); revalidatePath("/account/orders"); }
-  return data;
+// Orders the AI can still change (placed in the last 2 days, not shipped, has a size or colour)
+export type ChangeableOrder = { order_id: string; order_number: string; items: string };
+export async function changeableOrders(): Promise<ChangeableOrder[]> {
+  const orders = await listMyOrders();
+  const since = Date.now() - 2 * 24 * 3600 * 1000;
+  return orders
+    .filter((o) => ["placed", "processing"].includes(o.status) && new Date(o.created_at).getTime() > since && o.order_items.some((i) => i.variant))
+    .map((o) => ({ order_id: o.order_id, order_number: o.order_number,
+      items: o.order_items.filter((i) => i.variant).map((i) => `${i.product_name} (${i.variant})`).join(", ") }));
 }

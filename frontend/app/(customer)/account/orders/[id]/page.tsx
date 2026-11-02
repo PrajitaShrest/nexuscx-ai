@@ -5,17 +5,22 @@ import { day, dayTime, money } from "@/lib/format";
 import { ChatPill, OrderPill, OrderTracker, Panel, ProductTile, ReturnPill, btnPrimary } from "@/components/ShopUI";
 import { MapPinIcon, RepeatIcon, TruckIcon } from "@/components/Icons";
 import { AskForm, CancelButton } from "./OrderActions";
+import ChangeSize from "./ChangeSize";
 import type { Metadata } from "next";
 import { requireShop } from "@/lib/industry";
 
 export const metadata: Metadata = { title: "Order" };
 
-export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function OrderPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ change?: string }> }) {
   await requireShop("/support");
   const { id } = await params;
+  const { change } = await searchParams;
   const o = await getOrder(id);
   if (!o) notFound();
   const canCancel = ["placed", "processing"].includes(o.status);
+  // The AI can change a size or colour itself within 2 days, before it ships (migration 025)
+  // eslint-disable-next-line react-hooks/purity -- server component, rendered once per request
+  const canChange = canCancel && o.order_items.some((i) => i.variant) && Date.now() - new Date(o.created_at).getTime() < 2 * 24 * 3600 * 1000;
 
   return (
     <>
@@ -31,6 +36,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             {canCancel && <CancelButton orderId={o.order_id} number={o.order_number} />}
           </div>
         </div>
+        {canChange && <div className="mt-4"><ChangeSize orderId={o.order_id} startOpen={change === "1"} /></div>}
       </div>
 
       <Panel>
@@ -92,10 +98,10 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               <div>
                 <p className="font-semibold">{o.ship_recipient}</p>
                 <p className="text-muted">{o.ship_address}</p>
-                {o.notes && <p className="mt-2 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs text-muted">Note: {o.notes}</p>}
+                {o.notes && o.notes !== "Demo order" && <p className="mt-2 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs text-muted">Note: {o.notes}</p>}
               </div>
             </div>
-            {canCancel && <p className="mt-4 text-xs text-muted">Need a different address? Cancel and order again before it ships, or ask us in the help box.</p>}
+            {canCancel && <p className="mt-4 text-xs text-muted">Need a different address? Ask in the help box below before it ships.</p>}
           </Panel>
           {o.return_requests.length > 0 && (
             <Panel title="Returns & exchanges">

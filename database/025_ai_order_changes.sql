@@ -156,11 +156,17 @@ REVOKE EXECUTE ON FUNCTION public.ai_change_order_option(text, text, uuid, text)
 GRANT EXECUTE ON FUNCTION public.ai_change_order_option(text, text, uuid, text) TO authenticated;
 
 -- ---------- help article (so the AI can explain the rule in any wording) ----------
+UPDATE public.knowledge_documents SET content =
+       'You can change the size or colour of an item yourself if you ordered it in the last 2 days and it hasn''t shipped yet. '
+    || 'Open the order in My orders and press "Change size or colour", then choose the new one. It changes straight away. '
+    || 'There is no extra charge and your delivery date stays the same. If the order has already shipped, you can exchange it for free within 30 days of delivery from My orders.',
+       updated_at = now()
+WHERE title = 'Changing the size or colour of an order';
 INSERT INTO public.knowledge_documents (title, category, keywords, content, status, version, owner, approved_by, approved_at, source, industry)
 SELECT 'Changing the size or colour of an order', 'orders',
        'change size colour color swap band wrong size bigger smaller exchange order variant',
-       'I can change the size or colour of an item myself if you ordered it in the last 2 days and it hasn''t shipped yet. '
-       || 'Just type "change the size" here, then give me your order number and the delivery postcode so I can check it''s you. '
+       'You can change the size or colour of an item yourself if you ordered it in the last 2 days and it hasn''t shipped yet. '
+       || 'Open the order in My orders and press "Change size or colour", then choose the new one. It changes straight away. '
        || 'There is no extra charge and your delivery date stays the same. If the order has already shipped, you can exchange it for free within 30 days of delivery from My orders.',
        'approved', 'v1.0', 'Orders Team',
        (SELECT user_id FROM public.users WHERE role = 'knowledge_manager' ORDER BY name LIMIT 1), now(), 'NexusCX Store Help Centre', 'ecommerce'
