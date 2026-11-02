@@ -14,6 +14,8 @@ import { displayMobile } from "@/lib/auth/phone";
 import { Composer, NoteForm, ReturnControls, StatusBar } from "./CaseControls";
 import type { Metadata } from "next";
 import { FLAG_LABEL } from "@/lib/care";
+import { getPack } from "@/lib/industry";
+import { LANGUAGE_NAME } from "@/lib/packs";
 
 export const metadata: Metadata = { title: "Case" };
 
@@ -37,7 +39,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
   const me = await getMe();
   if (!can(me, "view_cases")) return <NoAccess me={me} page="Cases" needs="view_cases" />;
   const { id } = await params;
-  const c = await getCaseDetail(id);
+  const [c, pack] = await Promise.all([getCaseDetail(id), getPack()]);
   if (!c) notFound();
   // AI help for staff: only for cases that are with people
   const tip = ["escalated", "human_handling", "waiting"].includes(c.status) ? await getSuggestion(c.case_id) : null;
@@ -45,7 +47,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
   const canEdit = can(me, "resolve_cases");
   const active = c.assignments.find((a) => a.status === "active");
   const mine = active?.user?.user_id === me.user_id;
-  const customerName = c.customer?.user?.name ?? "Customer";
+  const customerName = c.customer?.user?.name ?? pack.person;
   const sla = slaText(c.sla_due_at, c.status);
   const conf = c.confidence !== null ? Math.round(Number(c.confidence) * 100) : null;
 
@@ -106,7 +108,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
                 );
               })}
             </div>
-            {canEdit && <Composer caseId={c.case_id} disabled={c.status === "closed"} firstName={customerName.split(" ")[0]} draft={tip?.draft} />}
+            {canEdit && <Composer caseId={c.case_id} disabled={c.status === "closed"} firstName={customerName.split(" ")[0]} draft={tip?.draft} industry={pack.id} />}
           </section>
 
           {/* Context */}
@@ -122,7 +124,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
                 <p className="mt-3 text-xs text-gray-500">A suggested reply is ready in the reply box (&ldquo;Use AI draft&rdquo;). You decide what is sent.</p>
               </Box>
             )}
-            <Box title="Customer">
+            <Box title={pack.person}>
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-500 text-sm font-semibold text-white">{initials(customerName)}</span>
                 <div className="min-w-0 text-sm">
@@ -133,7 +135,9 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
               <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
                 <div><dt className="text-gray-500">Tier</dt><dd className="font-medium capitalize">{c.customer?.tier ?? "—"}</dd></div>
                 <div><dt className="text-gray-500">Mobile</dt><dd className="font-medium">{c.customer?.phone ? displayMobile(c.customer.phone) : "—"}</dd></div>
-                <div><dt className="text-gray-500">Orders</dt><dd className="font-medium">{c.order_count}</dd></div>
+                {pack.shop
+                  ? <div><dt className="text-gray-500">Orders</dt><dd className="font-medium">{c.order_count}</dd></div>
+                  : <div><dt className="text-gray-500">Language</dt><dd className="font-medium">{LANGUAGE_NAME[c.language ?? "en"] ?? c.language ?? "English"}</dd></div>}
                 <div><dt className="text-gray-500">Other cases</dt><dd className="font-medium">{c.other_cases.length}</dd></div>
               </dl>
               {c.other_cases.length > 0 && (

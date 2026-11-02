@@ -8,6 +8,12 @@ export const CATEGORY: Record<string, { label: string; style: string }> = {
   account: { label: "Account", style: "border-purple-300 bg-purple-50 text-purple-700" },
   general: { label: "General", style: "border-gray-300 bg-gray-50 text-gray-600" },
   unknown: { label: "General", style: "border-gray-300 bg-gray-50 text-gray-600" },
+  // University pack
+  admissions: { label: "Admissions", style: "border-blue-300 bg-blue-50 text-blue-700" },
+  fees: { label: "Finance & fees", style: "border-green-300 bg-green-50 text-green-700" },
+  it_support: { label: "IT support", style: "border-orange-300 bg-orange-50 text-orange-700" },
+  academic: { label: "Exams & results", style: "border-violet-300 bg-violet-50 text-violet-700" },
+  student_services: { label: "Student services", style: "border-amber-300 bg-amber-50 text-amber-700" },
 };
 
 export const STATUS: Record<string, { label: string; style: string }> = {

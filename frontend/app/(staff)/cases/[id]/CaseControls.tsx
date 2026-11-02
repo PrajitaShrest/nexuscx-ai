@@ -57,16 +57,28 @@ export function StatusBar({ caseId, status, mine, canEdit }: { caseId: string; s
   );
 }
 
-const QUICK = [
-  "Thanks for your patience. I'm looking into this now.",
-  "Could you send a photo of the item so we can check it?",
-  "I've arranged a replacement. You'll get a tracking number by email.",
-  "Your refund has been processed and should appear in 3 to 5 business days.",
-  "Is there anything else I can help you with?",
-];
+// Quick phrases for the reply box, for each industry pack
+const QUICK: Record<"ecommerce" | "university", string[]> = {
+  ecommerce: [
+    "Thanks for your patience. I'm looking into this now.",
+    "Could you send a photo of the item so we can check it?",
+    "I've arranged a replacement. You'll get a tracking number by email.",
+    "Your refund has been processed and should appear in 3 to 5 business days.",
+    "Is there anything else I can help you with?",
+  ],
+  university: [
+    "Thanks for your patience. I'm looking into this now.",
+    "Could you upload your supporting document (for example a medical certificate) in the Student Hub?",
+    "I've booked you an appointment. You'll get a confirmation email shortly.",
+    "This has been approved and will show in the Student Hub within 2 business days.",
+    "Is there anything else I can help you with?",
+  ],
+};
 
 // Reply box for staff
-export function Composer({ caseId, disabled, firstName, draft }: { caseId: string; disabled: boolean; firstName: string; draft?: string }) {
+export function Composer({ caseId, disabled, firstName, draft, industry = "ecommerce" }: {
+  caseId: string; disabled: boolean; firstName: string; draft?: string; industry?: "ecommerce" | "university";
+}) {
   const [s, act, pending] = useActionState(reply, empty);
   const [text, setText] = useState("");
   const [then, setThen] = useState("");
@@ -85,27 +97,27 @@ export function Composer({ caseId, disabled, firstName, draft }: { caseId: strin
         </div>
       )}
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {[`Hi ${firstName}, `, ...QUICK].map((q) => (
+        {[`Hi ${firstName}, `, ...QUICK[industry]].map((q) => (
           <button key={q} type="button" onClick={() => setText((t) => (q.startsWith("Hi ") ? q + t : (t ? `${t} ${q}` : q)))}
             className="shrink-0 rounded-full bg-indigo-50 px-3 py-1 text-xs text-indigo-700 hover:bg-indigo-100">{q.length > 40 ? `${q.slice(0, 38)}…` : q}</button>
         ))}
       </div>
       <div className="flex items-end gap-2 rounded-xl border border-gray-300 p-2 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-100">
-        <label htmlFor="staff-reply" className="sr-only">Reply to the customer</label>
+        <label htmlFor="staff-reply" className="sr-only">Reply</label>
         <textarea id="staff-reply" name="message" rows={3} maxLength={2000} value={text} onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) ref.current?.requestSubmit(); }}
-          placeholder="Write to the customer… (Ctrl/⌘ + Enter to send)" className="min-h-16 flex-1 resize-none bg-transparent px-2 py-1 text-sm outline-none" />
+          placeholder={`Write to the ${industry === "university" ? "student" : "customer"}… (Ctrl/⌘ + Enter to send)`} className="min-h-16 flex-1 resize-none bg-transparent px-2 py-1 text-sm outline-none" />
         <button disabled={pending || text.trim().length < 2} aria-label="Send reply" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-40"><SendIcon className="h-4 w-4" /></button>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
         <label className="flex items-center gap-2">After sending:
           <select name="then" value={then} onChange={(e) => setThen(e.target.value)} className="rounded-md border border-gray-300 px-2 py-1 text-xs">
             <option value="">Keep working on it</option>
-            <option value="waiting">Wait for the customer</option>
+            <option value="waiting">Wait for their reply</option>
             <option value="resolved">Mark resolved</option>
           </select>
         </label>
-        <span>The customer sees this straight away and gets a notification.</span>
+        <span>They see this straight away and get a notification.</span>
       </div>
       <Msg s={s} />
     </form>

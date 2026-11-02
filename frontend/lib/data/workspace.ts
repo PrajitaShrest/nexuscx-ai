@@ -17,6 +17,7 @@ export type CaseDetail = {
   case_id: string; case_number: string; subject: string | null; status: string; priority: string; intent: string | null;
   sentiment: string | null; urgency: string | null; risk: string | null; confidence: number | null;
   created_at: string; updated_at: string; sla_due_at: string | null; closed_at: string | null; first_response_at: string | null;
+  language: string | null;
   customer: { customer_id: string; tier: string; phone: string | null; user: { name: string; email: string; username: string } | null } | null;
   order: { order_id: string; order_number: string; status: string; total_cents: number; created_at: string; tracking_number: string | null;
     order_items: { order_item_id: string; product_name: string; quantity: number; line_total_cents: number }[] } | null;
@@ -44,7 +45,7 @@ export async function getCaseDetail(id: string): Promise<CaseDetail | null> {
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
   const supabase = await createClient();
   const { data, error } = await supabase.from("cases").select(`
-      case_id, case_number, subject, status, priority, intent, sentiment, urgency, risk, confidence,
+      case_id, case_number, subject, status, priority, intent, sentiment, urgency, risk, confidence, language,
       created_at, updated_at, sla_due_at, closed_at, first_response_at,
       customer:customers(customer_id, tier, phone, user:users(name, email, username)),
       order:orders(order_id, order_number, status, total_cents, created_at, tracking_number, order_items(order_item_id, product_name, quantity, line_total_cents)),
