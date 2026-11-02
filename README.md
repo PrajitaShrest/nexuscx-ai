@@ -83,6 +83,7 @@ In Supabase, create a new project. Then open **SQL Editor → New query** and ru
 | 20 | `021_separate_organisations.sql` | Each account belongs to one organisation (store or Northbridge); Northbridge demo students and staff |
 | 21 | `022_better_answers.sql` | Who-to-contact line on every answer (departments table), 17 more specific Northbridge articles, confidence that reflects how well the article matches |
 | 22 | `023_university_staff.sql` | Northbridge staff job titles and teams (lecturer, librarian, reception, IT, admissions & finance); Team Operations shows each organisation's own staff |
+| 23 | `024_student_wording.sql` | Inbox items and new audit entries for university cases say "student" instead of "customer" |
 
 Each file ends with a small check query. A table of results means it worked.
 
