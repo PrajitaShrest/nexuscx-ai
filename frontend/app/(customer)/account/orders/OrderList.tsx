@@ -20,8 +20,8 @@ export default function OrderList({ orders }: { orders: Order[] }) {
   const shown = orders.filter((o) => t.test(o.status));
 
   if (orders.length === 0) {
-    return <EmptyState icon={<PackageIcon className="h-6 w-6" />} title="You haven't ordered anything yet"
-      text="Your orders and their delivery progress will show here." action={<Link href="/shop" className={btnPrimary}>Browse products</Link>} />;
+    return <EmptyState icon={<PackageIcon className="h-6 w-6" />} title="No orders yet"
+      text="Orders you place with the store show here, with their delivery progress." action={<Link href="/support" className={btnPrimary}>Ask the AI assistant</Link>} />;
   }
   return (
     <div className="space-y-4">

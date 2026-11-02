@@ -14,7 +14,7 @@ const OPTIONS: { id: Industry; label: string; short: string; org: string; icon: 
 ];
 
 // Pages that only exist in one pack: switching sends you to the right home page
-const SHOP_ONLY = ["/shop", "/account/orders", "/account/returns", "/account/addresses", "/orders", "/returns"];
+const SHOP_ONLY = ["/account/orders", "/account/returns", "/orders", "/returns"];
 
 export default function PackSwitch({ current, tone = "light", short = false, size = "md", block = false }: {
   current: Industry; tone?: "light" | "dark"; short?: boolean; size?: "md" | "lg"; block?: boolean; // block = full width (menus)
@@ -28,7 +28,7 @@ export default function PackSwitch({ current, tone = "light", short = false, siz
     start(async () => {
       await choosePack(id);
       if (id !== "ecommerce" && SHOP_ONLY.some((p) => path === p || path.startsWith(`${p}/`))) {
-        router.push(path.startsWith("/account") || path === "/shop" ? "/support" : "/dashboard");
+        router.push(path.startsWith("/account") ? "/support" : "/dashboard");
       } else if (id !== "ecommerce" && path === "/account") {
         router.push("/support");
       }

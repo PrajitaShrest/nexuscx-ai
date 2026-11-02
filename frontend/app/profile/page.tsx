@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
 import CustomerShell from "@/components/CustomerShell";
-import { listAddresses, listMyOrders } from "@/lib/data/shop";
+import { listMyOrders } from "@/lib/data/shop";
 import Avatar, { PRESENCE } from "@/components/Avatar";
 import { CalendarIcon, CheckIcon, ClockIcon, KeyIcon, ShieldIcon, UserIcon, XIcon } from "@/components/Icons";
 import { getMe, isStaff, roleNames } from "@/lib/data/me";
@@ -45,14 +45,13 @@ export default async function ProfilePage() {
   const [p, pack] = await Promise.all([getProfile(me), getPack()]);
   const roles = roleNames(me, pack.id);
 
-  const [cases, addresses, orders] = staff ? [[], [], []] : await Promise.all([listCaseQueue().then((r) => r.data), pack.shop ? listAddresses() : [], pack.shop ? listMyOrders() : []]);
+  const [cases, orders] = staff ? [[], []] : await Promise.all([listCaseQueue().then((r) => r.data), pack.shop ? listMyOrders() : []]);
 
   // Customers: how complete is the profile, and a summary of their requests
   const checks = [
     ["Full name", me.name.trim().length >= 2],
     ["Mobile number", !!p.phone],
     ["Date of birth", !!p.date_of_birth],
-    ...(pack.shop ? [["Delivery address", addresses.length > 0] as const] : []),
   ] as const;
   const percent = Math.round((checks.filter(([, ok]) => ok).length / checks.length) * 100);
   const openCount = cases.filter((c) => !["resolved", "closed"].includes(c.status)).length;
@@ -143,7 +142,6 @@ export default async function ProfilePage() {
                 <div className="grid grid-cols-2 gap-3">
                   {pack.shop && <Link href="/account/orders" className="rounded-2xl bg-sky-50 p-4 hover:ring-2 hover:ring-sky-200"><p className="text-2xl font-bold text-sky-700">{orders.length}</p><p className="text-xs text-sky-700">Orders</p></Link>}
                   <Link href="/account/chats" className="rounded-2xl bg-indigo-50 p-4 hover:ring-2 hover:ring-indigo-200"><p className="text-2xl font-bold text-indigo-700">{openCount}</p><p className="text-xs text-indigo-700">Open chats</p></Link>
-                  {pack.shop && <Link href="/account/addresses" className="rounded-2xl bg-amber-50 p-4 hover:ring-2 hover:ring-amber-200"><p className="text-2xl font-bold text-amber-700">{addresses.length}</p><p className="text-xs text-amber-700">Addresses</p></Link>}
                   <Link href="/account/chats" className="rounded-2xl bg-emerald-50 p-4 hover:ring-2 hover:ring-emerald-200"><p className="text-2xl font-bold text-emerald-700">{cases.length - openCount}</p><p className="text-xs text-emerald-700">Resolved chats</p></Link>
                 </div>
               </Card>

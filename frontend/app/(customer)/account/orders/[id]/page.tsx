@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getOrder } from "@/lib/data/shop";
 import { day, dayTime, money } from "@/lib/format";
-import { ChatPill, OrderPill, OrderTracker, Panel, ProductTile, ReturnPill, btnGhost, btnPrimary } from "@/components/ShopUI";
+import { ChatPill, OrderPill, OrderTracker, Panel, ProductTile, ReturnPill, btnPrimary } from "@/components/ShopUI";
 import { MapPinIcon, RepeatIcon, TruckIcon } from "@/components/Icons";
 import { AskForm, CancelButton } from "./OrderActions";
 import type { Metadata } from "next";
@@ -28,7 +28,6 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           </div>
           <div className="flex flex-wrap gap-2">
             {o.status === "delivered" && <Link href={`/account/orders/${o.order_id}/return`} className={btnPrimary}><RepeatIcon className="h-4 w-4" /> Return or exchange</Link>}
-            <Link href={`/shop?reorder=${o.order_id}`} className={btnGhost}><RepeatIcon className="h-4 w-4" /> Buy again</Link>
             {canCancel && <CancelButton orderId={o.order_id} number={o.order_number} />}
           </div>
         </div>

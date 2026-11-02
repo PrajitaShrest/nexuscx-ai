@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { getMe } from "@/lib/data/me";
-import { listAddresses, listMyChats, listMyOrders, oneLine } from "@/lib/data/shop";
+import { listMyChats, listMyOrders } from "@/lib/data/shop";
 import { listNotifications } from "@/lib/data/workspace";
 import { ago, day, greeting, money } from "@/lib/format";
-import { ArrowRightIcon, BellIcon, CartIcon, ChatIcon, ClockIcon, HeadsetIcon, MapPinIcon, PackageIcon, RepeatIcon, TruckIcon } from "@/components/Icons";
-import { ChatPill, EmptyState, OrderPill, OrderTracker, Panel, ProductTile, btnGhost, btnPrimary } from "@/components/ShopUI";
+import { ArrowRightIcon, BellIcon, BotIcon, ChatIcon, CheckIcon, ClockIcon, HeadsetIcon, PackageIcon, RepeatIcon, TruckIcon } from "@/components/Icons";
+import { ChatPill, EmptyState, OrderPill, OrderTracker, Panel, ProductTile, btnPrimary } from "@/components/ShopUI";
 import type { Metadata } from "next";
 import { requireShop } from "@/lib/industry";
 
@@ -14,25 +14,23 @@ export const metadata: Metadata = { title: "My account" };
 export default async function AccountHome() {
   await requireShop("/support");
   const me = await getMe();
-  const [orders, chats, addresses, notices] = await Promise.all([listMyOrders(), listMyChats(), listAddresses(), listNotifications(4)]);
+  const [orders, chats, notices] = await Promise.all([listMyOrders(), listMyChats(), listNotifications(4)]);
   const first = me.name.split(" ")[0];
   const active = orders.filter((o) => ["placed", "processing", "shipped"].includes(o.status));
   const openChats = chats.filter((c) => !["resolved", "closed"].includes(c.status));
   const latest = active[0] ?? orders[0];
-  const home = addresses.find((a) => a.is_default);
 
   const tiles = [
     { label: "Active orders", value: active.length, href: "/account/orders", icon: <TruckIcon className="h-5 w-5" />, tint: "bg-sky-50 text-sky-600" },
     { label: "Delivered", value: orders.filter((o) => o.status === "delivered").length, href: "/account/orders", icon: <PackageIcon className="h-5 w-5" />, tint: "bg-emerald-50 text-emerald-600" },
     { label: "Open chats", value: openChats.length, href: "/account/chats", icon: <ChatIcon className="h-5 w-5" />, tint: "bg-violet-50 text-violet-600" },
-    { label: "Saved addresses", value: addresses.length, href: "/account/addresses", icon: <MapPinIcon className="h-5 w-5" />, tint: "bg-amber-50 text-amber-600" },
+    { label: "Resolved chats", value: chats.length - openChats.length, href: "/account/chats", icon: <CheckIcon className="h-5 w-5" />, tint: "bg-amber-50 text-amber-600" },
   ];
   const actions = [
-    { label: "Shop products", text: "Browse and place an order", href: "/shop", icon: <CartIcon className="h-5 w-5" /> },
+    { label: "Ask the AI assistant", text: "Answers in seconds, any time", href: "/support", icon: <BotIcon className="h-5 w-5" /> },
     { label: "Track an order", text: "See where your parcel is", href: "/account/orders", icon: <TruckIcon className="h-5 w-5" /> },
-    { label: "Ask for help", text: "AI answers in seconds", href: "/support", icon: <HeadsetIcon className="h-5 w-5" /> },
     { label: "Return or exchange", text: "Free within 30 days", href: "/account/returns", icon: <RepeatIcon className="h-5 w-5" /> },
-    { label: "Delivery addresses", text: "Add or edit an address", href: "/account/addresses", icon: <MapPinIcon className="h-5 w-5" /> },
+    { label: "Chat history", text: "See past answers and replies", href: "/account/chats", icon: <HeadsetIcon className="h-5 w-5" /> },
   ];
 
   return (
@@ -48,8 +46,8 @@ export default async function AccountHome() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link href="/shop" className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-indigo-700 shadow-sm hover:bg-indigo-50">Start shopping</Link>
-            <Link href="/support" className="rounded-xl bg-white/15 px-4 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 hover:bg-white/25">Get help</Link>
+            <Link href="/support" className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-indigo-700 shadow-sm hover:bg-indigo-50">Ask the AI assistant</Link>
+            <Link href="/account/orders" className="rounded-xl bg-white/15 px-4 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 hover:bg-white/25">Track an order</Link>
           </div>
         </div>
       </section>
@@ -83,8 +81,8 @@ export default async function AccountHome() {
                 )}
               </div>
             ) : (
-              <EmptyState icon={<CartIcon className="h-6 w-6" />} title="No orders yet" text="When you place an order, you can track it here."
-                action={<Link href="/shop" className={btnPrimary}>Browse products</Link>} />
+              <EmptyState icon={<PackageIcon className="h-6 w-6" />} title="No orders yet" text="Orders you place with the store show here, so you can track them or ask the AI about them."
+                action={<Link href="/support" className={btnPrimary}>Ask the AI assistant</Link>} />
             )}
           </Panel>
 
@@ -157,22 +155,6 @@ export default async function AccountHome() {
             )}
           </Panel>
 
-          <Panel title="Delivery address" action={<Link href="/account/addresses" className="text-sm font-semibold text-indigo-700 hover:underline">{home ? "Edit" : "Add"}</Link>}>
-            {home ? (
-              <div className="flex gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600"><MapPinIcon className="h-5 w-5" /></span>
-                <div className="text-sm">
-                  <p className="font-semibold">{home.recipient} <span className="ml-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">{home.label}</span></p>
-                  <p className="text-muted">{oneLine(home)}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="text-sm text-muted">
-                <p>Add a delivery address so checkout is one click.</p>
-                <Link href="/account/addresses" className={`${btnGhost} mt-3`}>Add an address</Link>
-              </div>
-            )}
-          </Panel>
         </aside>
       </div>
     </>
