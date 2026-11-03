@@ -1,9 +1,18 @@
 import { redirect } from "next/navigation";
 import { getMe, isStaff, can } from "@/lib/data/me";
+import { createClient } from "@/lib/supabase/server";
+import Landing from "@/components/Landing";
+import type { Metadata } from "next";
 
-// Home: send each user to the first screen their roles allow.
+export const metadata: Metadata = { title: { absolute: "NexusCX AI · AI customer support, people when it matters" } };
+
+// Home: visitors who are not signed in see the landing page.
+// Signed-in users go to the first screen their roles allow.
 // A "saved" message (after editing the profile) is passed along.
 export default async function Home({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  if (!data?.claims) return <Landing />;
   const me = await getMe();
   const { saved } = await searchParams;
   const q = saved ? `?saved=${encodeURIComponent(saved)}` : "";
