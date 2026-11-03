@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { getChat } from "@/lib/data/shop";
 import { dayTime, day } from "@/lib/format";
 import { ChatPill } from "@/components/ShopUI";
-import { BotIcon, HeadsetIcon, PackageIcon, ShieldIcon } from "@/components/Icons";
+import { BotIcon, HeadsetIcon, PackageIcon, RepeatIcon, ShieldIcon } from "@/components/Icons";
+import { CHANGE_REQUEST, canChangeOrder } from "@/lib/orderChange";
 import ReplyBox from "./ReplyBox";
 import LiveRefresh from "@/components/LiveRefresh";
 import RateChat from "./RateChat";
@@ -13,6 +14,22 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Chat" };
 
+// The AI's answer to "can I change the size?" when the order can still be changed
+function ChangeCard({ href }: { href: string }) {
+  return (
+    <div className="flex gap-3">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white"><BotIcon className="h-5 w-5" /></span>
+      <div className="max-w-[80%] space-y-3 rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 text-[15px] shadow-sm">
+        <p>Good news: this order hasn&apos;t shipped yet, so you can change the size or colour yourself, straight away. No need to wait for our team.</p>
+        <Link href={href} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:brightness-110">
+          <RepeatIcon className="h-4 w-4" /> Change size or colour
+        </Link>
+        <p className="text-xs text-muted">Free, and your delivery date stays the same.</p>
+      </div>
+    </div>
+  );
+}
+
 export default async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const [chat, pack] = await Promise.all([getChat(id), getPack()]);
@@ -20,6 +37,10 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
   const done = ["resolved", "closed"].includes(chat.status);
   const rated = done ? await getMyRating(chat.case_id) : null;
   const title = chat.subject?.replace(/^About my order [A-Z0-9-]+: /, "") ?? "Support request";
+  // Size or colour change the AI can do itself: offer the button instead of waiting for a person
+  // eslint-disable-next-line react-hooks/purity -- server component, rendered once per request
+  const changeHref = pack.shop && chat.order && chat.orderInfo && canChangeOrder(chat.orderInfo, Date.now()) ? `/account/orders/${chat.order.order_id}?change=1` : null;
+  const askedChange = !!changeHref && !done && chat.messages.some((m) => m.sender_type === "customer" && CHANGE_REQUEST.test(m.content));
 
   return (
     <>
@@ -81,8 +102,9 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
               </div>
             );
           })}
+          {askedChange && changeHref && <ChangeCard href={changeHref} />}
         </div>
-        <ReplyBox caseId={chat.case_id} closed={chat.status === "closed"} />
+        <ReplyBox caseId={chat.case_id} closed={chat.status === "closed"} changeHref={changeHref} />
       </section>
     </>
   );

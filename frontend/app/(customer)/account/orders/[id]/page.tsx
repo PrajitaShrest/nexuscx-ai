@@ -6,6 +6,7 @@ import { ChatPill, OrderPill, OrderTracker, Panel, ProductTile, ReturnPill, btnP
 import { MapPinIcon, RepeatIcon, TruckIcon } from "@/components/Icons";
 import { AskForm, CancelButton } from "./OrderActions";
 import ChangeSize from "./ChangeSize";
+import { canChangeOrder } from "@/lib/orderChange";
 import type { Metadata } from "next";
 import { requireShop } from "@/lib/industry";
 
@@ -20,7 +21,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
   const canCancel = ["placed", "processing"].includes(o.status);
   // The AI can change a size or colour itself within 2 days, before it ships (migration 025)
   // eslint-disable-next-line react-hooks/purity -- server component, rendered once per request
-  const canChange = canCancel && o.order_items.some((i) => i.variant) && Date.now() - new Date(o.created_at).getTime() < 2 * 24 * 3600 * 1000;
+  const canChange = canChangeOrder(o, Date.now());
 
   return (
     <>
@@ -36,7 +37,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
             {canCancel && <CancelButton orderId={o.order_id} number={o.order_number} />}
           </div>
         </div>
-        {canChange && <div className="mt-4"><ChangeSize orderId={o.order_id} startOpen={change === "1"} /></div>}
+        {canChange && <div className="mt-4"><ChangeSize key={change ?? "x"} orderId={o.order_id} startOpen={change === "1"} /></div>}
       </div>
 
       <Panel>
@@ -72,7 +73,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
 
           <Panel title="Need help with this order?">
             <p className="-mt-2 mb-4 text-sm text-muted">Pick a reason or write your own. Our assistant replies straight away, and anything that needs a person goes to our team.</p>
-            <AskForm orderId={o.order_id} delivered={o.status === "delivered"} />
+            <AskForm canChange={canChange} orderId={o.order_id} delivered={o.status === "delivered"} />
             {o.cases.length > 0 && (
               <div className="mt-5 border-t pt-4">
                 <p className="mb-2 text-sm font-semibold">Chats about this order</p>

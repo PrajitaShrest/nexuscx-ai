@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useRouter } from "next/navigation";
+import { CHANGE_REQUEST } from "@/lib/orderChange";
 import { ask, cancel, type OrderActionState } from "../actions";
 import { btnPrimary } from "@/components/ShopUI";
 import { SendIcon, XIcon } from "@/components/Icons";
@@ -29,14 +31,23 @@ export function CancelButton({ orderId, number }: { orderId: string; number: str
   );
 }
 
-export function AskForm({ orderId, delivered }: { orderId: string; delivered: boolean }) {
+export function AskForm({ orderId, delivered, canChange = false }: { orderId: string; delivered: boolean; canChange?: boolean }) {
   const [state, action, pending] = useActionState(ask, empty);
   const [text, setText] = useState("");
+  const router = useRouter();
+  // "Change the size" on an order that can still be changed: open the size picker instead of a chat
+  const onSubmit = (e: React.FormEvent) => {
+    if (canChange && CHANGE_REQUEST.test(text)) {
+      e.preventDefault();
+      setText("");
+      router.push(`/account/orders/${orderId}?change=1`, { scroll: true });
+    }
+  };
   const reasons = delivered
     ? ["An item arrived damaged", "I received the wrong item", "An item is not working", "I have a question about my refund"]
     : ["Where is my order?", "Can I change the delivery address?", "My parcel is late", "I was charged twice"];
   return (
-    <form action={action} className="space-y-3">
+    <form action={action} onSubmit={onSubmit} className="space-y-3">
       <input type="hidden" name="order_id" value={orderId} />
       <div className="flex flex-wrap gap-2">
         {reasons.map((r) => (

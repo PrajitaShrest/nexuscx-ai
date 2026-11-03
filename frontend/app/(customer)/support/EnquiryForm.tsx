@@ -4,7 +4,8 @@ import { useActionState, useEffect, useRef, useState, useTransition } from "reac
 import type { EnquiryResult } from "@/lib/data/cases";
 import { sendEnquiry, sendFeedback } from "./actions";
 import { TOPIC_SETS } from "./topics";
-import OrderChange, { CHANGE_REQUEST } from "./OrderChange";
+import OrderChange from "./OrderChange";
+import { CHANGE_REQUEST } from "@/lib/orderChange";
 import { PACKS, type Industry } from "@/lib/packs";
 import { BookIcon, BotIcon, HeadsetIcon, SendIcon, ShieldIcon } from "@/components/Icons";
 

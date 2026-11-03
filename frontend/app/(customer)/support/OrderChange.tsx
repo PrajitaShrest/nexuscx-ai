@@ -5,9 +5,6 @@ import { useEffect, useState } from "react";
 import { changeableOrders, type ChangeableOrder } from "./actions";
 import { BotIcon, RepeatIcon } from "@/components/Icons";
 
-// Words that mean "change the size or colour on my order"
-export const CHANGE_REQUEST = /\b(change|swap|switch|exchange|wrong|different|bigger|smaller|instead)\b[\s\S]*\b(size|sizes|colou?r|band)\b|\b(size|colou?r|band)\b[\s\S]*\b(change|swap|switch|exchange|wrong|bigger|smaller|instead)\b/i;
-
 // The AI's answer to "can I change the size?": a button to each order it can still change.
 // The change itself is made on the order page (Change size or colour).
 export default function OrderChange({ text, onHuman }: { text: string; onHuman: () => void }) {

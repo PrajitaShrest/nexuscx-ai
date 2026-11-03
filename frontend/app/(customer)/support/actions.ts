@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { answerFeedback, submitEnquiry, type EnquiryResult } from "@/lib/data/cases";
 import { check, enquirySchema } from "@/lib/validation";
 import { listMyOrders } from "@/lib/data/shop";
+import { canChangeOrder } from "@/lib/orderChange";
 
 export type EnquiryState = { error?: string; result?: EnquiryResult; message?: string };
 
@@ -32,9 +33,9 @@ export async function sendFeedback(caseId: string, helpful: boolean): Promise<{ 
 export type ChangeableOrder = { order_id: string; order_number: string; items: string };
 export async function changeableOrders(): Promise<ChangeableOrder[]> {
   const orders = await listMyOrders();
-  const since = Date.now() - 2 * 24 * 3600 * 1000;
+  const now = Date.now();
   return orders
-    .filter((o) => ["placed", "processing"].includes(o.status) && new Date(o.created_at).getTime() > since && o.order_items.some((i) => i.variant))
+    .filter((o) => canChangeOrder(o, now))
     .map((o) => ({ order_id: o.order_id, order_number: o.order_number,
       items: o.order_items.filter((i) => i.variant).map((i) => `${i.product_name} (${i.variant})`).join(", ") }));
 }
