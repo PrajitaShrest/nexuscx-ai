@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { BellIcon, CartIcon, ChatIcon, ClockIcon, HomeIcon, MapPinIcon, PackageIcon, RepeatIcon, SettingsIcon } from "./Icons";
+import { BellIcon, ChatIcon, ClockIcon, HomeIcon, PackageIcon, RepeatIcon, SettingsIcon } from "./Icons";
 
 // Customer menu, laid out like the staff sidebar (same sections, same colours).
 export const CUSTOMER_NAV: { section: string; items: { label: string; href: string; icon: (c: string) => ReactNode; exact?: boolean }[] }[] = [
@@ -11,8 +11,7 @@ export const CUSTOMER_NAV: { section: string; items: { label: string; href: stri
     { label: "Overview", href: "/account", icon: (c) => <HomeIcon className={c} />, exact: true },
     { label: "Help & chat", href: "/support", icon: (c) => <ChatIcon className={c} /> },
   ]},
-  { section: "Shopping", items: [
-    { label: "Shop", href: "/shop", icon: (c) => <CartIcon className={c} /> },
+  { section: "Orders", items: [
     { label: "My orders", href: "/account/orders", icon: (c) => <PackageIcon className={c} /> },
     { label: "Returns & exchanges", href: "/account/returns", icon: (c) => <RepeatIcon className={c} /> },
   ]},
@@ -21,15 +20,14 @@ export const CUSTOMER_NAV: { section: string; items: { label: string; href: stri
   ]},
   { section: "My account", items: [
     { label: "Notifications", href: "/account/notifications", icon: (c) => <BellIcon className={c} /> },
-    { label: "Addresses", href: "/account/addresses", icon: (c) => <MapPinIcon className={c} /> },
     { label: "Profile & security", href: "/profile", icon: (c) => <SettingsIcon className={c} /> },
   ]},
 ];
 
 const isActive = (path: string, href: string, exact?: boolean) => (exact ? path === href : path === href || path.startsWith(`${href}/`));
 
-// The overview, shopping and addresses only exist in the e-commerce pack (other packs start at Help & chat)
-const SHOP_ONLY = new Set(["/account", "/shop", "/account/orders", "/account/returns", "/account/addresses"]);
+// The overview, orders and returns only exist in the e-commerce pack (other packs start at Help & chat)
+const SHOP_ONLY = new Set(["/account", "/account/orders", "/account/returns"]);
 const navFor = (shop: boolean) =>
   CUSTOMER_NAV.map((g) => ({ ...g, items: g.items.filter((i) => shop || !SHOP_ONLY.has(i.href)) })).filter((g) => g.items.length > 0);
 

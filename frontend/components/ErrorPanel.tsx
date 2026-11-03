@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { LogoMark } from "./Logo";
+import { logout } from "@/app/auth/actions";
 
 // Shared "something went wrong" box used by every error.tsx.
 // It never shows the technical message to the user; the digest helps us find it in the logs.
@@ -17,6 +18,9 @@ export default function ErrorPanel({ error, reset, home, homeLabel }: { error: E
         <button onClick={reset} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Try again</button>
         <Link href={home} className="rounded-lg border px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">{homeLabel}</Link>
       </div>
+      <form action={logout} className="mt-4">
+        <button type="submit" className="text-sm font-medium text-gray-500 underline hover:text-gray-800">Log out</button>
+      </form>
     </div>
   );
 }

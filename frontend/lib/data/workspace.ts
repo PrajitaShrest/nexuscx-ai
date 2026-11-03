@@ -20,7 +20,7 @@ export type CaseDetail = {
   language: string | null;
   customer: { customer_id: string; tier: string; phone: string | null; user: { name: string; email: string; username: string } | null } | null;
   order: { order_id: string; order_number: string; status: string; total_cents: number; created_at: string; tracking_number: string | null;
-    order_items: { order_item_id: string; product_name: string; quantity: number; line_total_cents: number }[] } | null;
+    order_items: { order_item_id: string; product_name: string; quantity: number; line_total_cents: number; variant: string | null }[] } | null;
   messages: CaseMessage[];
   notes: { note_id: string; content: string; created_at: string; author: { name: string } | null }[];
   assignments: { status: string; assigned_at: string; user: { user_id: string; name: string } | null }[];
@@ -48,7 +48,7 @@ export async function getCaseDetail(id: string): Promise<CaseDetail | null> {
       case_id, case_number, subject, status, priority, intent, sentiment, urgency, risk, confidence, language,
       created_at, updated_at, sla_due_at, closed_at, first_response_at,
       customer:customers(customer_id, tier, phone, user:users(name, email, username)),
-      order:orders(order_id, order_number, status, total_cents, created_at, tracking_number, order_items(order_item_id, product_name, quantity, line_total_cents)),
+      order:orders(order_id, order_number, status, total_cents, created_at, tracking_number, order_items(order_item_id, product_name, quantity, line_total_cents, variant)),
       conversations(conversation_id, messages(message_id, sender_type, sender_id, content, message_type, sent_at)),
       notes:case_notes(note_id, content, created_at, author:users(name)),
       assignments:case_assignments(status, assigned_at, user:users(user_id, name)),

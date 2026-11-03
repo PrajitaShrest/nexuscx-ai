@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { askAboutOrder, cancelOrder } from "@/lib/data/shop";
+import { aiChangeOrderOption, askAboutOrder, cancelOrder, getOrder, type ChangeResult } from "@/lib/data/shop";
 
 export type OrderActionState = { error?: string };
 
@@ -25,4 +25,18 @@ export async function ask(_p: OrderActionState, f: FormData): Promise<OrderActio
   const res = r.data as { case_id: string };
   revalidatePath("/account", "layout");
   redirect(`/account/chats/${res.case_id}`);
+}
+
+// Change a size or colour on this order (the Orders Agent, migration 025).
+// The customer is signed in and on their own order, so the order's own number and
+// delivery postcode are used for the check. Without an item it lists the options.
+export async function sizeOptions(orderId: string, item: string | null = null, value: string | null = null): Promise<ChangeResult> {
+  const o = await getOrder(orderId);
+  if (!o) return { status: "error", message: "This order could not be found." };
+  const postcode = o.ship_address.match(/.*(\d{4})/)?.[1] ?? "";
+  if (item && !/^[0-9a-f-]{36}$/i.test(item)) return { status: "error", message: "That item could not be found." };
+  const { data, error } = await aiChangeOrderOption(o.order_number, postcode, item, value ? value.slice(0, 30) : null);
+  if (error || !data) return { status: "error", message: error ?? "Something went wrong. Please try again." };
+  if (data.status === "changed") revalidatePath(`/account/orders/${orderId}`);
+  return data;
 }

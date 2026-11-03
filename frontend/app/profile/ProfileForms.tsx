@@ -74,7 +74,6 @@ export function DetailsForm({ init }: { init: DetailsInit }) {
               <input id="date_of_birth" name="date_of_birth" type="date" value={v.dob} onChange={set("dob")}
                 max={new Date().toISOString().slice(0, 10)} className={inputClass(!!err("date_of_birth"))} />
             </Field>
-            {init.shop !== false && <div className="flex flex-col justify-end text-sm text-muted">Delivery addresses are kept in your <Link href="/account/addresses" className="font-semibold text-indigo-700 hover:underline">address book</Link>.</div>}
           </>
         )}
       </div>

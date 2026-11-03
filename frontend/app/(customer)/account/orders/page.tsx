@@ -13,8 +13,8 @@ export default async function OrdersPage() {
   const orders = await listMyOrders();
   return (
     <>
-      <PageHead title="My orders" sub="Track deliveries, buy again or get help with an order."
-        action={<Link href="/shop" className={btnPrimary}>Shop products</Link>} />
+      <PageHead title="My orders" sub="Track deliveries, return items, or ask the AI about any order."
+        action={<Link href="/support" className={btnPrimary}>Ask about an order</Link>} />
       <OrderList orders={orders} />
     </>
   );

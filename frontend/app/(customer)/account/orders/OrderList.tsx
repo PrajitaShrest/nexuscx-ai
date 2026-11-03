@@ -20,8 +20,8 @@ export default function OrderList({ orders }: { orders: Order[] }) {
   const shown = orders.filter((o) => t.test(o.status));
 
   if (orders.length === 0) {
-    return <EmptyState icon={<PackageIcon className="h-6 w-6" />} title="You haven't ordered anything yet"
-      text="Your orders and their delivery progress will show here." action={<Link href="/shop" className={btnPrimary}>Browse products</Link>} />;
+    return <EmptyState icon={<PackageIcon className="h-6 w-6" />} title="No orders yet"
+      text="Orders you place with the store show here, with their delivery progress." action={<Link href="/support" className={btnPrimary}>Ask the AI assistant</Link>} />;
   }
   return (
     <div className="space-y-4">
@@ -47,7 +47,7 @@ export default function OrderList({ orders }: { orders: Order[] }) {
                 </div>
                 <div className="mt-4 flex items-center gap-2">
                   {o.order_items.slice(0, 4).map((i) => <ProductTile key={i.order_item_id} category={i.category} size="sm" />)}
-                  <span className="ml-1 min-w-0 flex-1 truncate text-sm text-muted">{o.order_items.map((i) => `${i.quantity} × ${i.product_name}`).join(", ")}</span>
+                  <span className="ml-1 min-w-0 flex-1 truncate text-sm text-muted">{o.order_items.map((i) => `${i.quantity} × ${i.product_name}${i.variant ? ` (${i.variant})` : ""}`).join(", ")}</span>
                 </div>
                 <div className="mt-4"><OrderTracker status={o.status} compact /></div>
                 <div className="mt-3 flex items-center justify-between text-sm">

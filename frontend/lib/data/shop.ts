@@ -10,7 +10,7 @@ export type Address = {
   address_id: string; label: string; recipient: string; line1: string; line2: string | null;
   suburb: string; state: string; postcode: string; phone: string | null; is_default: boolean;
 };
-export type OrderItem = { order_item_id: string; product_id: string | null; product_name: string; category: string; unit_price_cents: number; quantity: number; line_total_cents: number };
+export type OrderItem = { order_item_id: string; product_id: string | null; product_name: string; category: string; unit_price_cents: number; quantity: number; line_total_cents: number; variant: string | null };
 export type OrderEvent = { event_id: string; status: string; note: string | null; created_at: string };
 export type Order = {
   order_id: string; order_number: string; status: string; ship_recipient: string; ship_address: string;
@@ -62,7 +62,7 @@ export const deleteAddress = (id: string) => rpc("delete_address", { p_address_i
 export const setDefaultAddress = (id: string) => rpc("set_default_address", { p_address_id: id }, "setDefaultAddress");
 
 // ---------- orders ----------
-const ORDER_COLS = "order_id, order_number, status, ship_recipient, ship_address, subtotal_cents, shipping_cents, total_cents, notes, tracking_number, created_at, updated_at, order_items(order_item_id, product_id, product_name, category, unit_price_cents, quantity, line_total_cents)";
+const ORDER_COLS = "order_id, order_number, status, ship_recipient, ship_address, subtotal_cents, shipping_cents, total_cents, notes, tracking_number, created_at, updated_at, order_items(order_item_id, product_id, product_name, category, unit_price_cents, quantity, line_total_cents, variant)";
 
 export async function listMyOrders(): Promise<Order[]> {
   const supabase = await createClient();
@@ -88,6 +88,11 @@ export async function getOrder(id: string): Promise<OrderDetail | null> {
 export const placeOrder = (addressId: string, items: { product_id: string; quantity: number }[], notes: string) =>
   rpc("place_order", { p_address_id: addressId, p_items: items, p_notes: notes }, "placeOrder");
 export const cancelOrder = (id: string) => rpc("cancel_order", { p_order_id: id }, "cancelOrder");
+// The Orders Agent changes a size or colour (migration 025). Without an item it only checks the order.
+export type ChangeItem = { order_item_id: string; product_name: string; label: string; current: string | null; options: string[] };
+export type ChangeResult = { status: "error" | "verified" | "changed"; message?: string; order_number?: string; items?: ChangeItem[]; case_number?: string; order_id?: string };
+export const aiChangeOrderOption = (orderNumber: string, postcode: string, item: string | null, value: string | null) =>
+  rpc("ai_change_order_option", { p_order_number: orderNumber, p_postcode: postcode, p_item: item, p_new: value }, "aiChangeOrderOption") as Promise<{ data?: ChangeResult; error?: string }>;
 export const askAboutOrder = (id: string, message: string) => rpc("ask_about_order", { p_order_id: id, p_message: message }, "askAboutOrder");
 
 // ---------- chat history ----------
@@ -109,21 +114,23 @@ export async function listMyChats(): Promise<Chat[]> {
   });
 }
 
-export async function getChat(caseId: string): Promise<(Chat & { messages: ChatMessage[]; conversation_ids: string[] }) | null> {
+export async function getChat(caseId: string): Promise<(Chat & { messages: ChatMessage[]; conversation_ids: string[]; orderInfo: { status: string; created_at: string; order_items: { variant: string | null }[] } | null }) | null> {
   if (!/^[0-9a-f-]{36}$/i.test(caseId)) return null;
   const supabase = await createClient();
   const { data, error } = await supabase.from("cases")
-    .select("case_id, case_number, subject, status, intent, created_at, updated_at, orders(order_id, order_number), conversations(conversation_id, messages(message_id, sender_type, content, message_type, sent_at))")
+    .select("case_id, case_number, subject, status, intent, created_at, updated_at, orders(order_id, order_number, status, created_at, order_items(variant)), conversations(conversation_id, messages(message_id, sender_type, content, message_type, sent_at))")
     .eq("case_id", caseId).maybeSingle();
   if (error) console.error("[getChat]", error.message);
   if (!data) return null;
   const r = data as unknown as Omit<Chat, "order" | "last" | "count"> & {
-    orders: { order_id: string; order_number: string } | null; conversations: { conversation_id: string; messages: ChatMessage[] }[];
+    orders: { order_id: string; order_number: string; status: string; created_at: string; order_items: { variant: string | null }[] } | null;
+    conversations: { conversation_id: string; messages: ChatMessage[] }[];
   };
   const messages = r.conversations.flatMap((c) => c.messages).sort((a, b) => a.sent_at.localeCompare(b.sent_at));
   return {
     case_id: r.case_id, case_number: r.case_number, subject: r.subject, status: r.status, intent: r.intent,
-    created_at: r.created_at, updated_at: r.updated_at, order: r.orders,
+    created_at: r.created_at, updated_at: r.updated_at,
+    order: r.orders && { order_id: r.orders.order_id, order_number: r.orders.order_number }, orderInfo: r.orders,
     last: messages.at(-1) ?? null, count: messages.length, messages, conversation_ids: r.conversations.map((c) => c.conversation_id),
   };
 }

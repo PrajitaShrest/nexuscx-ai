@@ -9,7 +9,7 @@ export type StatsFilters = { days: number; topic: string; sentiment: string; pri
 // Topic filter groups the raw AI intents into the same labels used across the app.
 // Each topic belongs to one industry pack (migration 017); filters show the active pack's topics.
 export const TOPICS: Record<string, { label: string; intents: string[]; industry: Industry }> = {
-  orders: { label: "Orders & delivery", intents: ["order_status", "return_request"], industry: "ecommerce" },
+  orders: { label: "Orders & delivery", intents: ["order_status", "return_request", "order_change"], industry: "ecommerce" },
   billing: { label: "Billing & refunds", intents: ["billing_question", "refund_request"], industry: "ecommerce" },
   technical: { label: "Technical", intents: ["technical_issue"], industry: "ecommerce" },
   account: { label: "Account", intents: ["account"], industry: "ecommerce" },
@@ -23,7 +23,7 @@ export const TOPICS: Record<string, { label: string; intents: string[]; industry
 };
 export const topicsFor = (industry: Industry) => Object.entries(TOPICS).filter(([, t]) => t.industry === industry);
 export const ISSUE_LABEL: Record<string, string> = {
-  order_status: "Order status", return_request: "Returns & exchanges", billing_question: "Billing questions",
+  order_status: "Order status", order_change: "Size & colour changes", return_request: "Returns & exchanges", billing_question: "Billing questions",
   refund_request: "Refunds", technical_issue: "Technical problems", account: "Account & login", general: "General", unknown: "General",
   admissions: "Admissions", fees: "Finance & fees", it_support: "IT support", academic: "Academic, exams & results", student_services: "Student services",
 };
