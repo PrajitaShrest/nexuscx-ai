@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { CHOICE_COOKIE, isIndustry } from "@/lib/packs";
 
 // "E-commerce demo / University demo": remembers the visitor's choice in
@@ -13,4 +14,11 @@ export async function choosePack(industry: string): Promise<{ error?: string }> 
   store.set(CHOICE_COOKIE, industry, { path: "/", sameSite: "lax", maxAge: 60 * 60 * 24 * 30, secure: process.env.NODE_ENV === "production" });
   revalidatePath("/", "layout");
   return {};
+}
+
+// Landing page "Try the demo" buttons: remember the choice, then open sign-in
+export async function startDemo(formData: FormData) {
+  const industry = String(formData.get("industry") ?? "");
+  if (isIndustry(industry)) await choosePack(industry);
+  redirect("/login");
 }
