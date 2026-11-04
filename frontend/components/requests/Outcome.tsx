@@ -1,6 +1,7 @@
 import { REQUEST_STATUS } from "@/lib/forms";
 import type { Values } from "@/lib/forms";
 import { CheckIcon } from "@/components/Icons";
+import { buildTranscript } from "@/lib/transcript";
 
 // What a finished request gives the person: a digital ID card, a letter, a permit,
 // or the changed order. Also the status pill and the step tracker.
@@ -132,13 +133,71 @@ export function Outcome({ type, details, outcome, photoUrl, name }: {
         </article>
       )}
 
-      {type === "transcript" && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm shadow-sm">
-          <p className="font-semibold">{d("kind")} transcript · Ref {o("reference")}</p>
-          <p className="mt-1 text-muted">Issued {fmt(o("issued"))}{d("copies") ? ` · ${d("copies")} official cop${d("copies") === "1" ? "y" : "ies"}` : ""}</p>
-          {o("sent") && <p className="mt-2">{o("sent")}.</p>}
-        </div>
-      )}
+      {type === "transcript" && (() => {
+        const t = d("course") && d("intake") ? buildTranscript(d("course"), d("intake"), d("load"), d("student_number")) : null;
+        const official = d("kind").startsWith("Official");
+        if (!t) {
+          return (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm shadow-sm">
+              <p className="font-semibold">{d("kind")} transcript · Ref {o("reference")}</p>
+              <p className="mt-1 text-muted">Issued {fmt(o("issued"))}</p>
+              {o("sent") && <p className="mt-2">{o("sent")}.</p>}
+            </div>
+          );
+        }
+        return (
+          <article className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 text-sm text-ink shadow-sm print:border-0 print:shadow-none">
+            {!official && <p aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-12 select-none text-7xl font-black tracking-widest text-slate-100">UNOFFICIAL</p>}
+            <div className="relative">
+              <div className="flex items-start justify-between gap-4 border-b pb-3">
+                <div>
+                  <p className="text-lg font-bold text-indigo-800">Northbridge University</p>
+                  <p className="font-semibold">{official ? "Official academic transcript" : "Unofficial academic transcript"}</p>
+                </div>
+                <div className="text-right text-xs text-muted">
+                  <p>Ref {o("reference")}</p><p>Issued {fmt(o("issued"))}</p>
+                  {official && (
+                    <span className="mt-2 inline-flex h-16 w-16 items-center justify-center rounded-full border-2 border-indigo-700 text-center text-[8px] font-bold uppercase leading-tight text-indigo-800">Northbridge<br />University<br />seal</span>
+                  )}
+                </div>
+              </div>
+              <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-4">
+                <div><dt className="text-xs text-muted">Student</dt><dd className="font-semibold">{name}</dd></div>
+                <div><dt className="text-xs text-muted">Student number</dt><dd className="font-mono font-semibold">{d("student_number")}</dd></div>
+                <div className="col-span-2"><dt className="text-xs text-muted">Course</dt><dd className="font-semibold">{d("course")} ({d("load") || "Full-time"})</dd></div>
+                <div><dt className="text-xs text-muted">Started</dt><dd>{d("intake")}</dd></div>
+                <div><dt className="text-xs text-muted">Status</dt><dd>{t.status}</dd></div>
+                <div><dt className="text-xs text-muted">Expected completion</dt><dd>{completion(d("course"), d("intake"), d("load"))}</dd></div>
+              </dl>
+              {t.terms.map((term) => (
+                <section key={term.label} className="mt-4 break-inside-avoid">
+                  <h4 className="mb-1 font-semibold">{term.label}{term.current && <span className="ml-2 text-xs font-normal text-muted">(in progress)</span>}</h4>
+                  <table className="w-full table-fixed text-left text-[13px]">
+                    <thead className="border-b text-xs text-muted"><tr><th className="w-20 py-1 pr-2 font-medium">Unit</th><th className="py-1 pr-2 font-medium">Name</th><th className="w-16 py-1 pr-2 text-right font-medium">Credit</th><th className="w-16 py-1 pr-2 text-right font-medium">Mark</th><th className="w-20 py-1 text-right font-medium">Grade</th></tr></thead>
+                    <tbody>
+                      {term.rows.map((u) => (
+                        <tr key={u.code} className="border-b border-slate-100">
+                          <td className="py-1 pr-2 font-mono">{u.code}</td><td className="py-1 pr-2">{u.name}</td>
+                          <td className="py-1 pr-2 text-right">{u.points}</td><td className="py-1 pr-2 text-right">{u.mark ?? "—"}</td>
+                          <td className={`py-1 text-right font-semibold ${u.grade === "Enrolled" ? "font-normal text-muted" : ""}`}>{u.grade}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </section>
+              ))}
+              <div className="mt-4 grid grid-cols-3 gap-3 rounded-xl bg-slate-50 p-3 text-center">
+                <div><p className="text-xs text-muted">Credit points</p><p className="font-semibold">{t.creditDone} of {t.creditTotal}</p></div>
+                <div><p className="text-xs text-muted">GPA (out of 7)</p><p className="font-semibold">{t.gpa ?? "—"}</p></div>
+                <div><p className="text-xs text-muted">Average mark (WAM)</p><p className="font-semibold">{t.wam ?? "—"}</p></div>
+              </div>
+              <p className="mt-3 text-xs text-muted">Grades: HD High Distinction (85–100), D Distinction (75–84), C Credit (65–74), P Pass (50–64), N Fail (below 50).</p>
+              {o("sent") && <p className="mt-1 text-xs text-muted">{o("sent")}.</p>}
+              <p className="mt-3 border-t pt-2 text-xs text-muted">Sample transcript made by a student demo project. Northbridge University is not a real organisation and these results are not real.</p>
+            </div>
+          </article>
+        );
+      })()}
 
       {type === "parking_permit" && (
         <div className="mx-auto max-w-sm overflow-hidden rounded-2xl border-2 border-amber-400 bg-amber-50 text-ink shadow-sm">
