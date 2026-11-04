@@ -85,6 +85,7 @@ In Supabase, create a new project. Then open **SQL Editor → New query** and ru
 | 22 | `023_university_staff.sql` | Northbridge staff job titles and teams (lecturer, librarian, reception, IT, admissions & finance); Team Operations shows each organisation's own staff |
 | 23 | `024_student_wording.sql` | Inbox items and new audit entries for university cases say "student" instead of "customer" |
 | 24 | `025_ai_order_changes.sql` | The Orders Agent changes a size or colour itself: checks order number + delivery postcode, ordered in the last 2 days, not shipped; logs it and closes the case. Re-run to refresh the demo order |
+| 25 | `026_service_requests.sql` | Forms and service requests: the AI offers a pre-filled, checked form (student ID card with photo, enrolment letter, transcript, parking permit, store delivery address change); staff queue, mark ready, person notified; digital card, letter and permit |
 
 Each file ends with a small check query. A table of results means it worked.
 

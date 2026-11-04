@@ -6,10 +6,12 @@ import { sendEnquiry, sendFeedback } from "./actions";
 import { TOPIC_SETS } from "./topics";
 import OrderChange from "./OrderChange";
 import { CHANGE_REQUEST } from "@/lib/orderChange";
+import RequestForm from "@/components/requests/RequestForm";
+import { formForMessage, hoursText, type Prefill, type RequestType } from "@/lib/forms";
 import { PACKS, type Industry } from "@/lib/packs";
 import { BookIcon, BotIcon, HeadsetIcon, SendIcon, ShieldIcon } from "@/components/Icons";
 
-type Turn = { text: string; result: EnquiryResult; change?: boolean };
+type Turn = { text: string; result: EnquiryResult; change?: boolean; form?: RequestType };
 type ChatState = { turns: Turn[]; error?: string; failed?: string };
 const MAX = 2000;
 
@@ -78,6 +80,27 @@ function Clarify({ text, result: r, onChoose }: Turn & { onChoose: (title: strin
   );
 }
 
+// The AI recognised a request with a form: it explains, then shows the form already filled in
+function FormTurn({ text, type, prefill }: { text: string; type: RequestType; prefill: Prefill }) {
+  const photo = type.fields.some((f) => f.type === "photo");
+  const auto = type.fields.filter((f) => f.prefill && (prefill[f.prefill] ?? "") !== "").length;
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <div className="max-w-[80%] rounded-2xl rounded-br-md bg-gradient-to-br from-indigo-600 to-violet-600 px-4 py-3 text-[15px] text-white shadow-sm">{text}</div>
+      </div>
+      <div className="flex gap-3">
+        <BotAvatar />
+        <div className="min-w-0 max-w-[92%] flex-1 space-y-3 rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 text-[15px] text-ink shadow-sm">
+          <p>I can sort out your <strong>{type.title.toLowerCase()}</strong> right here. {auto > 0 ? `I've already filled in ${auto} detail${auto === 1 ? "" : "s"} from your account. ` : ""}
+            Just check {auto > 0 ? "them" : "the form"}{photo ? ", add a photo" : ""} and send. It goes straight to the {type.team_name} team, who usually finish these {hoursText(type.sla_hours)}.</p>
+          <RequestForm type={type} prefill={prefill} compact />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Reply({ text, result: r }: Turn) {
   return (
     <div className="space-y-4">
@@ -102,7 +125,7 @@ function Reply({ text, result: r }: Turn) {
   );
 }
 
-export default function EnquiryForm({ firstName, industry }: { firstName: string; industry: Industry }) {
+export default function EnquiryForm({ firstName, industry, forms }: { firstName: string; industry: Industry; forms?: { types: RequestType[]; prefill: Prefill } }) {
   const TOPICS = TOPIC_SETS[industry];
   const pack = PACKS[industry];
   const [draft, setDraft] = useState("");
@@ -119,6 +142,12 @@ export default function EnquiryForm({ firstName, industry }: { firstName: string
     if (pack.shop && CHANGE_REQUEST.test(text)) {
       setDraft("");
       return { turns: [...prev.turns, { text, result: { status: "order_change" } as unknown as EnquiryResult, change: true }] };
+    }
+    // A request that has a form (ID card, letter, permit, address change): the AI offers the form here
+    const form = forms && !fd.get("clarified") ? formForMessage(forms.types, text) : null;
+    if (form) {
+      setDraft("");
+      return { turns: [...prev.turns, { text, result: { status: "form" } as unknown as EnquiryResult, form }] };
     }
     const r = await sendEnquiry({}, fd);
     if (r.result) {
@@ -186,7 +215,9 @@ export default function EnquiryForm({ firstName, industry }: { firstName: string
           </div>
         )}
 
-        {chat.turns.map((t, i) => t.change
+        {chat.turns.map((t, i) => t.form && forms
+          ? <FormTurn key={`f${i}`} text={t.text} type={t.form} prefill={forms.prefill} />
+          : t.change
           ? <OrderChange key={`o${i}`} text={t.text} onHuman={askHuman} />
           : t.result.status === "clarify"
           ? <Clarify key={`c${i}`} {...t} onChoose={(title) => choose(t.text, title)} />

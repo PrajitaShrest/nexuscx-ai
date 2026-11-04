@@ -21,7 +21,7 @@ export default async function InboxPage() {
           <h1 className="text-xl font-semibold">Inbox</h1>
           <LiveRefresh name={`inbox-${me.user_id}`} watch={[{ table: "notifications", event: "INSERT", filter: `user_id=eq.${me.user_id}` }]} />
         </div>
-        <p className="mb-4 text-sm text-gray-500">Cases sent to people, replies and requests. Click one to open the case.</p>
+        <p className="mb-4 text-sm text-gray-500">Cases sent to people, replies and new requests. Click one to open it.</p>
         <div className="max-w-3xl"><NoticeList notices={notices} /></div>
       </main>
     </div>

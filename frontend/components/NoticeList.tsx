@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import type { Notice } from "@/lib/data/workspace";
 import { ago } from "@/lib/format";
 import { markAllRead } from "@/app/notifications-actions";
-import { BellIcon, ChatIcon, HeadsetIcon, PackageIcon, RepeatIcon, ShieldIcon } from "./Icons";
+import { BellIcon, ChatIcon, HeadsetIcon, IdCardIcon, PackageIcon, RepeatIcon, ShieldIcon } from "./Icons";
 
 const ICON: Record<string, { icon: React.ReactNode; tint: string }> = {
   new_escalation: { icon: <ShieldIcon className="h-4 w-4" />, tint: "bg-rose-50 text-rose-600" },
@@ -16,6 +16,8 @@ const ICON: Record<string, { icon: React.ReactNode; tint: string }> = {
   order_update: { icon: <PackageIcon className="h-4 w-4" />, tint: "bg-emerald-50 text-emerald-600" },
   return_request: { icon: <RepeatIcon className="h-4 w-4" />, tint: "bg-amber-50 text-amber-600" },
   return_update: { icon: <RepeatIcon className="h-4 w-4" />, tint: "bg-amber-50 text-amber-600" },
+  new_request: { icon: <IdCardIcon className="h-4 w-4" />, tint: "bg-violet-50 text-violet-600" },
+  request_update: { icon: <IdCardIcon className="h-4 w-4" />, tint: "bg-emerald-50 text-emerald-600" },
 };
 
 // Shows notifications and marks them read once the page has been seen.

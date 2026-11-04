@@ -5,6 +5,7 @@ import { listCaseQueue } from "@/lib/data/cases";
 import EnquiryForm from "./EnquiryForm";
 import MyRequests, { type RequestCard } from "./MyRequests";
 import { getPack } from "@/lib/industry";
+import { getRequestForms } from "@/lib/data/requests";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Help & chat" };
@@ -23,7 +24,7 @@ function ago(iso: string) {
 export default async function SupportPage() {
   const me = await getMe();
   if (isStaff(me)) redirect("/conversations");
-  const [{ data: myCases }, pack] = await Promise.all([listCaseQueue(), getPack()]); // RLS returns only this person's cases
+  const [{ data: myCases }, pack, forms] = await Promise.all([listCaseQueue(), getPack(), getRequestForms()]); // RLS returns only this person's cases
   const first = me.name.split(" ")[0];
 
   const items: RequestCard[] = myCases.map((c) => ({
@@ -67,7 +68,7 @@ export default async function SupportPage() {
         </section>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="min-w-0 lg:col-span-2"><EnquiryForm key={pack.id} firstName={first} industry={pack.id} /></div>
+          <div className="min-w-0 lg:col-span-2"><EnquiryForm key={pack.id} firstName={first} industry={pack.id} forms={forms} /></div>
           <aside className="min-w-0 space-y-6">
             <MyRequests items={items} industry={pack.id} />
             <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
