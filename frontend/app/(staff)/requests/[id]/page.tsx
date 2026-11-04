@@ -18,7 +18,7 @@ export const metadata: Metadata = { title: "Request" };
 
 const LABELS: Record<string, string> = {
   full_name: "Full name", student_number: "Student number", date_of_birth: "Date of birth", course: "Course", reason: "Reason",
-  delivery: "Delivery", purpose: "Purpose", addressed_to: "Addressed to", include: "Include", kind: "Transcript", copies: "Copies",
+  delivery: "Delivery", intake: "Started", load: "Study load", purpose: "Purpose", addressed_to: "Addressed to", include: "Include", kind: "Transcript", copies: "Copies",
   postal_address: "Postal address", rego: "Registration", rego_state: "State", car: "Car", permit: "Permit", start_date: "Start date",
   phone: "Mobile", order: "Order", recipient: "Recipient", line1: "Street", line2: "Unit / level", suburb: "Suburb", state: "State",
   postcode: "Postcode", instructions: "Instructions",

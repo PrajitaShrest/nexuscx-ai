@@ -88,6 +88,15 @@ export function DigitalCard({ name, studentNumber, course, photoUrl, cardNumber,
   );
 }
 
+// Expected end of a course: Bachelor 3 years, Master 2, Diploma 1 (twice as long part-time).
+// A February start finishes in November; a July start finishes in June.
+export function completion(course: string, intake: string, load: string) {
+  const years = (course.startsWith("Bachelor") ? 3 : course.startsWith("Master") ? 2 : 1) * (load === "Part-time" ? 2 : 1);
+  const [month, y] = intake.split(" ");
+  const start = Number(y);
+  return month === "July" ? `June ${start + years}` : `November ${start + years - 1}`;
+}
+
 const fmt = (d?: string | boolean) => (typeof d === "string" && d ? new Date(d).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" }) : "");
 
 export function Outcome({ type, details, outcome, photoUrl, name }: {
@@ -112,7 +121,10 @@ export function Outcome({ type, details, outcome, photoUrl, name }: {
           </div>
           <p className="mt-4">{d("addressed_to") || "To whom it may concern"},</p>
           <p className="mt-3"><strong>Confirmation of enrolment</strong></p>
-          <p className="mt-2">This letter confirms that <strong>{name}</strong> (student number {d("student_number")}) is currently enrolled at Northbridge University in the <strong>{d("course")}</strong>.</p>
+          <p className="mt-2">This letter confirms that <strong>{name}</strong> (student number {d("student_number")}) is currently enrolled{d("load") ? ` ${d("load").toLowerCase()}` : ""} at Northbridge University in the <strong>{d("course")}</strong>.</p>
+          {d("intake") && (
+            <p className="mt-2">The course started in <strong>{d("intake")}</strong>, and the expected completion date is <strong>{completion(d("course"), d("intake"), d("load"))}</strong>.</p>
+          )}
           {d("include").includes("fees") && <p className="mt-2">The student&apos;s tuition fees and payments for this year are listed in their statement of account, available from the Student Centre on request.</p>}
           <p className="mt-2">This letter was requested for: {d("purpose").toLowerCase()}.</p>
           <p className="mt-4">Yours sincerely,<br /><strong>{o("issued_by") || "Student Centre"}</strong><br />Student Centre, Northbridge University</p>

@@ -66,8 +66,8 @@ export default async function MyRequestPage({ params }: { params: Promise<{ id: 
       )}
 
       {done && (
-        <Panel title={r.type_key === "id_card" ? "Your digital student card" : "Your result"} action={r.type_key === "enrolment_letter" || r.type_key === "id_card" ? <span className="print:hidden"><PrintButton /></span> : undefined}>
-          <Outcome type={r.type_key} details={r.details} outcome={r.outcome} photoUrl={photoUrl} name={me.name} />
+        <Panel title={r.type_key === "id_card" ? "Your digital student card" : "Your result"} action={["enrolment_letter", "id_card", "parking_permit", "transcript"].includes(r.type_key) ? <span className="print:hidden"><PrintButton /></span> : undefined}>
+          <div className="print-area"><Outcome type={r.type_key} details={r.details} outcome={r.outcome} photoUrl={photoUrl} name={me.name} /></div>
           {r.staff_note && <p className="mt-3 text-sm text-muted">Note from {r.assignee?.name ?? "the team"}: {r.staff_note}</p>}
         </Panel>
       )}
