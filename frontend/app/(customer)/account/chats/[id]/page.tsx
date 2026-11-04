@@ -6,10 +6,12 @@ import { ChatPill } from "@/components/ShopUI";
 import { BotIcon, HeadsetIcon, PackageIcon, RepeatIcon, ShieldIcon } from "@/components/Icons";
 import { CHANGE_REQUEST, canChangeOrder } from "@/lib/orderChange";
 import ReplyBox from "./ReplyBox";
+import ScrollToEnd from "@/components/ScrollToEnd";
 import LiveRefresh from "@/components/LiveRefresh";
 import RateChat from "./RateChat";
 import { getMyRating } from "@/lib/data/workspace";
 import { getPack } from "@/lib/industry";
+import { getRequestForms } from "@/lib/data/requests";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Chat" };
@@ -32,7 +34,7 @@ function ChangeCard({ href }: { href: string }) {
 
 export default async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [chat, pack] = await Promise.all([getChat(id), getPack()]);
+  const [chat, pack, { types: forms }] = await Promise.all([getChat(id), getPack(), getRequestForms()]);
   if (!chat) notFound();
   const done = ["resolved", "closed"].includes(chat.status);
   const rated = done ? await getMyRating(chat.case_id) : null;
@@ -103,8 +105,9 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
             );
           })}
           {askedChange && changeHref && <ChangeCard href={changeHref} />}
+          <ScrollToEnd count={chat.messages.length} />
         </div>
-        <ReplyBox caseId={chat.case_id} closed={chat.status === "closed"} changeHref={changeHref} />
+        <ReplyBox caseId={chat.case_id} closed={chat.status === "closed"} changeHref={changeHref} forms={forms} withPerson={["escalated", "human_handling", "waiting"].includes(chat.status)} />
       </section>
     </>
   );

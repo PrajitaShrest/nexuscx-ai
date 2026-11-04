@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { customerReply } from "@/lib/data/shop";
 import { chatReplySchema, check, formObject, ratingSchema } from "@/lib/validation";
 
-export type ReplyState = { error?: string; sent?: number };
+export type ReplyState = { error?: string; sent?: number; answered?: boolean };
 
 export async function reply(_p: ReplyState, f: FormData): Promise<ReplyState> {
   const v = check(chatReplySchema, formObject(f));
@@ -13,7 +13,7 @@ export async function reply(_p: ReplyState, f: FormData): Promise<ReplyState> {
   const r = await customerReply(caseId, v.data.message);
   if (r.error) return { error: r.error };
   revalidatePath(`/account/chats/${caseId}`);
-  return { sent: Date.now() };
+  return { sent: Date.now(), answered: (r.data as { answered?: boolean } | undefined)?.answered === true };
 }
 
 export type RateState = { error?: string; done?: boolean };

@@ -58,6 +58,7 @@ export function AskForm({ orderId, delivered, canChange = false }: { orderId: st
       <div className="flex items-end gap-2 rounded-2xl border border-slate-300 p-2 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-100">
         <label htmlFor="ask" className="sr-only">Your question about this order</label>
         <textarea id="ask" name="message" rows={2} maxLength={1500} value={text} onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); if (text.trim().length >= 5) e.currentTarget.form?.requestSubmit(); } }}
           placeholder="Describe the problem…" className="min-h-12 flex-1 resize-none bg-transparent px-2 py-1.5 text-sm outline-none" />
         <button disabled={pending || text.trim().length < 5} aria-label="Send" className={`${btnPrimary} h-11 w-11 shrink-0 px-0`}><SendIcon className="h-4 w-4" /></button>
       </div>

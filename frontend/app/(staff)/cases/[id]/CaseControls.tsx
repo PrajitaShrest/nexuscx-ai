@@ -105,8 +105,8 @@ export function Composer({ caseId, disabled, firstName, draft, industry = "ecomm
       <div className="flex items-end gap-2 rounded-xl border border-gray-300 p-2 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-100">
         <label htmlFor="staff-reply" className="sr-only">Reply</label>
         <textarea id="staff-reply" name="message" rows={3} maxLength={2000} value={text} onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) ref.current?.requestSubmit(); }}
-          placeholder={`Write to the ${industry === "university" ? "student" : "customer"}… (Ctrl/⌘ + Enter to send)`} className="min-h-16 flex-1 resize-none bg-transparent px-2 py-1 text-sm outline-none" />
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); if (text.trim().length >= 2 && !pending) ref.current?.requestSubmit(); } }}
+          placeholder={`Write to the ${industry === "university" ? "student" : "customer"}… (Enter to send, Shift+Enter for a new line)`} className="min-h-16 flex-1 resize-none bg-transparent px-2 py-1 text-sm outline-none" />
         <button disabled={pending || text.trim().length < 2} aria-label="Send reply" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-40"><SendIcon className="h-4 w-4" /></button>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
