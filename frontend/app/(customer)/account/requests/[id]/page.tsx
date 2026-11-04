@@ -7,13 +7,16 @@ import LiveRefresh from "@/components/LiveRefresh";
 import FormIcon from "@/components/requests/FormIcon";
 import RequestForm from "@/components/requests/RequestForm";
 import CancelRequest from "@/components/requests/CancelRequest";
-import PrintButton from "@/app/(staff)/duty-of-care/PrintButton";
+import DownloadPdf from "@/components/requests/DownloadPdf";
 import { Outcome, RequestPill, RequestSteps } from "@/components/requests/Outcome";
 import { hoursText, needsPickup, optionsFor } from "@/lib/forms";
 import { day, dayTime } from "@/lib/format";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Request" };
+
+// Results that can be saved as a PDF, and the start of their file name
+const DOCS: Record<string, string> = { id_card: "Student ID card", enrolment_letter: "Enrolment letter", transcript: "Transcript", parking_permit: "Parking permit" };
 
 export default async function MyRequestPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -66,7 +69,11 @@ export default async function MyRequestPage({ params }: { params: Promise<{ id: 
       )}
 
       {done && (
-        <Panel title={r.type_key === "id_card" ? "Your digital student card" : "Your result"} action={["enrolment_letter", "id_card", "parking_permit", "transcript"].includes(r.type_key) ? <span className="print:hidden"><PrintButton /></span> : undefined}>
+        <Panel title={r.type_key === "id_card" ? "Your digital student card" : "Your result"}
+          action={DOCS[r.type_key] ? <DownloadPdf fileName={`${DOCS[r.type_key]} ${String(r.outcome.reference ?? r.outcome.card_number ?? r.outcome.permit_number ?? r.request_number)}`} /> : undefined}>
+          {String(r.details.delivery ?? "").startsWith("Email") && (
+            <p className="mb-3 rounded-xl bg-indigo-50 px-4 py-2.5 text-sm text-indigo-900 print:hidden">You asked for this by email. You can also download it here at any time with <strong>Download PDF</strong>.</p>
+          )}
           <div className="print-area"><Outcome type={r.type_key} details={r.details} outcome={r.outcome} photoUrl={photoUrl} name={me.name} /></div>
           {r.staff_note && <p className="mt-3 text-sm text-muted">Note from {r.assignee?.name ?? "the team"}: {r.staff_note}</p>}
         </Panel>
