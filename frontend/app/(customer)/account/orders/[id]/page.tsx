@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getOrder } from "@/lib/data/shop";
 import { day, dayTime, money } from "@/lib/format";
-import { ChatPill, OrderPill, OrderTracker, Panel, ProductTile, ReturnPill, btnPrimary } from "@/components/ShopUI";
+import { ChatPill, OrderPill, OrderTracker, Panel, ProductTile, ReturnPill, btnGhost, btnPrimary } from "@/components/ShopUI";
 import { MapPinIcon, RepeatIcon, TruckIcon } from "@/components/Icons";
 import { AskForm, CancelButton } from "./OrderActions";
 import ChangeSize from "./ChangeSize";
@@ -34,6 +34,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
           </div>
           <div className="flex flex-wrap gap-2">
             {o.status === "delivered" && <Link href={`/account/orders/${o.order_id}/return`} className={btnPrimary}><RepeatIcon className="h-4 w-4" /> Return or exchange</Link>}
+            {canCancel && <Link href={`/account/requests/new?type=delivery_address&order=${o.order_number}`} className={btnGhost}><TruckIcon className="h-4 w-4" /> Change delivery address</Link>}
             {canCancel && <CancelButton orderId={o.order_id} number={o.order_number} />}
           </div>
         </div>
@@ -102,7 +103,7 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
                 {o.notes && o.notes !== "Demo order" && <p className="mt-2 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs text-muted">Note: {o.notes}</p>}
               </div>
             </div>
-            {canCancel && <p className="mt-4 text-xs text-muted">Need a different address? Ask in the help box below before it ships.</p>}
+            {canCancel && <p className="mt-4 text-xs text-muted">Need a different address? Use <Link href={`/account/requests/new?type=delivery_address&order=${o.order_number}`} className="font-semibold text-indigo-700 hover:underline">Change delivery address</Link> before it ships.</p>}
           </Panel>
           {o.return_requests.length > 0 && (
             <Panel title="Returns & exchanges">

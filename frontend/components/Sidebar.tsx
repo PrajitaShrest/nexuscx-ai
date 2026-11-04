@@ -17,6 +17,7 @@ export const NAV: { section: string; items: { label: string; href?: string; week
     { label: "Inbox", href: "/inbox", needs: "view_cases" },
     { label: "Conversations", href: "/conversations", needs: "view_cases" },
     { label: "Cases", href: "/cases", needs: "view_cases" },
+    { label: "Requests", href: "/requests", needs: "view_cases" },
     { label: "Orders", href: "/orders", needs: "view_cases" },
     { label: "Returns", href: "/returns", needs: "view_cases" },
     { label: "Customers", href: "/customers", needs: "view_cases" },
