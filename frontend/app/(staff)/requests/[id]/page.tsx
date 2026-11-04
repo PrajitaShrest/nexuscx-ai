@@ -18,7 +18,7 @@ export const metadata: Metadata = { title: "Request" };
 
 const LABELS: Record<string, string> = {
   full_name: "Full name", student_number: "Student number", date_of_birth: "Date of birth", course: "Course", reason: "Reason",
-  delivery: "Delivery", intake: "Started", load: "Study load", purpose: "Purpose", addressed_to: "Addressed to", include: "Include", kind: "Transcript", copies: "Copies",
+  delivery: "Delivery", institution: "Studied at", qualification: "Qualification", intake: "Started", load: "Study load", purpose: "Purpose", addressed_to: "Addressed to", include: "Include", kind: "Transcript", copies: "Copies",
   postal_address: "Postal address", rego: "Registration", rego_state: "State", car: "Car", permit: "Permit", start_date: "Start date",
   phone: "Mobile", order: "Order", recipient: "Recipient", line1: "Street", line2: "Unit / level", suburb: "Suburb", state: "State",
   postcode: "Postcode", instructions: "Instructions",
@@ -30,7 +30,8 @@ export default async function StaffRequestPage({ params }: { params: Promise<{ i
   const { id } = await params;
   const [r, pack] = await Promise.all([getRequest(id), getPack()]);
   if (!r) notFound();
-  const photoUrl = await signRequestPhoto(r.photo_path);
+  const photoUrl = await signRequestPhoto(r.photo_path, r.type_key);
+  const credit = r.type_key === "credit_transfer";
   const pickup = needsPickup(r.details);
   const rows = Object.entries(r.details).filter(([k, v]) => k !== "confirm" && v !== "" && v !== false);
 
@@ -61,7 +62,8 @@ export default async function StaffRequestPage({ params }: { params: Promise<{ i
                 <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">✓ All fields checked by the form</span>
               </div>
               <div className="flex flex-wrap gap-5">
-                {photoUrl && (
+                {photoUrl && credit && <a href={photoUrl} target="_blank" rel="noreferrer" className="font-semibold text-indigo-700 hover:underline">Open the student&apos;s transcript ↗</a>}
+                {photoUrl && !credit && (
                   <figure className="shrink-0">
                     <a href={photoUrl} target="_blank" rel="noreferrer">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -78,9 +80,9 @@ export default async function StaffRequestPage({ params }: { params: Promise<{ i
               {r.request_types?.fee_note && <p className="mt-4 rounded bg-gray-50 px-3 py-2 text-xs text-gray-600">{r.request_types.fee_note}</p>}
             </section>
 
-            {(r.status === "ready" || r.status === "completed") && (
+            {(r.status === "ready" || r.status === "completed" || credit) && (
               <section className="rounded-lg border bg-white p-5">
-                <h2 className="mb-3 font-semibold">What {r.customer?.user?.name?.split(" ")[0]} received</h2>
+                <h2 className="mb-3 font-semibold">{credit ? "The AI Credit Assessor’s decision" : `What ${r.customer?.user?.name?.split(" ")[0]} received`}</h2>
                 <Outcome type={r.type_key} details={r.details} outcome={r.outcome} photoUrl={photoUrl} name={r.customer?.user?.name ?? ""} />
               </section>
             )}

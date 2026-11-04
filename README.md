@@ -87,6 +87,7 @@ In Supabase, create a new project. Then open **SQL Editor → New query** and ru
 | 24 | `025_ai_order_changes.sql` | The Orders Agent changes a size or colour itself: checks order number + delivery postcode, ordered in the last 2 days, not shipped; logs it and closes the case. Re-run to refresh the demo order |
 | 25 | `026_service_requests.sql` | Forms and service requests: the AI offers a pre-filled, checked form (student ID card with photo, enrolment letter, transcript, parking permit, store delivery address change); staff queue, mark ready, person notified; digital card, letter and permit |
 | 26 | `027_ai_follow_ups.sql` | The AI also answers follow-up messages in an existing chat (a person only when needed); privacy and policy answers; wellbeing check recognises "not coping", "hopeless" and similar |
+| 27 | `028_credit_checker.sql` | AI credit checker: students add (or paste) previous units; credit rules approve recognised units instantly (precedents, same content, passed, last 10 years, up to half a course); only unclear units go to an academic assessor |
 
 Each file ends with a small check query. A table of results means it worked.
 

@@ -92,9 +92,15 @@ function FormTurn({ text, type, prefill }: { text: string; type: RequestType; pr
       <div className="flex gap-3">
         <BotAvatar />
         <div className="min-w-0 max-w-[92%] flex-1 space-y-3 rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 text-[15px] text-ink shadow-sm">
-          <p>I can sort out your <strong>{type.title.toLowerCase()}</strong> right here. {auto > 0 ? `I've already filled in ${auto} detail${auto === 1 ? "" : "s"} from your account. ` : ""}
-            Just check {auto > 0 ? "them" : "the form"}{photo ? ", add a photo" : ""} and send. It goes straight to the {type.team_name} team, who usually finish these {hoursText(type.sla_hours)}.</p>
-          <RequestForm type={type} prefill={prefill} compact />
+          {type.type_key === "credit_transfer" ? (
+            <p>Good news: I can check your credit <strong>straight away</strong>. Add the units you passed before (or paste them from your transcript) and I&apos;ll show which Northbridge units you can skip, and when you could finish. Recognised units are approved instantly.</p>
+          ) : <p>I can sort out your <strong>{type.title.toLowerCase()}</strong> right here. {auto > 0 ? `I've already filled in ${auto} detail${auto === 1 ? "" : "s"} from your account. ` : ""}
+            Just check {auto > 0 ? "them" : "the form"}{photo ? ", add a photo" : ""} and send. It goes straight to the {type.team_name} team, who usually finish these {hoursText(type.sla_hours)}.</p>}
+          {type.type_key === "credit_transfer" ? (
+            <a href="/account/credit" className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:brightness-110">
+              Check my credit now →
+            </a>
+          ) : <RequestForm type={type} prefill={prefill} compact />}
         </div>
       </div>
     </div>

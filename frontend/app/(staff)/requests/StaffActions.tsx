@@ -24,6 +24,7 @@ const READY_LABEL: Record<string, [string, string]> = {
   transcript: ["Issue the transcript", "Transcript ready to collect"],
   parking_permit: ["Activate the permit", "Activate the permit"],
   delivery_address: ["Change the address on the order", "Change the address on the order"],
+  credit_transfer: ["Approve the units to check", "Approve the units to check"],
 };
 const PHOTO_CHECKS = ["The face is clear and looking at the camera", "Plain, light background, no hat or sunglasses", "It matches the student's name and details"];
 
@@ -81,8 +82,9 @@ export default function StaffActions({ id, type, status, pickup, hasPhoto }: { i
       {!photoOk && <p className="text-xs text-gray-500">Tick the three photo checks first.</p>}
       <p className="text-xs text-gray-500">The person is notified straight away{pickup ? ", with where to collect it" : ""}.</p>
 
+      {type === "credit_transfer" && <p className="text-xs text-gray-500">The AI already approved the clear units. Compare the unit outlines for the ones marked &ldquo;Assessor checking&rdquo;.</p>}
       <div className="flex flex-wrap gap-2 border-t pt-3">
-        <button type="button" onClick={() => { setMode(mode === "need_info" ? "" : "need_info"); setNote(""); }} className={`${btn} border bg-white text-amber-800 hover:bg-amber-50`}>Ask for a change</button>
+        {type !== "credit_transfer" && <button type="button" onClick={() => { setMode(mode === "need_info" ? "" : "need_info"); setNote(""); }} className={`${btn} border bg-white text-amber-800 hover:bg-amber-50`}>Ask for a change</button>}
         <button type="button" onClick={() => { setMode(mode === "reject" ? "" : "reject"); setNote(""); }} className={`${btn} border bg-white text-red-700 hover:bg-red-50`}>Reject</button>
       </div>
 

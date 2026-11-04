@@ -16,16 +16,17 @@ import type { Metadata } from "next";
 export const metadata: Metadata = { title: "Request" };
 
 // Results that can be saved as a PDF, and the start of their file name
-const DOCS: Record<string, string> = { id_card: "Student ID card", enrolment_letter: "Enrolment letter", transcript: "Transcript", parking_permit: "Parking permit" };
+const DOCS: Record<string, string> = { credit_transfer: "Credit decision", id_card: "Student ID card", enrolment_letter: "Enrolment letter", transcript: "Transcript", parking_permit: "Parking permit" };
 
 export default async function MyRequestPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const [r, me, { types, prefill }] = await Promise.all([getRequest(id), getMe(), getRequestForms()]);
   if (!r) notFound();
   const type = types.find((t) => t.type_key === r.type_key);
-  const photoUrl = await signRequestPhoto(r.photo_path);
+  const photoUrl = await signRequestPhoto(r.photo_path, r.type_key);
+  const credit = r.type_key === "credit_transfer";
   const pickup = needsPickup(r.details);
-  const done = r.status === "ready" || r.status === "completed";
+  const done = r.status === "ready" || r.status === "completed" || (r.type_key === "credit_transfer" && r.status === "in_review");
   const fields = (type?.fields ?? []).filter((f) => f.type !== "photo" && f.type !== "checkbox" && r.details[f.name] !== undefined && r.details[f.name] !== "");
 
   return (
@@ -69,7 +70,7 @@ export default async function MyRequestPage({ params }: { params: Promise<{ id: 
       )}
 
       {done && (
-        <Panel title={r.type_key === "id_card" ? "Your digital student card" : "Your result"}
+        <Panel title={r.type_key === "id_card" ? "Your digital student card" : credit ? "Your credit decision" : "Your result"}
           action={DOCS[r.type_key] ? <DownloadPdf fileName={`${DOCS[r.type_key]} ${String(r.outcome.reference ?? r.outcome.card_number ?? r.outcome.permit_number ?? r.request_number)}`} /> : undefined}>
           {String(r.details.delivery ?? "").startsWith("Email") && (
             <p className="mb-3 rounded-xl bg-indigo-50 px-4 py-2.5 text-sm text-indigo-900 print:hidden">You asked for this by email. You can also download it here at any time with <strong>Download PDF</strong>.</p>
@@ -88,7 +89,8 @@ export default async function MyRequestPage({ params }: { params: Promise<{ id: 
                 <dd className="break-words font-medium">{f.options_from ? optionsFor(f, prefill).find((o) => o.value === r.details[f.name])?.label ?? String(r.details[f.name]) : String(r.details[f.name])}</dd>
               </div>
             ))}
-            {photoUrl && r.type_key !== "id_card" && (
+            {photoUrl && credit && <a href={photoUrl} target="_blank" rel="noreferrer" className="inline-block font-semibold text-indigo-700 hover:underline">Your transcript file ↗</a>}
+            {photoUrl && r.type_key !== "id_card" && !credit && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={photoUrl} alt="Your photo" className="h-28 w-24 rounded-lg object-cover" />
             )}
