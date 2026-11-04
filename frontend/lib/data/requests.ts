@@ -73,11 +73,12 @@ export async function requestStats(days = 30): Promise<RequestStats | null> {
   return data as RequestStats;
 }
 
-// A short-lived private link to a request photo (only the owner and staff can make one)
-export async function signRequestPhoto(path: string | null): Promise<string | null> {
+// A short-lived private link to a request photo or document (only the owner and staff can make one).
+// Credit applications keep the transcript in "request-documents"; other forms keep photos in "request-photos".
+export async function signRequestPhoto(path: string | null, type = ""): Promise<string | null> {
   if (!path) return null;
   const supabase = await createClient();
-  const { data, error } = await supabase.storage.from("request-photos").createSignedUrl(path, 3600);
+  const { data, error } = await supabase.storage.from(type === "credit_transfer" ? "request-documents" : "request-photos").createSignedUrl(path, 3600);
   if (error) { console.error("[signRequestPhoto]", error.message); return null; }
   return data?.signedUrl ?? null;
 }
@@ -88,3 +89,14 @@ export const updateMyRequest = (id: string, action: "resubmit" | "cancel", detai
   rpc("update_my_service_request", { p_id: id, p_action: action, p_details: details, p_photo: photo }, "updateMyRequest");
 export const staffUpdateRequest = (id: string, action: string, note: string | null) =>
   rpc("staff_update_service_request", { p_id: id, p_action: action, p_note: note }, "staffUpdateRequest");
+
+// ---------- credit for previous study (migration 028) ----------
+export type PriorUnit = { name: string; code: string; grade: string; year: string };
+export type CreditUnit = { name: string; code: string; grade: string; year: number | null; decision: "granted" | "review" | "none"; reason: string; nb_code: string | null; nb_name: string | null };
+export type CreditResult = { course: string; units: CreditUnit[]; granted_points: number; granted_units: number; review_units: number; total_points: number; cap_points: number };
+
+export const checkCredit = (course: string, institution: string, units: PriorUnit[]) =>
+  rpc("check_credit", { p_course: course, p_institution: institution, p_units: units }, "checkCredit") as Promise<{ data?: CreditResult; error?: string }>;
+export const applyForCredit = (a: { course: string; intake: string; load: string; institution: string; qualification: string; units: PriorUnit[]; document: string | null }) =>
+  rpc("apply_for_credit", { p_course: a.course, p_intake: a.intake, p_load: a.load, p_institution: a.institution, p_qualification: a.qualification, p_units: a.units, p_document: a.document },
+    "applyForCredit") as Promise<{ data?: { request_id: string; request_number: string; status: string }; error?: string }>;

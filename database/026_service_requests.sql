@@ -560,6 +560,11 @@ BEGIN
                                       ELSE (v_r.details->>'start_date')::date END);
       v_msg := v_r.request_number || ': your parking permit is active';
 
+    ELSIF v_r.type_key = 'credit_transfer' THEN
+      -- the assessor confirms the units the AI could not decide alone
+      v_outcome := jsonb_build_object('assessor', v_me_name, 'assessor_date', current_date);
+      v_msg := v_r.request_number || ': your credit decision is complete';
+
     ELSIF v_r.type_key = 'delivery_address' THEN
       -- make the change on the order itself, if it still hasn't shipped
       v_addr := concat_ws(', ', v_r.details->>'line1', NULLIF(v_r.details->>'line2', ''),

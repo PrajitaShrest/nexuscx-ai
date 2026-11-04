@@ -1,7 +1,7 @@
 import { REQUEST_STATUS } from "@/lib/forms";
 import type { Values } from "@/lib/forms";
 import { CheckIcon } from "@/components/Icons";
-import { buildTranscript } from "@/lib/transcript";
+import { buildTranscript, finishWith } from "@/lib/transcript";
 
 // What a finished request gives the person: a digital ID card, a letter, a permit,
 // or the changed order. Also the status pill and the step tracker.
@@ -195,6 +195,48 @@ export function Outcome({ type, details, outcome, photoUrl, name }: {
               {o("sent") && <p className="mt-1 text-xs text-muted">{o("sent")}.</p>}
               <p className="mt-3 border-t pt-2 text-xs text-muted">Sample transcript made by a student demo project. Northbridge University is not a real organisation and these results are not real.</p>
             </div>
+          </article>
+        );
+      })()}
+
+      {type === "credit_transfer" && Array.isArray((outcome as unknown as { units?: unknown }).units) && (() => {
+        const res = outcome as unknown as { units: { name: string; code: string; grade: string; year: number | null; decision: string; reason: string; nb_code: string | null; nb_name: string | null }[];
+          granted_units: number; review_units: number; granted_points: number; total_points: number; assessor?: string; assessor_date?: string; assessed?: string };
+        const confirmed = !!res.assessor;
+        const units = res.granted_units + (confirmed ? res.review_units : 0);
+        const finish = d("course") && d("intake") ? finishWith(d("course"), d("intake"), d("load"), units) : null;
+        return (
+          <article className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-ink shadow-sm print:border-0 print:shadow-none">
+            <div className="flex items-start justify-between gap-4 border-b pb-3">
+              <div><p className="text-lg font-bold text-indigo-800">Northbridge University</p><p className="font-semibold">Credit for previous study: decision</p></div>
+              <p className="text-right text-xs text-muted">Assessed {fmt(String(res.assessed ?? ""))}<br />by the AI Credit Assessor{confirmed ? <><br />Confirmed by {res.assessor}</> : null}</p>
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-4">
+              <div><dt className="text-xs text-muted">Student</dt><dd className="font-semibold">{name}</dd></div>
+              <div><dt className="text-xs text-muted">Student number</dt><dd className="font-mono font-semibold">{d("student_number")}</dd></div>
+              <div className="col-span-2"><dt className="text-xs text-muted">Course</dt><dd className="font-semibold">{d("course")} ({d("load")}, from {d("intake")})</dd></div>
+              <div className="col-span-2"><dt className="text-xs text-muted">Previous study</dt><dd>{d("institution")}{d("qualification") ? `, ${d("qualification")}` : ""}</dd></div>
+              <div><dt className="text-xs text-muted">Credit approved</dt><dd className="font-semibold">{units * 10} of {res.total_points} credit points</dd></div>
+              <div><dt className="text-xs text-muted">Expected finish</dt><dd className="font-semibold">{finish ?? "—"}</dd></div>
+            </dl>
+            <table className="mt-4 w-full table-fixed text-left text-[13px]">
+              <thead className="border-b text-xs text-muted"><tr><th className="py-1 pr-2 font-medium">Your unit</th><th className="w-48 py-1 pr-2 font-medium">Northbridge unit</th><th className="w-36 py-1 font-medium">Decision</th></tr></thead>
+              <tbody>
+                {res.units.map((u, i) => {
+                  const label = u.decision === "granted" ? "Credit approved" : u.decision === "review" ? (confirmed ? "Approved by assessor" : "Assessor checking") : "No credit";
+                  const tone = u.decision === "granted" || (u.decision === "review" && confirmed) ? "text-emerald-700" : u.decision === "review" ? "text-amber-700" : "text-muted";
+                  return (
+                    <tr key={i} className="border-b border-slate-100 align-top">
+                      <td className="py-1.5 pr-2"><span className="font-medium">{u.name}</span><span className="block text-xs text-muted">{[u.code, u.grade, u.year].filter(Boolean).join(" · ")}{u.decision === "none" ? ` · ${u.reason}` : ""}</span></td>
+                      <td className="py-1.5 pr-2">{u.nb_code ? <><span className="font-mono text-xs">{u.nb_code}</span> {u.nb_name}</> : "—"}</td>
+                      <td className={`py-1.5 font-semibold ${tone}`}>{label}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <p className="mt-3 text-xs text-muted">Rules: passed units from the last 10 years that match a unit in the course, up to half of the course. Credited units do not need to be studied or paid for.</p>
+            <p className="mt-3 border-t pt-2 text-xs text-muted">Sample decision made by a student demo project. Northbridge University is not a real organisation.</p>
           </article>
         );
       })()}

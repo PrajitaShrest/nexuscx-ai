@@ -9,6 +9,7 @@ export const metadata: Metadata = { title: "New request" };
 
 export default async function NewRequestPage({ searchParams }: { searchParams: Promise<{ type?: string; order?: string }> }) {
   const { type: key, order } = await searchParams;
+  if (key === "credit_transfer") redirect("/account/credit");
   const { types, prefill } = await getRequestForms();
   const type = types.find((t) => t.type_key === key);
   if (!type) redirect("/account/requests");

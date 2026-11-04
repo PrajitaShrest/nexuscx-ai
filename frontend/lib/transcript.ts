@@ -97,3 +97,17 @@ export function buildTranscript(course: string, intake: string, load: string, st
     status: creditDone >= creditTotal ? "Course completed" : "Currently enrolled",
   };
 }
+
+// When the course would finish if some units are credited (semester 1 ends in June, semester 2 in November)
+export function finishWith(course: string, intake: string, load: string, skippedUnits: number): string | null {
+  const units = UNITS[course];
+  const [month, y] = intake.split(" ");
+  if (!units || !y) return null;
+  const perTerm = load === "Part-time" ? 2 : 4;
+  const terms = Math.max(1, Math.ceil((units.length - skippedUnits) / perTerm));
+  const startIndex = Number(y) * 2 + (month === "July" ? 1 : 0); // 2 semesters a year
+  const end = startIndex + terms - 1;
+  return end % 2 === 0 ? `June ${Math.floor(end / 2)}` : `November ${Math.floor(end / 2)}`;
+}
+
+export const COURSES = Object.keys(UNITS);
