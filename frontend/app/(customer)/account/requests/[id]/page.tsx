@@ -115,7 +115,7 @@ export default async function MyRequestPage({ params }: { params: Promise<{ id: 
           {String(r.details.delivery ?? "").startsWith("Email") && (
             <p className="mb-3 rounded-xl bg-indigo-50 px-4 py-2.5 text-sm text-indigo-900 print:hidden">You asked for this by email. You can also download it here at any time with <strong>Download PDF</strong>.</p>
           )}
-          <div className="print-area"><Outcome type={r.type_key} details={r.details} outcome={r.outcome} photoUrl={photoUrl} name={me.name}
+          <div className="print-area rounded-2xl bg-gradient-to-br from-slate-100 to-indigo-50 p-3 sm:p-8 print:bg-none print:p-0"><Outcome type={r.type_key} details={r.details} outcome={r.outcome} photoUrl={photoUrl} name={me.name}
             status={r.status} note={r.staff_note} reference={r.request_number} updated={r.updated_at} /></div>
           {r.staff_note && !sc && <p className="mt-3 text-sm text-muted">Note from {r.assignee?.name ?? "the team"}: {r.staff_note}</p>}
         </Panel></div>

@@ -116,7 +116,7 @@ export function Outcome({ type, details, outcome, photoUrl, name, status = "comp
       )}
 
       {type === "enrolment_letter" && (
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 text-sm leading-relaxed text-ink shadow-sm print:border-0 print:shadow-none">
+        <article className="mx-auto max-w-3xl rounded-xl border-t-4 border-indigo-600 bg-white p-6 text-sm leading-relaxed text-ink shadow-lg shadow-slate-300/50 sm:p-10 print:max-w-none print:border-0 print:shadow-none">
           <div className="flex items-start justify-between border-b pb-3">
             <div><p className="font-bold text-indigo-800">Northbridge University</p><p className="text-xs text-muted">Student Centre · studentcentre@northbridge.example</p></div>
             <p className="text-right text-xs text-muted">Ref {o("reference")}<br />{fmt(o("issued"))}</p>
@@ -135,7 +135,7 @@ export function Outcome({ type, details, outcome, photoUrl, name, status = "comp
       )}
 
       {type === "holiday_letter" && (
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 text-sm leading-relaxed text-ink shadow-sm print:border-0 print:shadow-none">
+        <article className="mx-auto max-w-3xl rounded-xl border-t-4 border-indigo-600 bg-white p-6 text-sm leading-relaxed text-ink shadow-lg shadow-slate-300/50 sm:p-10 print:max-w-none print:border-0 print:shadow-none">
           <div className="flex items-start justify-between border-b pb-3">
             <div><p className="font-bold text-indigo-800">Northbridge University</p><p className="text-xs text-muted">Student Centre · studentcentre@northbridge.example</p></div>
             <p className="text-right text-xs text-muted">Ref {o("reference")}<br />{fmt(o("issued"))}</p>
@@ -154,7 +154,7 @@ export function Outcome({ type, details, outcome, photoUrl, name, status = "comp
       )}
 
       {type === "completion_letter" && (
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 text-sm leading-relaxed text-ink shadow-sm print:border-0 print:shadow-none">
+        <article className="mx-auto max-w-3xl rounded-xl border-t-4 border-indigo-600 bg-white p-6 text-sm leading-relaxed text-ink shadow-lg shadow-slate-300/50 sm:p-10 print:max-w-none print:border-0 print:shadow-none">
           <div className="flex items-start justify-between border-b pb-3">
             <div><p className="font-bold text-indigo-800">Northbridge University</p><p className="text-xs text-muted">Student Centre · studentcentre@northbridge.example</p></div>
             <p className="text-right text-xs text-muted">Ref {o("reference")}<br />{fmt(o("issued"))}</p>
@@ -172,7 +172,7 @@ export function Outcome({ type, details, outcome, photoUrl, name, status = "comp
       {type === "special_consideration" && (o("decision") || status === "rejected") && (() => {
         const approved = status !== "rejected";
         return (
-          <article className="rounded-2xl border border-slate-200 bg-white p-6 text-sm leading-relaxed text-ink shadow-sm print:border-0 print:shadow-none">
+          <article className="mx-auto max-w-3xl rounded-xl border-t-4 border-indigo-600 bg-white p-6 text-sm leading-relaxed text-ink shadow-lg shadow-slate-300/50 sm:p-10 print:max-w-none print:border-0 print:shadow-none">
             <div className="flex items-start justify-between border-b pb-3">
               <div><p className="font-bold text-indigo-800">Northbridge University</p><p className="text-xs text-muted">Academic Services · academicservices@northbridge.example</p></div>
               <p className="text-right text-xs text-muted">Ref {reference}<br />{fmt(o("decided_on")) || fmt(updated)}</p>
