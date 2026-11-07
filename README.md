@@ -91,6 +91,7 @@ In Supabase, create a new project. Then open **SQL Editor → New query** and ru
 | 28 | `029_instant_letters.sql` | Digital enrolment letters are issued instantly from the student record (no staff click); printed copies still go to the Student Centre |
 | 29 | `030_batch1.sql` | Holiday letter and course completion letter (instant, by the university's rules); product safety reports in the online store are a hard stop (urgent, to a person) and counted in the duty-of-care report; follow-up messages that go to a person now count as escalations |
 | 30 | `031_batch2.sql` | Talk to a person: urgent call-backs (wellbeing and product safety never have to book), call back today, or book a time with a team; staff Bookings page; special consideration form (a person always decides) |
+| 31 | `032_safe_limits.sql` | Spam guard never blocks a wellbeing or product-safety message; 10 new chats per 10 minutes (was 5) |
 
 Each file ends with a small check query. A table of results means it worked.
 
