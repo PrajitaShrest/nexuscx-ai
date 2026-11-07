@@ -84,7 +84,7 @@ export async function signRequestPhoto(path: string | null, type = ""): Promise<
 }
 
 export const submitRequest = (type: string, details: Values, photo: string | null) =>
-  rpc("submit_service_request", { p_type: type, p_details: details, p_photo: photo }, "submitRequest") as Promise<{ data?: { request_id: string; request_number: string; team: string; sla_hours: number }; error?: string }>;
+  rpc("submit_service_request", { p_type: type, p_details: details, p_photo: photo }, "submitRequest") as Promise<{ data?: { request_id: string; request_number: string; team: string; sla_hours: number; status?: string }; error?: string }>;
 export const updateMyRequest = (id: string, action: "resubmit" | "cancel", details: Values | null, photo: string | null) =>
   rpc("update_my_service_request", { p_id: id, p_action: action, p_details: details, p_photo: photo }, "updateMyRequest");
 export const staffUpdateRequest = (id: string, action: string, note: string | null) =>
