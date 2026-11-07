@@ -123,7 +123,7 @@ export default async function ProfilePage() {
             <>
               <Card title="Profile strength" icon={<UserIcon className="h-5 w-5" />}>
                 <div className="flex items-center gap-4">
-                  <div className="relative h-20 w-20 shrink-0 rounded-full" style={{ background: `conic-gradient(#6366f1 ${percent * 3.6}deg, #e2e8f0 0deg)` }}>
+                  <div className="relative h-20 w-20 shrink-0 rounded-full" style={{ background: `conic-gradient(#4562e0 ${percent * 3.6}deg, #e2e8f0 0deg)` }}>
                     <div className="absolute inset-2 flex items-center justify-center rounded-full bg-white text-lg font-bold">{percent}%</div>
                   </div>
                   <p className="text-sm text-muted">{percent === 100 ? "All done! Your profile is complete." : "Complete your profile so our team can help you faster."}</p>

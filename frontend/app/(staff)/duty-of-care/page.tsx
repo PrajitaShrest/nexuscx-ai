@@ -67,7 +67,7 @@ export default async function DutyOfCarePage({ searchParams }: { searchParams: P
               <div>
                 <p className="text-2xl font-bold">{r.sensitive_ai_only === 0 ? `All ${r.sensitive} sensitive cases went to a person` : `${r.sensitive_ai_only} sensitive case(s) were answered by AI alone`}</p>
                 <p className="text-sm text-white/85">
-                  Wellbeing, personal visa questions, special consideration, refunds and other sensitive requests are never answered by the AI alone. These are hard stops.
+                  {r.industry === "university" ? "Wellbeing, personal visa questions, special consideration, refunds and other sensitive requests" : "Product safety reports (injury, fire, allergy), refunds and other sensitive requests"} are never answered by the AI alone. These are hard stops.
                 </p>
               </div>
             </section>
@@ -75,9 +75,9 @@ export default async function DutyOfCarePage({ searchParams }: { searchParams: P
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
               <Stat label="All cases" value={r.cases} note={`${r.ai_answered} answered by AI · ${r.to_person} by people`} />
               <Stat label="Sensitive cases" value={r.sensitive} note="always sent to a person" />
-              <Stat label="Wellbeing cases picked up in" value={mins(r.wellbeing.median_pickup_min)} note={`median · ${r.wellbeing.cases} case${r.wellbeing.cases === 1 ? "" : "s"}, ${r.wellbeing.urgent} urgent`} good={r.wellbeing.cases > 0} />
+              <Stat label={r.industry === "university" ? "Wellbeing cases picked up in" : "Safety cases picked up in"} value={mins(r.wellbeing.median_pickup_min)} note={`median · ${r.wellbeing.cases} case${r.wellbeing.cases === 1 ? "" : "s"}, ${r.wellbeing.urgent} urgent`} good={r.wellbeing.cases > 0} />
               <Stat label="Picked up within target" value={`${pct(r.within_target, r.picked_up)}%`} note={`${r.within_target} of ${r.picked_up} · median ${mins(r.median_pickup_min)}`} good={pct(r.within_target, r.picked_up) >= 90} />
-              <Stat label="Waiting for a person now" value={r.waiting_now} note={r.wellbeing.waiting_now ? `${r.wellbeing.waiting_now} wellbeing` : "no wellbeing case waiting"} />
+              <Stat label="Waiting for a person now" value={r.waiting_now} note={r.wellbeing.waiting_now ? `${r.wellbeing.waiting_now} ${r.industry === "university" ? "wellbeing" : "safety"}` : `no ${r.industry === "university" ? "wellbeing" : "safety"} case waiting`} />
               <Stat label="Steps recorded" value={r.audit_entries} note="in the audit log" />
             </div>
 

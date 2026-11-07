@@ -89,6 +89,7 @@ In Supabase, create a new project. Then open **SQL Editor → New query** and ru
 | 26 | `027_ai_follow_ups.sql` | The AI also answers follow-up messages in an existing chat (a person only when needed); privacy and policy answers; wellbeing check recognises "not coping", "hopeless" and similar |
 | 27 | `028_credit_checker.sql` | AI credit checker: students add (or paste) previous units; credit rules approve recognised units instantly (precedents, same content, passed, last 10 years, up to half a course); only unclear units go to an academic assessor |
 | 28 | `029_instant_letters.sql` | Digital enrolment letters are issued instantly from the student record (no staff click); printed copies still go to the Student Centre |
+| 29 | `030_batch1.sql` | Holiday letter and course completion letter (instant, by the university's rules); product safety reports in the online store are a hard stop (urgent, to a person) and counted in the duty-of-care report; follow-up messages that go to a person now count as escalations |
 
 Each file ends with a small check query. A table of results means it worked.
 

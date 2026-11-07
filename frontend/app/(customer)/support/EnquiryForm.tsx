@@ -198,7 +198,7 @@ export default function EnquiryForm({ firstName, industry, forms }: { firstName:
       </div>
 
       {/* Conversation */}
-      <div className="max-h-[560px] min-h-[320px] space-y-6 overflow-y-auto bg-[radial-gradient(circle_at_top_right,#eef2ff,transparent_45%)] px-5 py-6">
+      <div className="max-h-[560px] min-h-[320px] space-y-6 overflow-y-auto bg-[radial-gradient(circle_at_top_right,#eef2fd,transparent_45%)] px-5 py-6">
         <div className="flex gap-3">
           <BotAvatar />
           <div className="max-w-[85%] rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 text-[15px] text-ink shadow-sm">

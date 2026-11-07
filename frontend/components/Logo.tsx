@@ -5,7 +5,7 @@ export function LogoMark({ size = 40, className = "" }: { size?: number; classNa
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none" role="img" aria-label="NexusCX" className={className}>
       <path d="M8 4h24a6 6 0 0 1 6 6v15a6 6 0 0 1-6 6H17l-7.5 6.2c-.7.6-1.5.1-1.5-.8V31a6 6 0 0 1-6-6V10a6 6 0 0 1 6-6Z"
-        fill="#4f46e5" />
+        fill="#2f4cdd" />
       <path d="M9 17.5h5.5c3.5 0 4.5-5.5 8.5-5.5h4.5M14.5 17.5c3.5 0 4.5 5.5 8.5 5.5h4.5"
         stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
       <circle cx="30.5" cy="12" r="2.6" fill="#fff" />

@@ -9,4 +9,5 @@ export const FLAG_LABEL: Record<string, string> = {
   refund: "Refund request",
   account_change: "Account or bank change",
   injection: "Attempt to trick the AI",
+  product_safety: "Product safety (injury, fire, allergy)",
 };

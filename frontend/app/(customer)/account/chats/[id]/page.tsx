@@ -73,7 +73,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
       {done && <RateChat caseId={chat.case_id} rated={rated} />}
 
       <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div className="max-h-[60vh] space-y-4 overflow-y-auto bg-[radial-gradient(circle_at_top_right,#eef2ff,transparent_45%)] p-5">
+        <div className="max-h-[60vh] space-y-4 overflow-y-auto bg-[radial-gradient(circle_at_top_right,#eef2fd,transparent_45%)] p-5">
           {chat.messages.map((m) => {
             if (m.sender_type === "customer") {
               return (
