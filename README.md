@@ -88,6 +88,7 @@ In Supabase, create a new project. Then open **SQL Editor → New query** and ru
 | 25 | `026_service_requests.sql` | Forms and service requests: the AI offers a pre-filled, checked form (student ID card with photo, enrolment letter, transcript, parking permit, store delivery address change); staff queue, mark ready, person notified; digital card, letter and permit |
 | 26 | `027_ai_follow_ups.sql` | The AI also answers follow-up messages in an existing chat (a person only when needed); privacy and policy answers; wellbeing check recognises "not coping", "hopeless" and similar |
 | 27 | `028_credit_checker.sql` | AI credit checker: students add (or paste) previous units; credit rules approve recognised units instantly (precedents, same content, passed, last 10 years, up to half a course); only unclear units go to an academic assessor |
+| 28 | `029_instant_letters.sql` | Digital enrolment letters are issued instantly from the student record (no staff click); printed copies still go to the Student Centre |
 
 Each file ends with a small check query. A table of results means it worked.
 

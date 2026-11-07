@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { submitRequest, updateMyRequest } from "@/lib/data/requests";
 import type { Values } from "@/lib/forms";
 
-export type SendResult = { ok?: boolean; error?: string; request_id?: string; request_number?: string; team?: string; sla_hours?: number };
+export type SendResult = { ok?: boolean; error?: string; request_id?: string; request_number?: string; team?: string; sla_hours?: number; status?: string };
 
 const okKey = (k: string) => /^[a-z_]{2,40}$/.test(k);
 const okPhoto = (p: string | null) => p === null || /^[0-9a-f-]{36}\/[A-Za-z0-9-]+\.(jpg|jpeg|png|webp)$/.test(p);
