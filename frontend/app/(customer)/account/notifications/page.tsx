@@ -11,7 +11,7 @@ export default async function CustomerNotificationsPage() {
   return (
     <>
       <PageHead title="Notifications" sub={pack.shop ? "Replies from our team, order updates and return progress." : `Replies from ${pack.org} staff about your enquiries.`} />
-      <NoticeList notices={notices} />
+      <NoticeList notices={notices} caseBase="/account/chats/" />
     </>
   );
 }

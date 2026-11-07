@@ -123,10 +123,10 @@ export async function getMyRating(caseId: string): Promise<number | null> {
 }
 
 // ---------- notifications (customers and staff) ----------
-export type Notice = { notification_id: string; type: string; title: string; link: string | null; read_at: string | null; created_at: string };
+export type Notice = { notification_id: string; type: string; title: string; link: string | null; case_id: string | null; read_at: string | null; created_at: string };
 export async function listNotifications(limit = 50): Promise<Notice[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("notifications").select("notification_id, type, title, link, read_at, created_at")
+  const { data, error } = await supabase.from("notifications").select("notification_id, type, title, link, case_id, read_at, created_at")
     .order("created_at", { ascending: false }).limit(limit);
   if (error) console.error("[listNotifications]", error.message);
   return (data ?? []) as Notice[];
