@@ -12,7 +12,7 @@ import ReplyBox from "./ReplyBox";
 import ScrollToEnd from "@/components/ScrollToEnd";
 import LiveRefresh from "@/components/LiveRefresh";
 import RateChat from "./RateChat";
-import { getMyRating } from "@/lib/data/workspace";
+import { getMyRating, markNoticesReadFor } from "@/lib/data/workspace";
 import { getPack } from "@/lib/industry";
 import { getRequestForms } from "@/lib/data/requests";
 import type { Metadata } from "next";
@@ -53,6 +53,8 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const [chat, pack, { types: forms }, booking] = await Promise.all([getChat(id), getPack(), getRequestForms(), getBookingOptions()]);
   if (!chat) notFound();
+  // Opening the chat counts as reading its notifications
+  await markNoticesReadFor({ link: `/account/chats/${chat.case_id}`, caseId: chat.case_id });
   const done = ["resolved", "closed"].includes(chat.status);
   const rated = done ? await getMyRating(chat.case_id) : null;
   const title = chat.subject?.replace(/^About my order [A-Z0-9-]+: /, "") ?? "Support request";

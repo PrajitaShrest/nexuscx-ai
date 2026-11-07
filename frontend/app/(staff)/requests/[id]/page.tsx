@@ -8,7 +8,7 @@ import FormIcon from "@/components/requests/FormIcon";
 import { Outcome, RequestPill } from "@/components/requests/Outcome";
 import { can, getMe } from "@/lib/data/me";
 import { getPack } from "@/lib/industry";
-import { getRequest, signRequestPhoto } from "@/lib/data/requests";
+import { getFormFields, getRequest, signRequestPhoto } from "@/lib/data/requests";
 import { needsPickup } from "@/lib/forms";
 import { dayTime } from "@/lib/format";
 import StaffActions from "../StaffActions";
@@ -33,7 +33,22 @@ export default async function StaffRequestPage({ params }: { params: Promise<{ i
   const photoUrl = await signRequestPhoto(r.photo_path, r.type_key);
   const credit = r.type_key === "credit_transfer";
   const pickup = needsPickup(r.details);
-  const rows = Object.entries(r.details).filter(([k, v]) => k !== "confirm" && v !== "" && v !== false);
+  // Labels and order come from the form itself, so every form (old or new) reads the same way
+  const fields = await getFormFields(r.type_key);
+  const short = (label: string) => label.replace(/\s*\((optional|as it should appear[^)]*)\).*$/i, "").replace(/,? for example.*$/i, "").replace(/\?$/, "");
+  const nice = (k: string) => k.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
+  const known = fields.filter((f) => f.type !== "checkbox" && f.type !== "photo").map((f) => f.name);
+  const extra = Object.keys(r.details).filter((k) => !known.includes(k) && k !== "confirm");
+  const fmtValue = (k: string, v: unknown) => {
+    const f = fields.find((x) => x.name === k);
+    if ((f?.type === "date" || /date|_on$/.test(k)) && typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v))
+      return new Date(`${v}T00:00:00`).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
+    return String(v);
+  };
+  const rows = [...known, ...extra]
+    .map((k) => [k, r.details[k]] as const)
+    .filter(([, v]) => v !== undefined && v !== "" && v !== false)
+    .map(([k, v]) => ({ k, label: short(fields.find((f) => f.name === k)?.label ?? LABELS[k] ?? nice(k)), value: fmtValue(k, v) }));
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 text-gray-900 md:flex-row">
@@ -73,7 +88,7 @@ export default async function StaffRequestPage({ params }: { params: Promise<{ i
                   </figure>
                 )}
                 <dl className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-x-4 gap-y-2 text-sm">
-                  {rows.map(([k, v]) => (<Fragment key={k}><dt className="text-gray-500">{LABELS[k] ?? k}</dt><dd className="break-words font-medium">{String(v)}</dd></Fragment>))}
+                  {rows.map((row) => (<Fragment key={row.k}><dt className="text-gray-500">{row.label}</dt><dd className="whitespace-pre-line break-words font-medium">{row.value}</dd></Fragment>))}
                   <dt className="text-gray-500">Email</dt><dd className="break-words">{r.customer?.user?.email}</dd>
                 </dl>
               </div>
@@ -83,7 +98,8 @@ export default async function StaffRequestPage({ params }: { params: Promise<{ i
             {(r.status === "ready" || r.status === "completed" || credit) && (
               <section className="rounded-lg border bg-white p-5">
                 <h2 className="mb-3 font-semibold">{credit ? "The AI Credit Assessor’s decision" : `What ${r.customer?.user?.name?.split(" ")[0]} received`}</h2>
-                <Outcome type={r.type_key} details={r.details} outcome={r.outcome} photoUrl={photoUrl} name={r.customer?.user?.name ?? ""} />
+                <Outcome type={r.type_key} details={r.details} outcome={r.outcome} photoUrl={photoUrl} name={r.customer?.user?.name ?? ""}
+                  status={r.status} note={r.staff_note} reference={r.request_number} updated={r.updated_at} />
               </section>
             )}
             {r.staff_note && ["needs_info", "rejected"].includes(r.status) && (

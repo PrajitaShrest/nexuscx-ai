@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { friendlyError } from "./errors";
-import type { Prefill, RequestType, Values } from "@/lib/forms";
+import type { FieldDef, Prefill, RequestType, Values } from "@/lib/forms";
 
 // Forms and service requests (migration 026).
 // Row Level Security: a person reads only their own requests; staff read their organisation's.
@@ -100,3 +100,11 @@ export const checkCredit = (course: string, institution: string, units: PriorUni
 export const applyForCredit = (a: { course: string; intake: string; load: string; institution: string; qualification: string; units: PriorUnit[]; document: string | null }) =>
   rpc("apply_for_credit", { p_course: a.course, p_intake: a.intake, p_load: a.load, p_institution: a.institution, p_qualification: a.qualification, p_units: a.units, p_document: a.document },
     "applyForCredit") as Promise<{ data?: { request_id: string; request_number: string; status: string }; error?: string }>;
+
+// The questions of one form, in order (labels for the staff "Details sent" list)
+export async function getFormFields(typeKey: string): Promise<FieldDef[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("request_types").select("fields").eq("type_key", typeKey).maybeSingle();
+  if (error) console.error("[getFormFields]", error.message);
+  return ((data as { fields?: FieldDef[] } | null)?.fields ?? []);
+}
