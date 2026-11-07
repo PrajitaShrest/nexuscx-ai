@@ -35,7 +35,7 @@ export async function updateSession(request: NextRequest) {
   let signedIn = Boolean(data?.claims);
   const path = request.nextUrl.pathname;
   const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
-  const staffPath = ["/dashboard", "/conversations", "/cases", "/customers", "/knowledge", "/ai-agents", "/routing", "/analytics", "/team", "/audit", "/settings", "/orders", "/returns", "/inbox", "/users", "/simulator", "/duty-of-care", "/requests"].some((p) => path.startsWith(p));
+  const staffPath = ["/dashboard", "/conversations", "/cases", "/customers", "/knowledge", "/ai-agents", "/routing", "/analytics", "/team", "/audit", "/settings", "/orders", "/returns", "/inbox", "/users", "/simulator", "/duty-of-care", "/requests", "/bookings"].some((p) => path.startsWith(p));
 
   // Not "remembered" and idle for 30 minutes (or the browser restored an old tab): sign out.
   if (signedIn && !remember) {

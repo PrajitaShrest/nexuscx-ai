@@ -4,7 +4,10 @@ import { getChat } from "@/lib/data/shop";
 import { dayTime, day } from "@/lib/format";
 import { ChatPill } from "@/components/ShopUI";
 import { BotIcon, HeadsetIcon, PackageIcon, RepeatIcon, ShieldIcon } from "@/components/Icons";
-import { CHANGE_REQUEST, canChangeOrder } from "@/lib/orderChange";
+import { CANCEL_REQUEST, CHANGE_REQUEST, canChangeOrder } from "@/lib/orderChange";
+import TalkToPerson from "@/components/talk/TalkToPerson";
+import { getBookingOptions } from "@/lib/data/appointments";
+import { CancelButton } from "../../orders/[id]/OrderActions";
 import ReplyBox from "./ReplyBox";
 import ScrollToEnd from "@/components/ScrollToEnd";
 import LiveRefresh from "@/components/LiveRefresh";
@@ -32,9 +35,23 @@ function ChangeCard({ href }: { href: string }) {
   );
 }
 
+// The AI's answer to "cancel my order" while it has not shipped (031): cancel it right here
+function CancelCard({ orderId, number }: { orderId: string; number: string }) {
+  return (
+    <div className="flex gap-3">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white"><BotIcon className="h-5 w-5" /></span>
+      <div className="max-w-[80%] space-y-3 rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 text-[15px] shadow-sm">
+        <p>Order {number} hasn&apos;t shipped yet, so you can cancel it yourself, right now. You get a full refund to your original payment.</p>
+        <CancelButton orderId={orderId} number={number} />
+        <p className="text-xs text-muted">Once an order ships, cancelling isn&apos;t possible, but you can still return it.</p>
+      </div>
+    </div>
+  );
+}
+
 export default async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [chat, pack, { types: forms }] = await Promise.all([getChat(id), getPack(), getRequestForms()]);
+  const [chat, pack, { types: forms }, booking] = await Promise.all([getChat(id), getPack(), getRequestForms(), getBookingOptions()]);
   if (!chat) notFound();
   const done = ["resolved", "closed"].includes(chat.status);
   const rated = done ? await getMyRating(chat.case_id) : null;
@@ -43,6 +60,8 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
   // eslint-disable-next-line react-hooks/purity -- server component, rendered once per request
   const changeHref = pack.shop && chat.order && chat.orderInfo && canChangeOrder(chat.orderInfo, Date.now()) ? `/account/orders/${chat.order.order_id}?change=1` : null;
   const askedChange = !!changeHref && !done && chat.messages.some((m) => m.sender_type === "customer" && CHANGE_REQUEST.test(m.content));
+  const cancelOrder = pack.shop && chat.order && chat.orderInfo && ["placed", "processing"].includes(chat.orderInfo.status) ? chat.order : null;
+  const askedCancel = !!cancelOrder && !done && chat.messages.some((m) => m.sender_type === "customer" && CANCEL_REQUEST.test(m.content));
 
   return (
     <>
@@ -73,7 +92,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
       {done && <RateChat caseId={chat.case_id} rated={rated} />}
 
       <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div className="max-h-[60vh] space-y-4 overflow-y-auto bg-[radial-gradient(circle_at_top_right,#eef2ff,transparent_45%)] p-5">
+        <div className="max-h-[60vh] space-y-4 overflow-y-auto bg-[radial-gradient(circle_at_top_right,#eef2fd,transparent_45%)] p-5">
           {chat.messages.map((m) => {
             if (m.sender_type === "customer") {
               return (
@@ -105,9 +124,11 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
             );
           })}
           {askedChange && changeHref && <ChangeCard href={changeHref} />}
+          {askedCancel && cancelOrder && <CancelCard orderId={cancelOrder.order_id} number={cancelOrder.order_number} />}
           <ScrollToEnd count={chat.messages.length} />
         </div>
-        <ReplyBox caseId={chat.case_id} closed={chat.status === "closed"} changeHref={changeHref} forms={forms} withPerson={["escalated", "human_handling", "waiting"].includes(chat.status)} />
+        {chat.status !== "closed" && <TalkToPerson caseId={chat.case_id} flag={chat.safety_flag} options={booking} uni={!pack.shop} />}
+        <ReplyBox caseId={chat.case_id} closed={chat.status === "closed"} changeHref={changeHref} cancelOrder={cancelOrder} forms={forms} withPerson={["escalated", "human_handling", "waiting"].includes(chat.status)} />
       </section>
     </>
   );

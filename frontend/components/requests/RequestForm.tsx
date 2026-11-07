@@ -192,7 +192,7 @@ export default function RequestForm({ type, prefill, mode = "new", requestId, sa
       <div ref={top} className="space-y-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-950">
         <p className="flex items-center gap-2 text-base font-bold"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white"><CheckIcon className="h-4 w-4" /></span>
           Your {type.title.toLowerCase()} is ready</p>
-        <p>Issued instantly ({result.request_number}). Your enrolment was confirmed from your student record, so nobody needed to check it by hand.</p>
+        <p>Issued instantly ({result.request_number}). It was checked against your student record and the university&apos;s rules, so nobody needed to check it by hand.</p>
         {result.request_id && <Link href={`/account/requests/${result.request_id}`} className="inline-block rounded-xl bg-emerald-600 px-4 py-2 font-semibold text-white hover:bg-emerald-700">Open and download your letter →</Link>}
       </div>
     );
@@ -216,7 +216,7 @@ export default function RequestForm({ type, prefill, mode = "new", requestId, sa
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h2 className="text-lg font-bold">{mode === "fix" ? `Update your ${type.title.toLowerCase()} request` : type.title}</h2>
-            <p className="text-sm text-muted">{type.type_key === "enrolment_letter" ? "Digital letters are issued instantly" : <>Goes to the {type.team_name} team · usually {hoursText(type.sla_hours)}</>}</p>
+            <p className="text-sm text-muted">{["enrolment_letter", "holiday_letter", "completion_letter"].includes(type.type_key) ? "Digital letters are issued instantly" : <>Goes to the {type.team_name} team · usually {hoursText(type.sla_hours)}</>}</p>
           </div>
           {step === "fill" && <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">{filled} of {fields.length} done</span>}
         </div>

@@ -4,8 +4,8 @@
 :root {
   --navy: #0f1b33;
   --navy-soft: #1a2a4a;
-  --indigo: #4f46e5;
-  --indigo-tint: #eef2ff;
+  --indigo: #2f4cdd;
+  --indigo-tint: #eef2fd;
   --ink: #1e2433;
   --muted: #5b6474;
   --ok: #12805c;
@@ -16,7 +16,34 @@
   --font-sans: var(--font-figtree);
 }
 
+/* Main colour: clear blue (Nov 2026). Tailwind's indigo, violet and fuchsia
+   are re-pointed to one blue family, so every page changes together. */
 @theme {
+  --color-indigo-50: #eef2fd;
+  --color-indigo-100: #dde5fb;
+  --color-indigo-200: #bccbf7;
+  --color-indigo-300: #93a9f1;
+  --color-indigo-400: #6682e8;
+  --color-indigo-500: #4562e0;
+  --color-indigo-600: #2f4cdd;
+  --color-indigo-700: #2740b8;
+  --color-indigo-800: #223795;
+  --color-indigo-900: #1f3176;
+  --color-indigo-950: #141e48;
+  --color-violet-50: #eaf5fe;
+  --color-violet-100: #d3ebfd;
+  --color-violet-200: #a9d8fb;
+  --color-violet-300: #73bff7;
+  --color-violet-400: #3ea3f0;
+  --color-violet-500: #1d8ae0;
+  --color-violet-600: #1a75d2;
+  --color-violet-700: #155ea8;
+  --color-violet-800: #154f86;
+  --color-violet-900: #16426b;
+  --color-fuchsia-300: #7fdcea;
+  --color-fuchsia-400: #3fc7da;
+  --color-fuchsia-500: #16b3c9;
+  --color-fuchsia-600: #0e95a8;
   --color-navy: #0f1b33;
   --color-navy-soft: #1a2a4a;
   --color-ink: #1e2433;
@@ -56,7 +83,7 @@ textarea:focus-visible {
 
 /* Typing indicator in the support chat */
 @keyframes typing { 0%, 80%, 100% { opacity: .3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
-.typing-dot { width: 7px; height: 7px; border-radius: 9999px; background: #6366f1; animation: typing 1.2s infinite ease-in-out; }
+.typing-dot { width: 7px; height: 7px; border-radius: 9999px; background: #4562e0; animation: typing 1.2s infinite ease-in-out; }
 .typing-dot:nth-child(2) { animation-delay: .15s; }
 .typing-dot:nth-child(3) { animation-delay: .3s; }
 @media (prefers-reduced-motion: reduce) { .typing-dot { animation: none; opacity: .6; } }

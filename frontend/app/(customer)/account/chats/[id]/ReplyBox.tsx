@@ -5,7 +5,8 @@ import { useActionState, useRef, useState } from "react";
 import { reply, type ReplyState } from "../actions";
 import { ArrowRightIcon, RepeatIcon, SendIcon } from "@/components/Icons";
 import { btnPrimary } from "@/components/ShopUI";
-import { CHANGE_REQUEST } from "@/lib/orderChange";
+import { CANCEL_REQUEST, CHANGE_REQUEST } from "@/lib/orderChange";
+import { CancelButton } from "../../orders/[id]/OrderActions";
 import { formForMessage, type RequestType } from "@/lib/forms";
 
 // Reply in an existing chat.
@@ -13,9 +14,10 @@ import { formForMessage, type RequestType } from "@/lib/forms";
 // - The AI answers straight away when it safely can (migration 027); otherwise a person replies.
 // - "Change the size" (changeHref) or a request that has a form (ID card, letter...) opens that
 //   instead of waiting for a person.
-export default function ReplyBox({ caseId, closed, changeHref = null, forms = [], withPerson = false }: {
-  caseId: string; closed: boolean; changeHref?: string | null; forms?: RequestType[]; withPerson?: boolean;
+export default function ReplyBox({ caseId, closed, changeHref = null, cancelOrder = null, forms = [], withPerson = false }: {
+  caseId: string; closed: boolean; changeHref?: string | null; cancelOrder?: { order_id: string; order_number: string } | null; forms?: RequestType[]; withPerson?: boolean;
 }) {
+  const [cancelOffer, setCancelOffer] = useState(false);
   const [state, action, pending] = useActionState<ReplyState, FormData>(reply, {});
   const [offer, setOffer] = useState(false);
   const [form, setForm] = useState<RequestType | null>(null);
@@ -30,7 +32,8 @@ export default function ReplyBox({ caseId, closed, changeHref = null, forms = []
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     const msg = text.trim();
     if (msg.length < 2 || pending) { e.preventDefault(); return; }
-    if (changeHref && CHANGE_REQUEST.test(msg)) { e.preventDefault(); setOffer(true); setForm(null); setText(""); return; }
+    if (changeHref && CHANGE_REQUEST.test(msg)) { e.preventDefault(); setOffer(true); setForm(null); setCancelOffer(false); setText(""); return; }
+    if (cancelOrder && CANCEL_REQUEST.test(msg)) { e.preventDefault(); setCancelOffer(true); setOffer(false); setForm(null); setText(""); return; }
     const f = formForMessage(forms, msg);
     if (f) { e.preventDefault(); setForm(f); setOffer(false); setText(""); }
   };
@@ -40,6 +43,12 @@ export default function ReplyBox({ caseId, closed, changeHref = null, forms = []
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/60 px-4 py-3 text-sm">
           <span>You can change the size or colour yourself, straight away.</span>
           <Link href={changeHref} className={btnPrimary}><RepeatIcon className="h-4 w-4" /> Change size or colour</Link>
+        </div>
+      )}
+      {cancelOffer && cancelOrder && (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/60 px-4 py-3 text-sm">
+          <span>Order {cancelOrder.order_number} hasn&apos;t shipped yet, so you can cancel it yourself now, with a full refund.</span>
+          <CancelButton orderId={cancelOrder.order_id} number={cancelOrder.order_number} />
         </div>
       )}
       {form && (

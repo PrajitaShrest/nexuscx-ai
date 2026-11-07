@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { BellIcon, ChatIcon, ClockIcon, HomeIcon, IdCardIcon as ListIcon, PackageIcon, RepeatIcon, SettingsIcon } from "./Icons";
+import { BellIcon, CalendarIcon, ChatIcon, ClockIcon, HomeIcon, IdCardIcon as ListIcon, PackageIcon, RepeatIcon, SettingsIcon } from "./Icons";
 
 // Customer menu, laid out like the staff sidebar (same sections, same colours).
 export const CUSTOMER_NAV: { section: string; items: { label: string; href: string; icon: (c: string) => ReactNode; exact?: boolean }[] }[] = [
@@ -18,6 +18,7 @@ export const CUSTOMER_NAV: { section: string; items: { label: string; href: stri
   { section: "Support", items: [
     { label: "Requests & forms", href: "/account/requests", icon: (c) => <ListIcon className={c} /> },
     { label: "Chat history", href: "/account/chats", icon: (c) => <ClockIcon className={c} /> },
+    { label: "My appointments", href: "/account/appointments", icon: (c) => <CalendarIcon className={c} /> },
   ]},
   { section: "My account", items: [
     { label: "Notifications", href: "/account/notifications", icon: (c) => <BellIcon className={c} /> },

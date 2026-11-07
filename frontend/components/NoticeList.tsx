@@ -21,7 +21,9 @@ const ICON: Record<string, { icon: React.ReactNode; tint: string }> = {
 };
 
 // Shows notifications and marks them read once the page has been seen.
-export default function NoticeList({ notices }: { notices: Notice[] }) {
+// caseBase: where an alert about a case opens when it has no link of its own
+// (staff: /cases/<id>, students and customers: /account/chats/<id>)
+export default function NoticeList({ notices, caseBase = "/cases/" }: { notices: Notice[]; caseBase?: string }) {
   const router = useRouter();
   const [, start] = useTransition();
   const unread = notices.filter((n) => !n.read_at).length;
@@ -56,7 +58,10 @@ export default function NoticeList({ notices }: { notices: Notice[] }) {
         );
         return (
           <li key={n.notification_id} className={`border-b border-slate-100 last:border-0 ${n.read_at ? "" : "bg-indigo-50/40"}`}>
-            {n.link ? <Link href={n.link} className="block hover:bg-slate-50">{body}</Link> : body}
+            {(() => {
+              const href = n.link ?? (n.case_id ? `${caseBase}${n.case_id}` : null);
+              return href ? <Link href={href} className="block hover:bg-slate-50">{body}</Link> : body;
+            })()}
           </li>
         );
       })}

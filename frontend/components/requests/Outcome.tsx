@@ -61,7 +61,7 @@ export function DigitalCard({ name, studentNumber, course, photoUrl, cardNumber,
   name: string; studentNumber: string; course: string; photoUrl: string | null; cardNumber?: string; expires?: string; preview?: boolean;
 }) {
   return (
-    <div className="relative mx-auto aspect-[1.586] w-full max-w-sm overflow-hidden rounded-2xl bg-gradient-to-br from-[#0f1b33] via-[#23306b] to-[#5b21b6] p-4 text-white shadow-xl shadow-indigo-200 print:shadow-none">
+    <div className="relative mx-auto aspect-[1.586] w-full max-w-sm overflow-hidden rounded-2xl bg-gradient-to-br from-[#0f1b33] via-[#1f3176] to-[#2f4cdd] p-4 text-white shadow-xl shadow-indigo-200 print:shadow-none">
       <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10" />
       <div className="relative flex items-center justify-between">
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-200">Northbridge University</p>
@@ -131,6 +131,49 @@ export function Outcome({ type, details, outcome, photoUrl, name }: {
           <p className="mt-4">Yours sincerely,<br /><strong>{o("issued_by") || "Student Centre"}</strong><br />Student Centre, Northbridge University</p>
           <p className="mt-4 border-t pt-2 text-xs text-muted">Sample letter made by a student demo project. Northbridge University is not a real organisation.</p>
         </article>
+      )}
+
+      {type === "holiday_letter" && (
+        <article className="rounded-2xl border border-slate-200 bg-white p-6 text-sm leading-relaxed text-ink shadow-sm print:border-0 print:shadow-none">
+          <div className="flex items-start justify-between border-b pb-3">
+            <div><p className="font-bold text-indigo-800">Northbridge University</p><p className="text-xs text-muted">Student Centre · studentcentre@northbridge.example</p></div>
+            <p className="text-right text-xs text-muted">Ref {o("reference")}<br />{fmt(o("issued"))}</p>
+          </div>
+          <p className="mt-4">{d("addressed_to") || "To whom it may concern"},</p>
+          <p className="mt-3"><strong>Confirmation of university break dates</strong></p>
+          <p className="mt-2">This letter confirms that <strong>{name}</strong> (student number {d("student_number")}) is enrolled{d("load") ? ` ${d("load").toLowerCase()}` : ""} at Northbridge University in the <strong>{d("course")}</strong>.</p>
+          <p className="mt-2">The university&apos;s official {o("break_name")} runs from <strong>{fmt(o("break_from"))}</strong> to <strong>{fmt(o("break_to"))}</strong>. There are no classes during this time, and classes start again on <strong>{fmt(o("resume"))}</strong>.</p>
+          {d("leaving") && d("returning") && (
+            <p className="mt-2">{name.split(" ")[0] || "The student"} plans to be away from <strong>{fmt(d("leaving"))}</strong> to <strong>{fmt(d("returning"))}</strong>, which is within the official break. We expect them to continue their studies when classes start again.</p>
+          )}
+          <p className="mt-2">This letter was requested for: {d("purpose").toLowerCase()}.</p>
+          <p className="mt-4">Yours sincerely,<br /><strong>{o("issued_by") || "Student Centre"}</strong><br />Student Centre, Northbridge University</p>
+          <p className="mt-4 border-t pt-2 text-xs text-muted">Sample letter made by a student demo project. Northbridge University is not a real organisation.</p>
+        </article>
+      )}
+
+      {type === "completion_letter" && (
+        <article className="rounded-2xl border border-slate-200 bg-white p-6 text-sm leading-relaxed text-ink shadow-sm print:border-0 print:shadow-none">
+          <div className="flex items-start justify-between border-b pb-3">
+            <div><p className="font-bold text-indigo-800">Northbridge University</p><p className="text-xs text-muted">Student Centre · studentcentre@northbridge.example</p></div>
+            <p className="text-right text-xs text-muted">Ref {o("reference")}<br />{fmt(o("issued"))}</p>
+          </div>
+          <p className="mt-4">{d("addressed_to") || "To whom it may concern"},</p>
+          <p className="mt-3"><strong>Confirmation of course completion</strong></p>
+          <p className="mt-2">This letter confirms that <strong>{name}</strong> (student number {d("student_number")}) has completed all the requirements of the <strong>{d("course")}</strong> at Northbridge University.</p>
+          <p className="mt-2">They started the course in <strong>{d("intake")}</strong>, studied {d("load").toLowerCase() || "full-time"}, and completed it in <strong>{o("completed") ? new Date(o("completed")).toLocaleDateString("en-AU", { month: "long", year: "numeric" }) : ""}</strong>. The award will be conferred at the next graduation ceremony.</p>
+          <p className="mt-2">This letter was requested for: {d("purpose").toLowerCase()}.</p>
+          <p className="mt-4">Yours sincerely,<br /><strong>{o("issued_by") || "Student Centre"}</strong><br />Student Centre, Northbridge University</p>
+          <p className="mt-4 border-t pt-2 text-xs text-muted">Sample letter made by a student demo project. Northbridge University is not a real organisation.</p>
+        </article>
+      )}
+
+      {type === "special_consideration" && o("decision") && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-950">
+          <p className="text-base font-bold">Special consideration: {o("decision").toLowerCase()}</p>
+          <p className="mt-1">{d("asking")} for {d("assessment").toLowerCase()} in {d("unit")}. Decided by {o("decided_by") || "Academic Services"} on {fmt(o("decided_on"))}.</p>
+          <p className="mt-1">Any details, like your new date, are in the note from Academic Services on this page.</p>
+        </div>
       )}
 
       {type === "transcript" && (() => {
