@@ -147,3 +147,26 @@ export async function getSuggestion(caseId: string): Promise<Suggestion | null> 
   if (error) { console.error("[getSuggestion]", error.message); return null; }
   return (data as Suggestion | null) ?? null;
 }
+
+// A notification counts as read only when the person opens it (or opens the page it is about)
+export async function markNoticeRead(id: string) {
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return;
+  const supabase = await createClient();
+  const { error } = await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("notification_id", id).is("read_at", null);
+  if (error) console.error("[markNoticeRead]", error.message);
+}
+export async function markNoticesReadFor({ link, caseId }: { link?: string; caseId?: string }) {
+  const supabase = await createClient();
+  let q = supabase.from("notifications").update({ read_at: new Date().toISOString() }).is("read_at", null);
+  if (link && caseId) q = q.or(`link.eq.${link},case_id.eq.${caseId}`);
+  else if (link) q = q.eq("link", link);
+  else if (caseId) q = q.eq("case_id", caseId);
+  else return;
+  const { error } = await q;
+  if (error) console.error("[markNoticesReadFor]", error.message);
+}
+export async function unreadLinks(prefix: string): Promise<string[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("notifications").select("link").is("read_at", null).like("link", `${prefix}%`).limit(100);
+  return ((data ?? []) as { link: string | null }[]).map((n) => n.link ?? "").filter(Boolean);
+}

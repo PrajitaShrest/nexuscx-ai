@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getRequest, getRequestForms, signRequestPhoto } from "@/lib/data/requests";
 import { getMe } from "@/lib/data/me";
+import { markNoticesReadFor } from "@/lib/data/workspace";
+import { CheckIcon } from "@/components/Icons";
 import { Panel } from "@/components/ShopUI";
 import LiveRefresh from "@/components/LiveRefresh";
 import FormIcon from "@/components/requests/FormIcon";
@@ -16,17 +18,37 @@ import type { Metadata } from "next";
 export const metadata: Metadata = { title: "Request" };
 
 // Results that can be saved as a PDF, and the start of their file name
-const DOCS: Record<string, string> = { credit_transfer: "Credit decision", id_card: "Student ID card", enrolment_letter: "Enrolment letter", transcript: "Transcript", parking_permit: "Parking permit" };
+const DOCS: Record<string, string> = {
+  credit_transfer: "Credit decision", id_card: "Student ID card", enrolment_letter: "Enrolment letter", transcript: "Transcript", parking_permit: "Parking permit",
+  holiday_letter: "Holiday letter", completion_letter: "Course completion letter", special_consideration: "Special consideration decision",
+};
+
+// The headline at the top when a request is finished
+function headline(type: string, title: string, status: string) {
+  if (status === "rejected") return type === "special_consideration" ? "Not approved: your special consideration" : `Your ${title.toLowerCase()} request was not completed`;
+  if (type === "special_consideration") return "Approved: your special consideration";
+  if (type === "id_card") return status === "ready" ? "Your student ID card is ready to collect" : "Your student ID card is ready";
+  if (type === "credit_transfer") return "Your credit decision is ready";
+  if (type === "parking_permit") return "Your parking permit is active";
+  if (type === "delivery_address") return "Your delivery address was changed";
+  if (type === "transcript") return "Your transcript is ready";
+  return `Your ${title.toLowerCase()} is ready`;
+}
 
 export default async function MyRequestPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const [r, me, { types, prefill }] = await Promise.all([getRequest(id), getMe(), getRequestForms()]);
   if (!r) notFound();
+  // Opening the request counts as reading its notifications
+  await markNoticesReadFor({ link: `/account/requests/${r.request_id}` });
   const type = types.find((t) => t.type_key === r.type_key);
   const photoUrl = await signRequestPhoto(r.photo_path, r.type_key);
   const credit = r.type_key === "credit_transfer";
   const pickup = needsPickup(r.details);
   const done = r.status === "ready" || r.status === "completed" || (r.type_key === "credit_transfer" && r.status === "in_review");
+  const sc = r.type_key === "special_consideration";
+  const finished = done || r.status === "rejected";
+  const showResult = done || (sc && r.status === "rejected");
   const fields = (type?.fields ?? []).filter((f) => f.type !== "photo" && f.type !== "checkbox" && r.details[f.name] !== undefined && r.details[f.name] !== "");
 
   return (
@@ -45,11 +67,29 @@ export default async function MyRequestPage({ params }: { params: Promise<{ id: 
         </div>
       </div>
 
-      <Panel><RequestSteps status={r.status} pickup={pickup} />
+      {finished && (
+        <section className={`flex flex-wrap items-center gap-4 rounded-3xl p-5 sm:p-6 ${r.status === "rejected" ? "bg-rose-50 text-rose-950 ring-1 ring-rose-200" : "bg-emerald-600 text-white shadow-lg shadow-emerald-100"}`}>
+          <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${r.status === "rejected" ? "bg-rose-100 text-rose-700" : "bg-white/20"}`}>
+            {r.status === "rejected" ? <span className="text-2xl font-bold">!</span> : <CheckIcon className="h-7 w-7" />}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-xl font-bold sm:text-2xl">{headline(r.type_key, r.request_types?.title ?? "request", r.status)}</p>
+            <p className={`text-sm ${r.status === "rejected" ? "" : "text-white/90"}`}>
+              {r.status === "rejected"
+                ? r.staff_note ? `Reason: ${r.staff_note}` : "See the details below."
+                : pickup && r.status === "ready" ? String(r.outcome.pickup ?? "Ready to collect.") : `${r.assignee?.name ? `By ${r.assignee.name} · ` : ""}${day(r.completed_at ?? r.ready_at ?? r.updated_at)}`}
+            </p>
+          </div>
+          {showResult && <a href="#result" className={`rounded-xl px-4 py-2 text-sm font-semibold ${r.status === "rejected" ? "bg-white text-rose-800 ring-1 ring-rose-200 hover:bg-rose-100" : "bg-white text-emerald-800 hover:bg-emerald-50"}`}>{DOCS[r.type_key] ? "See your letter ↓" : "See the result ↓"}</a>}
+          {r.status === "rejected" && <Link href="/account/appointments" className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700">Talk to a person</Link>}
+        </section>
+      )}
+
+      {!finished && <Panel><RequestSteps status={r.status} pickup={pickup} />
         {(r.status === "submitted" || r.status === "in_review") && (
           <p className="mt-4 text-sm text-muted">The {r.request_types?.team_name} team usually finishes these {hoursText(r.request_types?.sla_hours ?? 24)}. We&apos;ll notify you.</p>
         )}
-      </Panel>
+      </Panel>}
 
       {r.status === "needs_info" && type && (
         <>
@@ -61,7 +101,7 @@ export default async function MyRequestPage({ params }: { params: Promise<{ id: 
         </>
       )}
 
-      {r.status === "rejected" && (
+      {r.status === "rejected" && !sc && (
         <div className="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-rose-950">
           <p className="font-semibold">This request could not be completed</p>
           {r.staff_note && <p className="mt-1">&ldquo;{r.staff_note}&rdquo;</p>}
@@ -69,15 +109,16 @@ export default async function MyRequestPage({ params }: { params: Promise<{ id: 
         </div>
       )}
 
-      {done && (
-        <Panel title={r.type_key === "id_card" ? "Your digital student card" : credit ? "Your credit decision" : "Your result"}
+      {showResult && (
+        <div id="result" className="scroll-mt-6"><Panel title={r.type_key === "id_card" ? "Your digital student card" : credit ? "Your credit decision" : sc ? "Your decision letter" : DOCS[r.type_key] ? "Your letter" : "Your result"}
           action={DOCS[r.type_key] ? <DownloadPdf fileName={`${DOCS[r.type_key]} ${String(r.outcome.reference ?? r.outcome.card_number ?? r.outcome.permit_number ?? r.request_number)}`} /> : undefined}>
           {String(r.details.delivery ?? "").startsWith("Email") && (
             <p className="mb-3 rounded-xl bg-indigo-50 px-4 py-2.5 text-sm text-indigo-900 print:hidden">You asked for this by email. You can also download it here at any time with <strong>Download PDF</strong>.</p>
           )}
-          <div className="print-area"><Outcome type={r.type_key} details={r.details} outcome={r.outcome} photoUrl={photoUrl} name={me.name} /></div>
-          {r.staff_note && <p className="mt-3 text-sm text-muted">Note from {r.assignee?.name ?? "the team"}: {r.staff_note}</p>}
-        </Panel>
+          <div className="print-area"><Outcome type={r.type_key} details={r.details} outcome={r.outcome} photoUrl={photoUrl} name={me.name}
+            status={r.status} note={r.staff_note} reference={r.request_number} updated={r.updated_at} /></div>
+          {r.staff_note && !sc && <p className="mt-3 text-sm text-muted">Note from {r.assignee?.name ?? "the team"}: {r.staff_note}</p>}
+        </Panel></div>
       )}
 
       <div className="grid gap-6 lg:grid-cols-2">

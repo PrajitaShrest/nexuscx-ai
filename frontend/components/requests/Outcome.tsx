@@ -100,8 +100,9 @@ export function completion(course: string, intake: string, load: string) {
 
 const fmt = (d?: string | boolean) => (typeof d === "string" && d ? new Date(d).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" }) : "");
 
-export function Outcome({ type, details, outcome, photoUrl, name }: {
+export function Outcome({ type, details, outcome, photoUrl, name, status = "completed", note = null, reference = "", updated = "" }: {
   type: string; details: Values; outcome: Record<string, string | boolean>; photoUrl: string | null; name: string;
+  status?: string; note?: string | null; reference?: string; updated?: string;
 }) {
   const d = (k: string) => String(details[k] ?? "");
   const o = (k: string) => (typeof outcome[k] === "string" ? (outcome[k] as string) : "");
@@ -168,13 +169,38 @@ export function Outcome({ type, details, outcome, photoUrl, name }: {
         </article>
       )}
 
-      {type === "special_consideration" && o("decision") && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-950">
-          <p className="text-base font-bold">Special consideration: {o("decision").toLowerCase()}</p>
-          <p className="mt-1">{d("asking")} for {d("assessment").toLowerCase()} in {d("unit")}. Decided by {o("decided_by") || "Academic Services"} on {fmt(o("decided_on"))}.</p>
-          <p className="mt-1">Any details, like your new date, are in the note from Academic Services on this page.</p>
-        </div>
-      )}
+      {type === "special_consideration" && (o("decision") || status === "rejected") && (() => {
+        const approved = status !== "rejected";
+        return (
+          <article className="rounded-2xl border border-slate-200 bg-white p-6 text-sm leading-relaxed text-ink shadow-sm print:border-0 print:shadow-none">
+            <div className="flex items-start justify-between border-b pb-3">
+              <div><p className="font-bold text-indigo-800">Northbridge University</p><p className="text-xs text-muted">Academic Services · academicservices@northbridge.example</p></div>
+              <p className="text-right text-xs text-muted">Ref {reference}<br />{fmt(o("decided_on")) || fmt(updated)}</p>
+            </div>
+            <p className="mt-4">Dear {name.split(" ")[0] || "student"},</p>
+            <p className="mt-3"><strong>Special consideration: {approved ? "approved" : "not approved"}</strong></p>
+            <table className="mt-3 w-full text-left text-sm">
+              <tbody>
+                <tr><td className="w-44 py-0.5 text-muted">Unit</td><td className="font-medium">{d("unit")}</td></tr>
+                <tr><td className="py-0.5 text-muted">Assessment</td><td className="font-medium">{d("assessment")}{d("due_date") ? `, due ${fmt(d("due_date"))}` : ""}</td></tr>
+                <tr><td className="py-0.5 text-muted">You asked for</td><td className="font-medium">{d("asking")}</td></tr>
+                <tr><td className="py-0.5 text-muted">Decision</td><td className={`font-bold ${approved ? "text-emerald-700" : "text-rose-700"}`}>{approved ? "Approved" : "Not approved"}</td></tr>
+              </tbody>
+            </table>
+            {approved ? (
+              <p className="mt-3">We have considered your circumstances and <strong>approved your request</strong>. {note ? <>Here is what happens next: <strong>{note}</strong></> : "Your unit coordinator will confirm the new arrangements with you."}</p>
+            ) : (
+              <>
+                <p className="mt-3">We have carefully considered your request, but we are not able to approve it.{note ? <> The reason is: <strong>{note}</strong></> : ""}</p>
+                <p className="mt-2">If you disagree, you can ask for a review within 10 working days. Reply in Help &amp; chat, or talk to a person from My appointments.</p>
+              </>
+            )}
+            <p className="mt-3">We know this can be a hard time. Student Wellbeing is free and confidential if you would like support.</p>
+            <p className="mt-4">Yours sincerely,<br /><strong>{o("decided_by") || "Academic Services"}</strong><br />Academic Services, Northbridge University</p>
+            <p className="mt-4 border-t pt-2 text-xs text-muted">Sample decision made by a student demo project. Northbridge University is not a real organisation.</p>
+          </article>
+        );
+      })()}
 
       {type === "transcript" && (() => {
         const t = d("course") && d("intake") ? buildTranscript(d("course"), d("intake"), d("load"), d("student_number")) : null;

@@ -1,9 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { markNotificationsRead } from "@/lib/data/workspace";
+import { markNoticeRead, markNotificationsRead } from "@/lib/data/workspace";
 
 export async function markAllRead() {
   await markNotificationsRead();
+  revalidatePath("/", "layout");
+}
+
+export async function readOne(id: string) {
+  await markNoticeRead(id);
   revalidatePath("/", "layout");
 }

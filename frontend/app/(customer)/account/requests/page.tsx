@@ -7,6 +7,8 @@ import FormIcon from "@/components/requests/FormIcon";
 import { RequestPill } from "@/components/requests/Outcome";
 import { getRequestForms, listMyRequests } from "@/lib/data/requests";
 import { getMe } from "@/lib/data/me";
+import { unreadLinks } from "@/lib/data/workspace";
+import { CheckIcon } from "@/components/Icons";
 import { hoursText, isOpen } from "@/lib/forms";
 import { ago, day } from "@/lib/format";
 import type { Metadata } from "next";
@@ -15,13 +17,44 @@ export const metadata: Metadata = { title: "Requests & forms" };
 
 // Forms the person can fill in, and the requests they have sent.
 export default async function MyRequestsPage() {
-  const [me, { types }, requests] = await Promise.all([getMe(), getRequestForms(), listMyRequests()]);
+  const [me, { types }, requests, newLinks] = await Promise.all([getMe(), getRequestForms(), listMyRequests(), unreadLinks("/account/requests/")]);
+  // Requests with an update the person has not opened yet
+  const fresh = new Set(newLinks.map((l) => l.split("/").pop()));
+  const updates = requests.filter((r) => fresh.has(r.request_id));
+  const verb = (status: string, type: string) =>
+    status === "rejected" ? (type === "special_consideration" ? "Not approved" : "Not completed")
+      : type === "special_consideration" && ["ready", "completed"].includes(status) ? "Approved"
+      : status === "ready" ? "Ready to collect" : status === "completed" ? "Ready" : status === "needs_info" ? "Needs your changes" : "Updated";
   const open = requests.filter((r) => isOpen(r.status) || r.status === "ready");
   const past = requests.filter((r) => !open.includes(r));
 
   return (
     <>
       <PageHead title="Requests & forms" sub="Ask for things online in a couple of minutes. Your details are filled in for you and checked before sending." />
+
+      {updates.length > 0 && (
+        <section aria-labelledby="updates" className="space-y-3">
+          <h2 id="updates" className="text-sm font-semibold uppercase tracking-wider text-emerald-700">Updates for you</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {updates.map((r) => {
+              const bad = r.status === "rejected" || r.status === "needs_info";
+              return (
+                <Link key={r.request_id} href={`/account/requests/${r.request_id}`}
+                  className={`flex items-center gap-4 rounded-2xl p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${bad ? "bg-amber-50 ring-1 ring-amber-200" : "bg-emerald-50 ring-1 ring-emerald-200"}`}>
+                  <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white ${bad ? "bg-amber-500" : "bg-emerald-600"}`}>
+                    {bad ? <span className="text-lg font-bold">!</span> : <CheckIcon className="h-6 w-6" />}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-semibold">{verb(r.status, r.type_key)}: {r.request_types?.title}</span>
+                    <span className="block text-sm text-muted">{r.request_number} · {ago(r.updated_at)}</span>
+                  </span>
+                  <span className="rounded-xl bg-white px-3 py-1.5 text-sm font-semibold text-indigo-700 ring-1 ring-slate-200">Open</span>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <section aria-labelledby="forms" className="space-y-3">
         <h2 id="forms" className="text-sm font-semibold uppercase tracking-wider text-muted">Start a request</h2>
@@ -56,7 +89,8 @@ export default async function MyRequestsPage() {
                 <Link href={`/account/requests/${r.request_id}`} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:border-indigo-300">
                   <FormIcon icon={r.request_types?.icon ?? ""} size="sm" />
                   <span className="min-w-0 flex-1">
-                    <span className="block font-semibold">{r.request_types?.title} <span className="font-normal text-muted">· {r.request_number}</span></span>
+                    <span className="block font-semibold">{r.request_types?.title} <span className="font-normal text-muted">· {r.request_number}</span>
+                      {fresh.has(r.request_id) && <span className="ml-2 rounded-full bg-indigo-600 px-2 py-0.5 text-[11px] font-bold text-white">New</span>}</span>
                     <span className="block text-xs text-muted">Sent {day(r.created_at)} · updated {ago(r.updated_at)}</span>
                   </span>
                   <RequestPill status={r.status} />
