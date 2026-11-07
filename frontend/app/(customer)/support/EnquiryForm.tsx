@@ -125,6 +125,14 @@ function Reply({ text, result: r }: Turn) {
             )}
           </div>
           {r.status === "ai_handling" && r.case_id && <Helpful caseId={r.case_id} />}
+          {r.status === "escalated" && r.case_id && (
+            // 031: a way to actually reach a person (urgent ones get "Call me now", never a booking form)
+            ["Student Wellbeing", "Product Safety"].includes(r.department ?? "") ? (
+              <a href={`/account/chats/${r.case_id}`} className="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-rose-700">Talk to a person now →</a>
+            ) : (
+              <a href={`/account/chats/${r.case_id}`} className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-white px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-50">Want to talk to a person? Ask for a call or book a time →</a>
+            )
+          )}
         </div>
       </div>
     </div>

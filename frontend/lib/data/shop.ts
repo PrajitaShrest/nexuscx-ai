@@ -114,11 +114,11 @@ export async function listMyChats(): Promise<Chat[]> {
   });
 }
 
-export async function getChat(caseId: string): Promise<(Chat & { messages: ChatMessage[]; conversation_ids: string[]; orderInfo: { status: string; created_at: string; order_items: { variant: string | null }[] } | null }) | null> {
+export async function getChat(caseId: string): Promise<(Chat & { safety_flag: string | null; messages: ChatMessage[]; conversation_ids: string[]; orderInfo: { status: string; created_at: string; order_items: { variant: string | null }[] } | null }) | null> {
   if (!/^[0-9a-f-]{36}$/i.test(caseId)) return null;
   const supabase = await createClient();
   const { data, error } = await supabase.from("cases")
-    .select("case_id, case_number, subject, status, intent, created_at, updated_at, orders(order_id, order_number, status, created_at, order_items(variant)), conversations(conversation_id, messages(message_id, sender_type, content, message_type, sent_at))")
+    .select("case_id, case_number, subject, status, intent, safety_flag, created_at, updated_at, orders(order_id, order_number, status, created_at, order_items(variant)), conversations(conversation_id, messages(message_id, sender_type, content, message_type, sent_at))")
     .eq("case_id", caseId).maybeSingle();
   if (error) console.error("[getChat]", error.message);
   if (!data) return null;
@@ -129,6 +129,7 @@ export async function getChat(caseId: string): Promise<(Chat & { messages: ChatM
   const messages = r.conversations.flatMap((c) => c.messages).sort((a, b) => a.sent_at.localeCompare(b.sent_at));
   return {
     case_id: r.case_id, case_number: r.case_number, subject: r.subject, status: r.status, intent: r.intent,
+    safety_flag: (r as { safety_flag?: string | null }).safety_flag ?? null,
     created_at: r.created_at, updated_at: r.updated_at,
     order: r.orders && { order_id: r.orders.order_id, order_number: r.orders.order_number }, orderInfo: r.orders,
     last: messages.at(-1) ?? null, count: messages.length, messages, conversation_ids: r.conversations.map((c) => c.conversation_id),

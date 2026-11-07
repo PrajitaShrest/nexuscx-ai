@@ -168,6 +168,14 @@ export function Outcome({ type, details, outcome, photoUrl, name }: {
         </article>
       )}
 
+      {type === "special_consideration" && o("decision") && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-950">
+          <p className="text-base font-bold">Special consideration: {o("decision").toLowerCase()}</p>
+          <p className="mt-1">{d("asking")} for {d("assessment").toLowerCase()} in {d("unit")}. Decided by {o("decided_by") || "Academic Services"} on {fmt(o("decided_on"))}.</p>
+          <p className="mt-1">Any details, like your new date, are in the note from Academic Services on this page.</p>
+        </div>
+      )}
+
       {type === "transcript" && (() => {
         const t = d("course") && d("intake") ? buildTranscript(d("course"), d("intake"), d("load"), d("student_number")) : null;
         const official = d("kind").startsWith("Official");
