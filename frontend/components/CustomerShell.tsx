@@ -12,7 +12,7 @@ export default async function CustomerShell({ me, children }: { me: Me; children
   const [unread, pack] = await Promise.all([unreadCount(), getPack()]);
   return (
     <div className="flex min-h-screen bg-slate-50 text-ink">
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-navy text-slate-300 lg:flex">
+      <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col bg-navy text-slate-300 md:flex xl:w-64">
         <div className="px-5 py-5">
           <Link href={pack.shop ? "/account" : "/support"}><Logo tone="light" size={34} /></Link>
           <span className="mt-2 inline-block rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-indigo-200">{pack.account}</span>
@@ -24,7 +24,7 @@ export default async function CustomerShell({ me, children }: { me: Me; children
         </div>
       </aside>
       <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/90 backdrop-blur lg:hidden">
+        <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/90 backdrop-blur md:hidden">
           <div className="flex items-center justify-between gap-3 px-4 py-2.5">
             <Link href={pack.shop ? "/account" : "/support"}><Logo size={30} /></Link>
             <div className="flex items-center gap-2">

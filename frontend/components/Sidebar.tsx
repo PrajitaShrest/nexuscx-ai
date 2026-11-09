@@ -63,7 +63,7 @@ export default async function Sidebar({ me, active }: { me: Me; active: string }
   return (
     <>
     <MobileStaffNav groups={groups} active={best ?? active} user={menuUser(me)} industry={me.org === null ? pack.id : null} />
-    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-navy text-slate-300 md:flex">
+    <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col bg-navy text-slate-300 md:flex xl:w-64">
       <div className="px-5 py-5">
         <Logo tone="light" size={34} />
         <p className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-indigo-200">
